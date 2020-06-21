@@ -1,0 +1,133 @@
+<h1>Jenkins Installation with Java 9 (JDK)</h1>
+
+<h2>Summary (TL;DR)</h2>
+
+
+
+
+
+<h3>Issue</h3>
+
+
+
+
+
+<ul><li>Jenkins is not yet compatible with Java / JDK 9 because of major changes</li></ul>
+
+
+
+
+
+<h3>Affects</h3>
+
+
+
+<ul><li>Jenkins 1.x or 2.x (all versions)</li></ul>
+
+
+
+
+
+<h3>Culprit</h3>
+
+
+
+
+
+<ul><li>Major changes within Java 9; See&nbsp;<a href="https://issues.jenkins-ci.org/browse/JENKINS-40689" title="Jenkins Issue 40689"  rel="nofollow">Jenkins Issue 40689</a>.</li></ul>
+
+
+
+
+
+<h3>Workarounds / Recommendation</h3>
+
+
+
+
+
+<ul><li>Do not use Java 9 or JDK 9 until Jenkins is updated to work with it.</li><li>Uninstall Java 9 if installed</li><li>Use latest version of Java / JDK 8 until further notice</li></ul>
+
+
+
+
+
+<h2>Backstory</h2>
+
+
+
+
+
+<h3>The Problem</h3>
+
+
+
+
+
+<p>Now that Java 9 is finally Generally Available (GA) and students continue to follow the advice demonstrated in the course, which is to install the latest version of Java from the Oracle website, Jenkins installations will fail or become unstable.</p>
+
+
+
+
+
+<p>This mainly affects students attempting to install Jenkins directly on Windows or Mac systems. Most Linux distributions have not made OpenJDK 9 available or the default version of Java yet.</p>
+
+
+
+
+
+<h3>The Issue</h3>
+
+
+
+
+
+<p>Like many open source (and commercial software), there are limited resources available to test and fix problems. In the case of Java 9, there are several significant changes that make supporting the latest JDK very difficult while maintaining backwards compatibility.</p>
+
+
+
+
+
+<p>The&nbsp;<a href="https://issues.jenkins-ci.org/browse/JENKINS-40689" title="Jenkins Issue 40689"  rel="nofollow">currently open issue</a>&nbsp;lists this effort as an&nbsp;<em>Epic</em>&nbsp;size - which means it might take a long time before Jenkins fully supports Java 9. However, since the GA of Java 9 and the increased adoption of that version - I fully expect Java 9 support to be a high priority in the near future.</p>
+
+
+
+
+
+<h3>Recommendation</h3>
+
+
+
+
+
+<p>To be fair, the installation instructions on the Jenkins website state the supported version of Java with the most recent versions of Jenkins is still Java 8.</p>
+
+
+
+
+
+<p>Since no version of Jenkins is ready for Java 9 just yet, students taking this course should use the latest patch of the Java Development Kit (JDK) 8. Oracle will continue to update and patch Java 8 until September 2018, at which point it will become&nbsp;<a href="http://www.oracle.com/technetwork/java/javase/eol-135779.html" title="Java End of Life Policy"  rel="nofollow">End of Lifed</a>. I fully expect Jenkins to be ready for Java 9 before support runs out for Java 8.</p>
+
+
+
+
+
+<h3>Other Workarounds</h3>
+
+
+
+
+
+<p>For students that need to run Java 9 on their main system can consider one of the other possible options for running Jenkins:</p>
+
+
+
+
+
+<ul><li>Run Jenkins within a Docker container (advanced, requires some Docker experience)</li><li>Use a virtual machine to install Java 8 and Jenkins</li></ul>
+
+
+
+
+
+<p>By far, the easiest solution is to simply run Jenkin with Java 8.</p>

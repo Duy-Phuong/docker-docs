@@ -1,0 +1,44 @@
+<h4>Maven Repository Server Plugin Problem</h4>
+<h4>Summary (TL;DR)</h4>
+<h4>Issue</h4>
+<ul>
+<li>Sample <a href="https://github.com/srctips/time-tracker" title='"Time Tracker Maven Project"'>Maven project</a> fails to build in Jenkins when the <a href="https://plugins.jenkins.io/repository" title='"Maven Repository Server Jenkins plugin"'>Maven Repository Server</a> plugin is enabled for that project</li>
+<li>Maven build in Jenkins throws exception that includes <code>Caused by: java.net.MalformedURLException</code></li>
+<li>Plugin has not been updated recently (over a year)</li>
+</ul>
+<h4>Affects</h4>
+<ul>
+<li>Jenkins 1.x or 2.x</li>
+<li><a href="https://plugins.jenkins.io/repository" title='"Maven Repository Server Jenkins plugin"'>Maven Repository Server</a> plugin (latest release)</li>
+</ul>
+<h4>Culprit</h4>
+<ul>
+<li>Maven Repository Server plugin does not appear to work correctly when enabled for projects.</li>
+<li>Open issue <a href="https://issues.jenkins-ci.org/browse/JENKINS-27403" title='"Jenkins Issue 27403"'>Jenkins 27403</a> has been open and unresolved for 2 years</li>
+</ul>
+<h4>Workarounds</h4>
+<ul>
+<li>Do not enable at the project level; Plugin will still expose project artifacts at the server level.</li>
+<li>Consider exposing the Jenkins.Repository setting directly using another plugin</li>
+</ul>
+<h4>Recommendation</h4>
+<ul>
+<li>Do no use; Skip section of the course.</li>
+<li>Use a real artifact repository like Nexus, Artifactory, or Archiva.</li>
+</ul>
+<h4>Backstory</h4>
+<h4>The Problem</h4>
+<p>Students have occasionally reported builds failing when the Maven Repository Server plugin is enabled for the project by checking the setting "Define Upstream Maven Repository" within the <strong>Build Environment</strong> configuration section.</p>
+<p>The below exception shows up in the <em>Console Output</em> of the next failed build (after enabling the above setting).</p>
+<p><strong>Exception:</strong></p>
+<pre class="editor-colors lang-text"><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>Problem setting upstream repository URL</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>ERROR: Processing failed due to a bug in the code. Please report this to jenkinsci-users@googlegroups.com</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>java.lang.RuntimeException: java.net.MalformedURLException</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span>    </span><span class="syntax--meta syntax--paragraph syntax--text"><span>at com.nirima.jenkins.RepositoryDefinitionProperty.setUp(RepositoryDefinitionProperty.java:88)</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>    at jenkins.tasks.SimpleBuildWrapper.setUp(SimpleBuildWrapper.java:145)</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>    at hudson.maven.MavenModuleSetBuild$MavenModuleSetBuildExecution.doRun(MavenModuleSetBuild.java:668)</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>    at hudson.model.AbstractBuild$AbstractBuildExecution.run(AbstractBuild.java:534)</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>    at hudson.model.Run.execute(Run.java:1728)</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>    at hudson.maven.MavenModuleSetBuild.run(MavenModuleSetBuild.java:544)</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>    at hudson.model.ResourceController.execute(ResourceController.java:98)</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>    at hudson.model.Executor.run(Executor.java:405)</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>Caused by: java.net.MalformedURLException</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span>    </span><span class="syntax--meta syntax--paragraph syntax--text"><span>at java.net.URL.&lt;init&gt;(Unknown Source)</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>    at java.net.URL.&lt;init&gt;(Unknown Source)</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>    at java.net.URL.&lt;init&gt;(Unknown Source)</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>    at com.nirima.jenkins.action.ProjectRepositoryAction.getUrl(ProjectRepositoryAction.java:45)</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>    at com.nirima.jenkins.RepositoryDefinitionProperty.setUp(RepositoryDefinitionProperty.java:81)</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>    ... 7 more</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span class="syntax--meta syntax--paragraph syntax--text"><span>Caused by: java.lang.NullPointerException</span></span></span></div><div class="line"><span class="syntax--text syntax--plain"><span>    </span><span class="syntax--meta syntax--paragraph syntax--text"><span>... 12 more</span></span></span></div></pre><h4>The Issue</h4>
+<p>After walking through the same steps in a recent Jenkins build using latest version of the plugin and a recent version of Maven, I was able to reproduce the same error reported in the course while using the Maven Repository Server plugin.</p>
+<p>I initially thought the problem was the use of the plugin may need <em>settings.xml</em> changes recommended by the plugin's documentation. However, this still failed.</p>
+<p>After a bit of research, I found this open <a href="https://issues.jenkins-ci.org/browse/JENKINS-27403" title='"Jenkins Issue 27403"'>Jenkins Issue</a> that hasn't been addressed in over a year. Additionally, looking at the plugin's page, I noticed no development activity with the plugin in over a year as well. If the plugin is fairly stable and works with the latest versions of the Jenkins core, I don't worry about it very much -- but, a plugin with many open critical bugs without recent development activity does concern me.</p>
+<h4>Recommendation</h4>
+<p>The main reason I included the plugin in the course is because it solved a missing link in the CI story for Maven projects on Jenkins without having to introduce more tools (an artifact repository). Simply using Jenkins as an artifact repository is attractive since Jenkins already stores build artifacts and it reduces the overall complexity required to maintain another server for artifact hosting.</p>
+<p>Even so - this approach, even with a working plugin, has limitations. First, I would really only recommend using Jenkins as an artifact repository for low volume build systems. Once the system starts building frequently and generates large artifacts, a dedicated artifact repository is required. Long term, setting up a dedicated Nexus, Artifactory or Archiva system is the right solution in most cases.</p>
+<p>Students in this course can safely skip the section <em>Publishing Build Artifacts to an Artifact Repository</em>. Later lectures in this course do not require anything from that section.</p>
+<h4>Workaround</h4>
+<p>For students that really want to use Jenkins as an artifact repository, may still use the plugin. But, do not enable it for any projects. The plugin will still expose Maven artifacts created during Project builds. However, you will lose the ability to access those artifacts directly from the Project pages -- instead, you must use the <strong>Maven Repository</strong> menu item from the Jenkins dashboard to access the Maven repository of the Jenkins server.</p>
+<p>This workaround has been tested with both Jenkins 1.x and 2.x series.</p>

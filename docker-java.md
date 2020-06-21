@@ -3,6 +3,70 @@ C:\Users\Admin\AppData\Local\Programs\Python\Python38-32\python.exe E:/programin
 
 [TOC]
 
+---
+
+- [Docker](#docker)
+	- [DOCs:](#docs)
+- [1. Important  Navigating through this course](#1-important-navigating-through-this-course)
+	- [1. How to navigate through this course](#1-how-to-navigate-through-this-course)
+- [2. Docker Fundamentals and Introduction](#2-docker-fundamentals-and-introduction)
+	- [1. What is Docker](#1-what-is-docker)
+	- [2. Docker Engine](#2-docker-engine)
+	- [3. Real World Use case - The problem](#3-real-world-use-case---the-problem)
+	- [4. Real World Use case - Docker to the rescue](#4-real-world-use-case---docker-to-the-rescue)
+- [3. Docker Installation on the MAC and Windows](#3-docker-installation-on-the-mac-and-windows)
+	- [1. Docker installation on the MAC](#1-docker-installation-on-the-mac)
+	- [1.4 Installation on the MAC](#14-installation-on-the-mac)
+	- [2. Docker installation on Windows 10 Professional](#2-docker-installation-on-windows-10-professional)
+	- [3. Docker Summary Break - 1](#3-docker-summary-break---1)
+- [4. Important-Note  Before you start the use cases](#4-important-note-before-you-start-the-use-cases)
+	- [1. Windows only Before you start the use case](#1-windows-only-before-you-start-the-use-case)
+	- [2. MAC only Before you start the use case](#2-mac-only-before-you-start-the-use-case)
+- [5. Use Case 1   Host a website on Apache httpd Server](#5-use-case-1-host-a-website-on-apache-httpd-server)
+	- [1. What are we going to do](#1-what-are-we-going-to-do)
+	- [2. What is a Docker Image](#2-what-is-a-docker-image)
+	- [3. Building, Listing and Inspecting Images](#3-building-listing-and-inspecting-images)
+	- [4. Running Containers, listing, starting and stopping containers](#4-running-containers-listing-starting-and-stopping-containers)
+	- [5. Logging into the container](#5-logging-into-the-container)
+	- [6. Removing Containers and Images](#6-removing-containers-and-images)
+	- [7. Usecase-1 Quick Summary and Recap](#7-usecase-1-quick-summary-and-recap)
+- [6. Use Case 2   Host a website on NGINX HTTP Server](#6-use-case-2-host-a-website-on-nginx-http-server)
+	- [1. Introduction to Use Case 2](#1-introduction-to-use-case-2)
+	- [2. Build-Tag-Push & Pull images](#2-build-tag-push--pull-images)
+- [7. Brain Overload - 1](#7-brain-overload---1)
+	- [1. What have you learnt so far](#1-what-have-you-learnt-so-far)
+- [8. Use Case 3  Docker-Git integration and creating a custom UBUNTU image](#8-use-case-3-docker-git-integration-and-creating-a-custom-ubuntu-image)
+	- [1. Introduction to Use Case 3](#1-introduction-to-use-case-3)
+	- [2. Build a Custom UBUNTU Image with JDK, VI editor, MAVEN](#2-build-a-custom-ubuntu-image-with-jdk-vi-editor-maven)
+	- [3. Docker-GIT-Integration](#3-docker-git-integration)
+- [9. Use Case 4 Deploy a Spring MVC war application on Apache Tomcat 8.x](#9-use-case-4-deploy-a-spring-mvc-war-application-on-apache-tomcat-8x)
+	- [1. Introduction and Deployment of war application on Tomcat 8.5](#1-introduction-and-deployment-of-war-application-on-tomcat-85)
+- [10. Use Case 5 and 6  Multiple containers w different JDK and Tomcat on UBUNTU](#10-use-case-5-and-6-multiple-containers-w-different-jdk-and-tomcat-on-ubuntu)
+	- [1. JDK7-Tomcat-7 and JDK8-Tomcat-8 on UBUNTU](#1-jdk7-tomcat-7-and-jdk8-tomcat-8-on-ubuntu)
+	- [2. Summary](#2-summary)
+- [11. Use Case 7 Mounting Volumes](#11-use-case-7-mounting-volumes)
+	- [1. Mounting Log Volumes](#1-mounting-log-volumes)
+- [12. Use Case 8 Microservices using Docker Machine and Docker Compose](#12-use-case-8-microservices-using-docker-machine-and-docker-compose)
+	- [1. Introduction to Docker-Machine](#1-introduction-to-docker-machine)
+	- [2. MAC Only Pre-requisite for installing Docker Machine](#2-mac-only-pre-requisite-for-installing-docker-machine)
+	- [3. Windows only Pre-requisite for Installing Docker Machine](#3-windows-only-pre-requisite-for-installing-docker-machine)
+	- [Install Docker Machine](#install-docker-machine)
+	- [4. Windows only Setting up 2 Docker Machines](#4-windows-only-setting-up-2-docker-machines)
+	- [5. Docker-compose Basics and Use case set up](#5-docker-compose-basics-and-use-case-set-up)
+	- [6. Working with Docker-compose](#6-working-with-docker-compose)
+	- [7. Summary](#7-summary)
+- [13. Use Case 9 Microservices with Docker, Spring Boot and Hibernate with MYSQL](#13-use-case-9-microservices-with-docker-spring-boot-and-hibernate-with-mysql)
+	- [1. Introduction and Initial Set up](#1-introduction-and-initial-set-up)
+	- [2. Building Spring Boot Microservice with Docker](#2-building-spring-boot-microservice-with-docker)
+- [14. Use Case 10 Service Discovery and Load Balancing](#14-use-case-10-service-discovery-and-load-balancing)
+	- [1. Use Case 10 Scaling up Microservices, Service Discovery and Load Balancing](#1-use-case-10-scaling-up-microservices-service-discovery-and-load-balancing)
+	- [2. Quick Code Overview](#2-quick-code-overview)
+	- [3. Demo](#3-demo)
+- [15. Summary, Docker Cheatsheets, Feedback](#15-summary-docker-cheatsheets-feedback)
+	- [1. All Powerpoints and Docker Cheatsheet](#1-all-powerpoints-and-docker-cheatsheet)
+	- [2. Summary and Feedback](#2-summary-and-feedback)
+
+---
 
 
 ## Docker
@@ -1750,7 +1814,19 @@ import to eclipse
 
 ![image-20200621134448479](docker-java.assets/image-20200621134448479.png)  
 
+![image-20200621135320324](docker-java.assets/image-20200621135320324.png)  
 
+![image-20200621135448819](docker-java.assets/image-20200621135448819.png)  
+
+![image-20200621135638775](docker-java.assets/image-20200621135638775.png)  
+
+![image-20200621135805578](docker-java.assets/image-20200621135805578.png)  
+
+Gọi post and get
+
+body lấy từ file post.json, type is application/context
+
+![image-20200621140015916](docker-java.assets/image-20200621140015916.png)
 
 ### 2. Building Spring Boot Microservice with Docker
 
@@ -1758,8 +1834,219 @@ import to eclipse
 
 ## 14. Use Case 10 Service Discovery and Load Balancing
 ### 1. Use Case 10 Scaling up Microservices, Service Discovery and Load Balancing
+
+![image-20200621140251007](docker-java.assets/image-20200621140251007.png)
+
+scripts
+
+```dockerfile
+*****************************************************************
+Step-1 # Run Powershell as administrator on WINDOWS or terminal on MAC
+-------------------------------------------------------------------
+docker-machine ps -a
+
+*****************************************************************
+Step-2 # Docker machine activation
+-------------------------------------------------------------------
+docker-machine env hyperv-vm-1
+WINDOWS (Copy and execute the last line): # & "C:\Program Files\Docker\Docker\Resources\bin\docker-machine.exe" env hyperv-vm-1 | Invoke-Expression
+
+Step-3 # Run the image in detached/non-detached mode (use -d) 
+-------------------------------------------------------------------
+docker-compose up -d
+docker-compose up
+docker-compose up -d <service-name>
+
+docker-compose scale <service-name>=<total containers>
+Ex: docker-compose scale web=2
+
+Step-4 # View logs and Tail logs
+-------------------------------------------------------------------
+# View logs
+docker-compose logs <service-name>
+
+# Tail logs
+docker-compose  logs -ft <service-name>
+
+Step-5 # Login to the container
+-------------------------------------------------------------------
+docker-compose run <service-name> /bin/bash 
+
+Step-6 # Stops all containers related to the compose file
+--------------------------------------------------
+docker-compose stop
+
+#Stop and start specific container
+docker-compose stop <service-name>
+
+#Stop and remove containers
+docker-compose down
+```
+
+
+
 ### 2. Quick Code Overview
+
+![image-20200621141227030](docker-java.assets/image-20200621141227030.png)  
+
+![image-20200621141401064](docker-java.assets/image-20200621141401064.png)  
+
+![image-20200621141631062](docker-java.assets/image-20200621141631062.png)  
+
+pom.xml trong dispatcher
+
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>pictolearn-dispatcher</groupId>
+	<artifactId>pictolearn-dispatcher</artifactId>
+	<packaging>war</packaging>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>docker-compose-dispatcher Maven Webapp</name>
+	<url>http://maven.apache.org</url>
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.5</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.1</version>
+		</dependency>
+
+
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.21</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.slf4j/jul-to-slf4j -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jul-to-slf4j</artifactId>
+			<version>1.7.21</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.21</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<finalName>pictolearn-dispatcher</finalName>
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<warSourceDirectory>WebContent</warSourceDirectory>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+				</configuration>
+			</plugin>
+		</plugins>
+
+	</build>
+</project>
+
+```
+
+  
+
+
+
 ### 3. Demo
+
+![image-20200621150057156](docker-java.assets/image-20200621150057156.png)  
+
+Make sure your windows enable hyper-v and run powershell with administration
+
+![image-20200621150319843](docker-java.assets/image-20200621150319843.png)  
+
+![image-20200621150437551](docker-java.assets/image-20200621150437551.png)  
+
+![image-20200621150542598](docker-java.assets/image-20200621150542598.png)  
+
+![image-20200621150717085](docker-java.assets/image-20200621150717085.png) 
+
+![image-20200621151018304](docker-java.assets/image-20200621151018304.png)  
+
+![image-20200621151039038](docker-java.assets/image-20200621151039038.png)  
+
+![image-20200621151149163](docker-java.assets/image-20200621151149163.png)  
+
+Sau đó vào mysql chỉnh sửa connection
+
+![image-20200621151310652](docker-java.assets/image-20200621151310652.png)  
+
+Mysql run on port 8888
+
+Test connection
+
+![image-20200621151343946](docker-java.assets/image-20200621151343946.png)  
+
+sau khi nhập pass ấn test
+
+![image-20200621151458471](docker-java.assets/image-20200621151458471.png)  
+
+![image-20200621151530248](docker-java.assets/image-20200621151530248.png)  
+
+![image-20200621151649782](docker-java.assets/image-20200621151649782.png)  
+
+So what I'm going to do here is and is going to say send and it's a success for introspect the headers
+
+it's going to tell you which machine it actually hit.
+
+So in this case it's 172 19 0.3.
+
+So what I'm going to do right now as I'm going to go and check into my school database to make sure
+
+there's an entry as I see it got inserted. 
+
+![image-20200621152041874](docker-java.assets/image-20200621152041874.png)  
+
+
+
+![image-20200621153402519](docker-java.assets/image-20200621153402519.png)
+
+And the reason why we have a dispatcher is to be able to route to one of these.
+
+So that said give it a few minutes until it starts up.
+
+And typically for logging from all these containers we use tools like loudly that is a tool cloggy our
+
+diner trays or at Dynamix higher performance monitoring tools.
+
+![image-20200621153431621](docker-java.assets/image-20200621153431621.png)  
+
+![image-20200621153544505](docker-java.assets/image-20200621153544505.png)  
+
+scale down
+
 ## 15. Summary, Docker Cheatsheets, Feedback
 ### 1. All Powerpoints and Docker Cheatsheet
 ### 2. Summary and Feedback

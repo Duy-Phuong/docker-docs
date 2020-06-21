@@ -1,0 +1,412 @@
+<h4>Installation Notes for Windows 10</h4>
+
+<p><strong>Version: 2.0<br></strong><strong>Last Updated: 9/3/2016</strong></p>
+
+
+
+
+
+<p>This page provides a quick listing of the tools needed and basic install instructions for each -- which is used throughout this course. Before you get started installing all the tools and software for this course, there are a few basic requirements. After that, I provide the general instructions for each tool used. Since this page is designed to aide the "get to the point" crowd, I keep my instructions as brief as possible.</p>
+
+
+
+
+
+<p>In order to support the most recent version of Windows available, these instructions were tested using <strong>Windows 10</strong>. However, with some modification, these instructions will generally work for older versions of Windows.</p>
+
+
+
+
+
+<h4>Summary (TL;DR)</h4>
+
+
+
+
+
+<p>Install the following, use defaults unless otherwise stated:</p>
+
+
+
+
+
+<ul><li><a rel="nofollow">Google Chrome</a> (optional)</li><li><a rel="nofollow">Git for Windows</a> (required)<ul><li>Configure with name and email</li></ul></li><li><a rel="nofollow">Notepad++</a> (optional)<ul><li>Add to System Path</li></ul></li><li><a rel="nofollow">Oracle Java - JDK</a><ul><li>Set <strong>JAVA_HOME</strong> system variable</li></ul></li><li><a rel="nofollow">Apache Maven 3</a><ul><li>Set <strong>M2_HOME</strong> system variable</li><li>Add <strong>%M2_HOME%\bin</strong> to <strong>Path</strong> system variable</li></ul></li><li><a rel="nofollow">Jenkins for Windows</a></li><li><a rel="nofollow">Tomcat 8</a><ul><li>Get the <em>Windows Service Installer</em> version</li><li>Change default port numbers</li></ul></li></ul>
+
+
+
+
+
+<p>Below is more information for those that need it. For those unfamiliar, <strong>TL;DR</strong> means "Too long; don't read" -- which I include for those that prefer to just know the list of components to install and don't require additional assistance.</p>
+
+
+
+
+
+<h4>Admin Rights</h4>
+
+
+
+
+
+<p>You need to have Administrator rights to your system. Most modern versions of Windows come with several "flavors" of user accounts -- only Administrators can install software.</p>
+
+
+
+
+
+<h4>The Right Bits</h4>
+
+
+
+
+
+<p>Windows comes in two flavors: 32-bit and 64-bit. What's even more confusing -- you might have a 32-bit version on hardware able to run 64-bit software.</p>
+
+
+
+
+
+<h4>Windows 10</h4>
+
+
+
+
+
+<p>The fastest way to find out if you have 32 or 64-bits installed:</p>
+
+
+
+
+
+<ul><li>Right-click on the <em>Start Menu</em>, this will display a pop-up menu</li><li>Click on the <em>System</em> item</li><li>Once the <em>System</em> window appears, look for the <strong>System Type</strong> entry under the <em>System</em> section. This should tell you if you have 32 or 64-bit version of Windows.</li></ul>
+
+
+
+
+
+<p>Make a note of this -- you'll want to install the 32-bit or 64-bit version of any software in order to best match your operating system and to have the best performance possible, when given the choice.</p>
+
+
+
+
+
+<h4>Google Chrome</h4>
+
+
+
+
+
+<p><strong>Optional.</strong></p>
+
+
+
+
+
+<p>I use Google Chrome for most of my courses. A few years ago, I would have strongly recommended or border-lined required the use of Chrome. However, most modern versions of all common browsers are adequate -- although the software engineer in me still prefers Chrome. For those wanting to follow along as closely as possible, install and use Chrome during this course. However, this is an <em>optional</em> step now, but I include it for completeness.</p>
+
+
+
+
+
+<h4>Install for Windows</h4>
+
+
+
+
+
+<ul><li>Go to the <a rel="nofollow">Google Chrome Desktop</a> page at <a rel="nofollow">https://www.google.com/chrome/browser/desktop</a></li><li>Click on the <strong>Download Chrome</strong> button</li><li>Accept the <em>Terms of Service</em> agreement (after reading, of course)</li><li>Follow the instructions through the install process</li></ul>
+
+
+
+
+
+<h4>Git for Windows</h4>
+
+
+
+
+
+<p><strong>Required.</strong></p>
+
+
+
+
+
+<p>Git is the source control tool used in this course. While Jenkins supports many other control control tools, Git is the most popular these days.</p>
+
+
+
+
+
+<h4>Install on Windows 10</h4>
+
+
+
+
+
+<ul><li><a rel="nofollow">Download Git for Windows</a> directly from <a rel="nofollow">https://github.com/git-for-windows/git/releases/latest</a>.</li><li>Run the installer program, follow the defaults (recommend other choices in the video, but defaults are ok too)</li><li>Open the <strong>Git Bash</strong> program, which is a Bash Shell terminal designed specifically for Git on Windows</li></ul>
+
+
+
+
+
+<h4>Configure Git</h4>
+
+
+
+
+
+<p>Git requires your name and email address before any real work can be done. It is best to just configure Git from the start.</p>
+
+
+
+
+
+<pre class="prettyprint linenums">git config --global user.name "Your Name"
+git config --global user.email "your.email@your-place.com"
+</pre>
+
+
+
+
+
+
+
+
+
+<h4>Notepad++</h4>
+
+
+
+
+
+<p><strong>Optional.</strong></p>
+
+
+
+
+
+<p>Windows comes with a text editor called <strong>Notepad</strong>, but it doesn't do much beyond allow you to edit text and many IT professionals prefer something more. I use a free and open-source program called <strong>Notepad++</strong> for most of my Windows based courses. If you are happy with Notepad, then this step is <em>optional</em>.</p>
+
+
+
+
+
+<h4>Install on Windows 10</h4>
+
+
+
+
+
+<ul><li><a rel="nofollow">Download Notepad++</a> from <a rel="nofollow">https://notepad-plus-plus.org/download</a></li><li>Since there are many adverts on the page, ensure you select the <strong>Notepad++ Installer</strong> and not an AD by mistake.</li><li>Once the installer has finished downloading, run the installer.</li><li>Follow all the defaults through the install process with the following exceptions:<ul><li>Check <em>Create Shortcut on Desktop</em> (personal choice)</li></ul></li></ul>
+
+
+
+
+
+<h4>Notepad++ System-Wide</h4>
+
+
+
+
+
+<p>If you plan to use Notepad++ a lot, I highly recommend adding Notepad++ to your system's PATH environment variable. You can confirm weather or not this is needed by opening a <strong>command prompt</strong> or <strong>Git Bash</strong> and type <code>notepade++</code> and press the <code>enter</code> key. If Notepad++ launches, then no additional work is needed. If you get a <code>Command Not Found</code> or similar error, then add the Notepad++ install folder to the system <strong>Path</strong> variable.</p>
+
+
+
+
+
+<h4>Oracle Java Development Kit</h4>
+
+
+
+
+
+<p><strong>Required.</strong></p>
+
+
+
+
+
+<p>The Oracle Java Development Kit is need to compile Java projects and is used with Maven (below).</p>
+
+
+
+
+
+<h4>Installation</h4>
+
+
+
+
+
+<ul><li>Go to the <a rel="nofollow">Java SE Downloads</a> page</li><li>Select the <strong>JDK</strong> <em>download</em> button</li><li>On the <em>Java SE Development Kit Downloads</em> page, accept the license</li><li>Click on the <em>windows</em>-exe that matches your platform (<strong>i586</strong> for 32-bit systems or <strong>x64</strong> for 64-bit systems)</li><li>Once the installer has downloaded, run the installer</li><li>Accept all defaults through install process</li></ul>
+
+
+
+
+
+<h4>Java Home</h4>
+
+
+
+
+
+<p>Maven (below) requires the <strong>JAVA_HOME</strong> system variable be set to the currently installed JDK location.</p>
+
+
+
+
+
+<h4>Apache Maven</h4>
+
+
+
+
+
+<p><strong>Required.</strong></p>
+
+
+
+
+
+<p>Maven is the build tool we use for Java projects in this course.</p>
+
+
+
+
+
+<h4>Installation</h4>
+
+
+
+
+
+<ul><li>Go to the <a rel="nofollow">Apache Maven downloads</a> page</li><li>Click on the <strong>Binary zip archive</strong> link to download the <em>ZIP</em> file</li><li>Expand <em>ZIP</em> file some place on your system (this will be important later)</li><li>Copy the path to the Apache Maven install location (contains the <em>LICENSE</em> file)</li></ul>
+
+
+
+
+
+<h4>Maven Setup</h4>
+
+
+
+
+
+<ul><li>Create a system variable called <strong>M2_HOME</strong> and paste in the value of the Maven install location</li><li>Edit the <strong>Path</strong> system variable</li><li>Add, at the end of the <strong>Path</strong> variable: <code>;%M2_HOME%\bin</code> (this will resolve to the <em>bin</em> folder inside the Maven install location</li><li>Close out any dialog boxes and Control Panel windows</li><li>Open your terminal of choice (restart it, if already open)</li><li>Type: <code>mvn -version</code> (this will confirm Maven is installed and accessible from anywhere on your system)</li></ul>
+
+
+
+
+
+<h4>Jenkins</h4>
+
+
+
+
+
+<p><strong>Required.</strong></p>
+
+
+
+
+
+<p>There is no getting around this one since it is the main focus of this course.</p>
+
+
+
+
+
+<h4>Jenkins 1.x vs 2.x Series</h4>
+
+
+
+
+
+<p>This course was originally developed with Jenkins 1.x. With the recent arrival of Jenkins 2, the user interface has changed quite a bit and several features have moved. The author and instructor for this course is actively working on an updated course featuring Jenkins 2. However, until those revisions are ready, please use the last Jenkins 1 series LTS release (<a rel="nofollow">1.651.3</a>) in order to follow along exactly.</p>
+
+
+
+
+
+<p><strong>Jenkins 1.651.3 Archive Installer</strong>:
+<a rel="nofollow">http://mirrors.jenkins-ci.org/windows-stable/jenkins-1.651.3.zip</a></p>
+
+
+
+
+
+<h4>Jenkins 1 Installation</h4>
+
+
+
+
+
+<ul><li>Download the last <a rel="nofollow">Jenkins 1.x Installer for Windows</a> directly from <a rel="nofollow">http://mirrors.jenkins-ci.org/windows-stable/jenkins-1.651.3.zip</a></li><li>Once file is downloaded, run installer and accept all defaults</li><li>Once install process is complete, Jenkins should be running already: Open favorite browser to <strong><a href="http://localhost:8080/" rel="nofollow">http://localhost:8080/</a></strong> to confirm Jenkins is up and running.</li></ul>
+
+
+
+
+
+<h4>What About Jenkins 2</h4>
+
+
+
+
+
+<p>Until this course is updated with all new videos featuring Jenkins 2, I strongly recommend staying with Jenkins 1 for the purpose of this course. After going through the course, you may decide to upgrade to the latest Jenkins 2 LTS. When you do, you'll notice some user interface changes but also several tools and options have moved or changed. This course provides documentation lectures with Jenkins 2 update notes to help support students choosing to move forward with Jenkins 2 with this course.</p>
+
+
+
+
+
+<h4>Apache Tomcat 8</h4>
+
+
+
+
+
+<p><strong>Required.</strong></p>
+
+
+
+
+
+<p>The install video for this is in the <em>Deployment</em> section of this course, but there is nothing wrong setting it up now. Keep in mind: <em>By default</em>, both Jenkins and Tomcat use port <strong>8080</strong>, which means we change the default port to something else during the install process so they won't conflict with each other on the same system.</p>
+
+
+
+
+
+<h4>Installation</h4>
+
+
+
+
+
+<ul><li>Go to the <a rel="nofollow">Apache Tomcat 8 Downloads</a> page</li><li>Click on the <strong>32-bit/64-bit Windows Service Installer</strong> link (this will download the installer)</li><li>Run installer once downloaded</li><li>Accept all defaults through install process, except:<ul><li>Configuration (change all leading <strong>8</strong>s to a <strong>9</strong>:<ul><li>Server Shutdown Port: 9005</li><li>HTTP/1.1 Connector Port: 9080</li><li>AJP/1.3 Connector Port: 9009</li></ul></li></ul></li></ul>
+
+
+
+
+
+<h4>Setup and Configuration</h4>
+
+
+
+
+
+<p>The videos in <em>Deployment</em> section go into further details on editing configuration files, installing Jenkins plugins, and everything else required to connect Tomcat and Jenkins together.</p>
+
+
+
+
+
+<h4>Conclusion</h4>
+
+
+
+
+
+<p>The install videos provide in this course will setup each tool as needed in this course. If you run into any issues with any of the above install procedures, watch the corresponding videos in the <em>Installation</em> section of this course (except for Tomcat -- which is in the <em>Deployment</em> section).</p>
