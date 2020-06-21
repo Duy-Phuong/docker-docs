@@ -1,6 +1,10 @@
 C:\Users\Admin\AppData\Local\Programs\Python\Python38-32\python.exe E:/programing/language/python/python-docs/readfile.py
 ======== name dir ========
 
+[TOC]
+
+
+
 ## Docker
 
 https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-containers-and-volumes
@@ -132,6 +136,9 @@ https://dev.to/peterj/run-a-react-app-in-a-docker-container-kjn
 
 
 ## 1. Important  Navigating through this course
+
+https://www.udemy.com/course/introduction-to-docker-for-java-developers/
+
 ### 1. How to navigate through this course
 
 https://github.com/pictolearn/docker-tutorial
@@ -1032,22 +1039,723 @@ Likewise, create docker image with java 8
 
 ![image-20200620180153488](docker-java.assets/image-20200620180153488.png)  
 
+comment trong Docker file jdk 8
+
+```dockerfile
+#&& \
+#rm -rf /opt/tomcat/webapps/examples && \
+#rm -rf /opt/tomcat/webapps/docs && \
+#rm -rf /opt/tomcat/webapps/ROOT
+```
+
+![image-20200621074821082](docker-java.assets/image-20200621074821082.png)  
+
+script
+
+```shell
+
+#Step 1: Building an image
+#Syntax: docker build -t <image-name> <location of dockerfile>
+-------------------------------------------------------------------
+docker build -t tomcat8-jdk8-image .
+
+#Step 2: List all the images
+#Syntax: docker images
+-------------------------------------------------------------------
+docker images
+
+Step 3: Create a repository on github for tomcat-8-jdk8
+-------------------------------------------------------------------
+
+Step 4: Verify image creation and push it into Docker Hub
+# In my case i did 
+# docker login
+# docker tag tomcat8-jdk8-image:latest pictolearn/tomcat8-jdk8:latest
+# docker push pictolearn/tomcat8-jdk8:latest
+
+-------------------------------------------------------------------
+docker login 
+docker tag <currentimage>:<tag> <repository-name>/<image-name>:<tag>
+docker push <repository-name>/<image-name>:<tag>
+```
+
+![image-20200621075027063](docker-java.assets/image-20200621075027063.png)  
+
+![image-20200621075110367](docker-java.assets/image-20200621075110367.png)  
+
+![image-20200621075155293](docker-java.assets/image-20200621075155293.png) 
+
+Use case 6
+
+Dockerfile
+
+```dockerfile
+# This file is used to create a docker image.
+# The image name created in the previous use case.
+#FROM pictolearn/tomcat7-jdk7
+FROM pictolearn/tomcat8-jdk8
+
+
+# Add deployment
+COPY docker-spring-mvc.war /opt/tomcat/webapps/ROOT.war
+
+#Set Catalina HOME and JAVA_OPTS
+ENV CATALINA_HOME /opt/tomcat
+ENV PATH $PATH:$CATALINA_HOME/bin
+ENV JAVA_OPTS="-Xms1024m -Xmx1024m -Xss8192k -XX:PermSize=500m -XX:CMSInitiatingOccupancyFraction=50 -XX:+ExplicitGCInvokesConcurrent -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:NewRatio=1 -XX:SurvivorRatio=1  -Dorg.apache.cxf.JDKBugHacks.imageIO=false"
+
+#Expose this a port to the host machine.
+EXPOSE 8080
+EXPOSE 8009
+
+# install supervisor for debugging in case image is not built correctly.
+# supervisor lets you debug information.
+#RUN apt-get -y install supervisor
+#RUN service supervisor restart
+
+#The WORKDIR instruction sets the working directory for any RUN, CMD, ENTRYPOINT, COPY and ADD instructions that follow it in the Dockerfile.
+WORKDIR /opt/tomcat
+
+# Launch Tomcat
+CMD ["/opt/tomcat/bin/catalina.sh", "run"]
+
+# Used for debugging in case something does not work and the container fails to start up because of the CMD instruction specified above.
+#ENTRYPOINT ["/bin/sh", "-c", "while true; do sleep 1; done"]
+
+
+# Added for debugging in case image does not get built
+# Install supervisor by commenting out that piece and make sure
+# all works fine.
+#ADD supervisord.conf /etc/supervisor/
+#CMD ["/usr/bin/supervisord", "-n"]
+```
+
+![image-20200621075435578](docker-java.assets/image-20200621075435578.png)  
+
+![image-20200621075548371](docker-java.assets/image-20200621075548371.png)  
+
+![image-20200621075701361](docker-java.assets/image-20200621075701361.png)  
+
+![image-20200621075748602](docker-java.assets/image-20200621075748602.png)  
+
+![image-20200621075804297](docker-java.assets/image-20200621075804297.png)  
+
+```shell
+Step 1: Remove the existing pictolearn/tomcat7-jdk7 and pictolearn/tomcat8-jdk8 images
+-------------------------------------------------------------------
+docker rmi pictolearn/tomcat7-jdk7
+docker rmi pictolearn/tomcat8-jdk8
+
+#Step 2: Building an image
+#Syntax: docker build -t <image-name> <location of dockerfile>
+-------------------------------------------------------------------
+docker build -t spring-mvc-tomcat7-jdk7-image .
+docker build -t spring-mvc-tomcat8-jdk8-image .
+
+
+#Step 3: Run a container from the image
+#Syntax: docker run -itd --name <container-name> -p <host-port>:<container-port> <image-name>
+---------------------------------------------------------------------------------------------
+docker run -itd --name tomcat7-jdk7-container-1 -p 5555:8080 spring-mvc-tomcat7-jdk7-image
+docker run -itd --name tomcat8-jdk8-container-2 -p 5556:8080 spring-mvc-tomcat8-jdk8-image
+```
+
+![image-20200621075923603](docker-java.assets/image-20200621075923603.png)  
+
+Sau khi chạy `docker build -t spring-mvc-tomcat7-jdk7-image .` thì sửa docker file
+
+![image-20200621080150102](docker-java.assets/image-20200621080150102.png)  
+
+Sau đó build như trên
+
+![image-20200621080521402](docker-java.assets/image-20200621080521402.png)
+
+![image-20200621080255181](docker-java.assets/image-20200621080255181.png)  
+
+![image-20200621080329902](docker-java.assets/image-20200621080329902.png)  
+
 
 
 ### 2. Summary
 ## 11. Use Case 7 Mounting Volumes
 ### 1. Mounting Log Volumes
+
+![image-20200621081809204](docker-java.assets/image-20200621081809204.png)  
+
+Dockerfile
+
+```dockerfile
+# This file is used to create a docker image.
+# The image name created in the previous use case.
+FROM pictolearn/tomcat7-jdk7
+
+#Set Catalina HOME and JAVA_OPTS
+ENV CATALINA_HOME /opt/tomcat
+ENV PATH $PATH:$CATALINA_HOME/bin
+ENV JAVA_OPTS="-Xms1024m -Xmx1024m -Xss8192k -XX:PermSize=500m -XX:CMSInitiatingOccupancyFraction=50 -XX:+ExplicitGCInvokesConcurrent -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:NewRatio=1 -XX:SurvivorRatio=1  -Dorg.apache.cxf.JDKBugHacks.imageIO=false"
+
+EXPOSE 8080
+EXPOSE 8009
+
+# Need a war file from the host to be mounted you can do so here. This instruction tells docker that content in those directories does not go in images and 
+# can be accessed from other containers using the --volumes-from command line parameter. You have to run the container using -v 
+#/path/on/host:/path/in/container to access directories from the host.
+VOLUME "/opt/tomcat/webapps"
+VOLUME "/opt/tomcat/logs"
+
+#The WORKDIR instruction sets the working directory for any RUN, CMD, ENTRYPOINT, COPY and ADD instructions that follow it in the Dockerfile.
+WORKDIR /opt/tomcat
+
+# Launch Tomcat
+CMD ["/opt/tomcat/bin/catalina.sh", "run"]
+```
+
+script
+
+```shell
+#Step 1: Building an image
+#Syntax: docker build -t <image-name> <location of dockerfile>
+-------------------------------------------------------------------
+docker build -t spring-mvc-tomcat7-jdk7-volume-sample .
+
+#Step 2: List all the images
+#Syntax: docker images
+-------------------------------------------------------------------
+docker images
+
+
+#Step 3: Run a container from the image with a volume mount
+#Container volume is the logs directory for example or war directory
+Example:  docker run -itd  -p <host-port>:<container-port> -v <host-volume-absolute-path>:<container-volume-path>  --name=<container-name> <image-id>
+---------------------------------------------------------------------------------------------
+docker run -itd  -p 3333:8080  -v F:/pictolearn/Docker/logs:/opt/tomcat/logs -v F:/pictolearn/Docker/webapps:/opt/tomcat/webapps  --name="tomcat-container-log" spring-mvc-tomcat7-jdk7-volume-sample
+```
+
+![image-20200621082243069](docker-java.assets/image-20200621082243069.png)  
+
+![image-20200621082508367](docker-java.assets/image-20200621082508367.png)  
+
+Vào setting của icon docker
+
+![image-20200621082916436](docker-java.assets/image-20200621082916436.png)  
+
+choose F folder
+
+![image-20200621083017744](docker-java.assets/image-20200621083017744.png)  
+
+Chỉnh norton smart firewall thành 1h
+
+![image-20200621083135381](docker-java.assets/image-20200621083135381.png)  
+
+Tạo folder log và webapp
+
+Afterwards, we copy file .war into webapp folder
+
+![image-20200621083734602](docker-java.assets/image-20200621083734602.png)
+
+![image-20200621083629864](docker-java.assets/image-20200621083629864.png)  
+
+![image-20200621083647677](docker-java.assets/image-20200621083647677.png)
+
 ## 12. Use Case 8 Microservices using Docker Machine and Docker Compose
 ### 1. Introduction to Docker-Machine
+
+![image-20200621085105449](docker-java.assets/image-20200621085105449.png)  
+
+![image-20200621085129604](docker-java.assets/image-20200621085129604.png)  
+
+So basically what you're going to be doing is you're going to be running virtual machines on your current
+
+computer beat the PC or the Mac  
+
+
+
 ### 2. MAC Only Pre-requisite for installing Docker Machine
+
+![image-20200621085429623](docker-java.assets/image-20200621085429623.png)  
+
+download 
+
+scripts
+
+```shell
+*****************************************************************
+Docker - machine: Windows and MAC
+*****************************************************************
+
+#Create 2 Docker machines (Remember both are virtual PCs running with different IPs)
+------------------------------------------------------------------------
+
+Windows: docker-machine create -d hyperv --hyperv-virtual-switch "vs-1" hyperv-vm-1
+MAC: docker-machine create --driver virtualbox --virtualbox-disk-size "20000" hyperv-vm-1
+
+Windows: docker-machine create -d hyperv --hyperv-virtual-switch "vs-1" hyperv-vm-2
+MAC: docker-machine create --driver virtualbox --virtualbox-disk-size "20000" hyperv-vm-2
+
+#Verify if docker-machine is running on an IP
+------------------------------------------------------------------------
+docker-machine ip hyperv-vm-1
+docker-machine ip hyperv-vm-2
+
+#Run the following command and whatever output you get run it again
+------------------------------------------------------------------------
+docker-machine env hyperv-vm-1
+docker-machine env hyperv-vm-2
+
+#Run the output of the last line of the command which is there before.
+------------------------------------------------------------------------
+ & "C:\Program Files\Docker\Docker\Resources\bin\docker-machine.exe" env hyperv-vm-1 | Invoke-Expression
+ & "C:\Program Files\Docker\Docker\Resources\bin\docker-machine.exe" env hyperv-vm-2 | Invoke-Expression
+
+#Verify the docker-machine is active.
+----------------------------------------
+docker-machine ls
+
+Turning OFF and ON docker-machine
+-------------------------------------
+docker-machine stop hyperv-vm-1
+docker-machine stop hyperv-vm-2
+docker-machine start hyperv-vm-1
+docker-machine start hyperv-vm-2
+
+Remove docker-machine (Turn off docker-machine on hyper-v manager for windows before executing this command, for MAC no extra steps are required)
+docker-machine rm -f <name-of-machine>
+
+*****************************************************************
+Docker - compose commands to follow (Common for MAC and Windows)
+Manual Reference: https://docs.docker.com/compose/reference/
+*****************************************************************
+Step-1 # Builds the image
+-------------------------------------------------------------------
+docker-compose build
+
+#Build a specific image
+docker-compose build <service-name>
+
+#Builds and run the containers
+docker-compose up --build -d
+
+Step-2 # View the image (All started and stopped containers)
+-------------------------------------------------------------------
+docker-compose ps 
+
+
+Step-3 # Run the image in detached/non-detached mode (use -d) 
+-------------------------------------------------------------------
+docker-compose up -d
+docker-compose up
+docker-compose up -d <service-name>
+
+
+Step-4 # View logs and Tail logs
+-------------------------------------------------------------------
+# View logs
+docker-compose logs <service-name>
+
+# Tail logs
+docker-compose  logs -ft <service-name>
+
+Step-5 # Login to the container
+-------------------------------------------------------------------
+docker-compose run <service-name> /bin/bash 
+
+Step-6 # Stops all containers related to the compose file
+--------------------------------------------------
+docker-compose stop
+
+#Stop and start specific container
+docker-compose stop <service-name>
+
+#Stop and remove containers
+docker-compose down
+```
+
+![image-20200621085758640](docker-java.assets/image-20200621085758640.png)  
+
+![image-20200621085941165](docker-java.assets/image-20200621085941165.png)  
+
+![image-20200621090059492](docker-java.assets/image-20200621090059492.png)  
+
+![image-20200621090257358](docker-java.assets/image-20200621090257358.png)  
+
+![image-20200621090355142](docker-java.assets/image-20200621090355142.png)  
+
+Với địa chỉ 100 thì chưa access được  
+
+![image-20200621090618015](docker-java.assets/image-20200621090618015.png)  
+
+So nginx can run in both container
+
+![image-20200621090757672](docker-java.assets/image-20200621090757672.png)  
+
+
+
 ### 3. Windows only Pre-requisite for Installing Docker Machine
+
+https://docs.docker.com/machine/install-machine/
+
+### Install Docker Machine
+
+1. Install [Docker](https://docs.docker.com/engine/install/).
+
+2. Download the Docker Machine binary and extract it to your PATH.
+
+   If you are running **macOS**:
+
+   ```
+   $ base=https://github.com/docker/machine/releases/download/v0.16.0 &&
+     curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/usr/local/bin/docker-machine &&
+     chmod +x /usr/local/bin/docker-machine
+   ```
+
+   If you are running **Linux**:
+
+   ```
+   $ base=https://github.com/docker/machine/releases/download/v0.16.0 &&
+     curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine &&
+     sudo mv /tmp/docker-machine /usr/local/bin/docker-machine &&
+     chmod +x /usr/local/bin/docker-machine
+   ```
+
+   If you are running **Windows** with [Git BASH](https://git-for-windows.github.io/):
+
+   ```
+   $ base=https://github.com/docker/machine/releases/download/v0.16.0 &&
+     mkdir -p "$HOME/bin" &&
+     curl -L $base/docker-machine-Windows-x86_64.exe > "$HOME/bin/docker-machine.exe" &&
+     chmod +x "$HOME/bin/docker-machine.exe"
+   ```
+
+   > The above command works on Windows only if you use a terminal emulator such as [Git BASH](https://git-for-windows.github.io/), which supports Linux commands like `chmod`.
+
+   Otherwise, download one of the releases from the [docker/machine release page](https://github.com/docker/machine/releases/) directly.
+
+3. Check the installation by displaying the Machine version:
+
+   ```shell
+   $ docker-machine version
+   docker-machine version 0.16.0, build 9371605
+   ```
+
+Vào ô search nhập turn windows feature on off
+
+https://techcommunity.microsoft.com/t5/itops-talk-blog/step-by-step-enabling-hyper-v-for-use-on-windows-10/ba-p/267945
+
+![image-20200621095106418](docker-java.assets/image-20200621095106418.png)  
+
+Check container và hyper-v => restart
+
+![image-20200621100022497](docker-java.assets/image-20200621100022497.png)  
+
+Create new virtual switch manager by click on it
+
+![image-20200621100119921](docker-java.assets/image-20200621100119921.png)  
+
+chọn external and click CREATE
+
+![image-20200621100559386](docker-java.assets/image-20200621100559386.png)
+
+Nhập như trên chọn lại External network là 6025
+
+![image-20200621101049489](docker-java.assets/image-20200621101049489.png)  
+
+chọn yes
+
 ### 4. Windows only Setting up 2 Docker Machines
+
+![image-20200621101804758](docker-java.assets/image-20200621101804758.png)  
+
+![image-20200621102014423](docker-java.assets/image-20200621102014423.png)  
+
+![image-20200621102352697](docker-java.assets/image-20200621102352697.png)  
+
+![image-20200621102553765](docker-java.assets/image-20200621102553765.png)  
+
+run với port 32771 cũng chạy
+
+![image-20200621102830276](docker-java.assets/image-20200621102830276.png)  
+
+![image-20200621102928224](docker-java.assets/image-20200621102928224.png)
+
 ### 5. Docker-compose Basics and Use case set up
+
+![image-20200621114801536](docker-java.assets/image-20200621114801536.png)  
+
+![image-20200621114918380](docker-java.assets/image-20200621114918380.png)  
+
+Now Docker composed this used to create micro services are run services inside of Docker machines.
+
+Vào eclipse import project java mysql
+
+pom.xml
+
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>docker-mysql-connector</groupId>
+	<artifactId>docker-mysql-connector</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>docker-mysql-connector</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>6.0.6</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
+
+```
+
+Dockerfile
+
+```dockerfile
+FROM pictolearn/ubuntu-jdk8
+
+#Author of the Docker File
+# MAINTAINER Pictolearn Note: MAINTAINER has been deprecated for LABEL, 
+# LABEL is a key value pair 
+LABEL "Maintainer"="Pictolearn"
+
+ADD . /usr/local/docker-mysql-connector
+RUN cd /usr/local/docker-mysql-connector && mvn assembly:assembly
+CMD ["java", "-cp", "/usr/local/docker-mysql-connector/target/docker-mysql-connector-1.0.0-SNAPSHOT-jar-with-dependencies.jar", "org.pictolearn.docker.mysql.MySQLConnection"]
+```
+
+![image-20200621120037320](docker-java.assets/image-20200621120037320.png)  
+
+So just to take you back to that picture you're going to go back to that picture which I gave which
+
+is the use case picture which is going to give you a clear description as you can see we created two
+
+documentaries with two different IP addresses these are dummy IP addresses.
+
+One has a Microsoft is running which is called My sql and another is a Java container and standalone
+
+javascript called web.
+
+=> 2 dịa chỉ Ip máy ảo khác nhau
+
+docker-compose
+
+```dockerfile
+version: '3.1' #version of Docker-compose
+services: #Specifies the micro-service you want to run
+  db: # create an image by the name mysql
+    # NOTE: As of June, 2018 this has been updated to use the version of mysql 5.7.22  
+    image: mysql:5.7.22 # specify the image to download from docker hub, 
+    ports: ["3306:3306"] # expose ports to docker-machine , same as the EXPOSE command
+    hostname: db  #specify the name of a host which can be used by a container running on the same docker machine
+    environment: # specify the password and default database to connect to, note that the default root user will be picked up.
+        - MYSQL_ROOT_PASSWORD=root
+        - MYSQL_DATABASE=Users
+    container_name: mysqldatabase
+  web: # create an image by the name web
+    build: docker-mysql-connector 
+    image: docker-mysql-connector
+    hostname: web
+    tty: true   # same as the "-t" option used in docker build "-t" 
+    depends_on: #Specifies that this container should start up after mysql is build and has started
+      - db
+    links:  # you will specify this name or the alias name db:<alias> in the java code to connect, note you will not use localhost
+      - db:db
+    environment: #Specifies the environment variables
+      - AWS_ACCESS_KEY=123456
+```
+
+
+
 ### 6. Working with Docker-compose
+
+![image-20200621121400556](docker-java.assets/image-20200621121400556.png)  
+
+![image-20200621121508189](docker-java.assets/image-20200621121508189.png)  
+
+![image-20200621121523296](docker-java.assets/image-20200621121523296.png)  
+
+![image-20200621121637021](docker-java.assets/image-20200621121637021.png)  
+
+![image-20200621121702955](docker-java.assets/image-20200621121702955.png)  
+
+![image-20200621121759139](docker-java.assets/image-20200621121759139.png)  
+
+Nhập vào store in va...  để nhập pass test
+
+![image-20200621122108119](docker-java.assets/image-20200621122108119.png)  
+
+Build specific id
+
+![image-20200621122204427](docker-java.assets/image-20200621122204427.png)  
+
+Lý do có url vì
+
+![image-20200621122235602](docker-java.assets/image-20200621122235602.png)  
+
+![image-20200621122547856](docker-java.assets/image-20200621122547856.png)  
+
+copy the last command 
+
+![image-20200621122658172](docker-java.assets/image-20200621122658172.png)  
+
+![image-20200621122942098](docker-java.assets/image-20200621122942098.png)
+
+Sau khi sửa lại url trong java có chỉ có db: mới chạy đúng
+
+=> This make easier to deploy selective microservices
+
+![image-20200621123631306](docker-java.assets/image-20200621123631306.png)  
+
+stop all
+
+![image-20200621123846810](docker-java.assets/image-20200621123846810.png)
+
 ### 7. Summary
 ## 13. Use Case 9 Microservices with Docker, Spring Boot and Hibernate with MYSQL
 ### 1. Introduction and Initial Set up
+
+![image-20200621132323492](docker-java.assets/image-20200621132323492.png)  
+
+script
+
+```shell
+*****************************************************************
+Docker - compose commands to follow (Common for MAC and Windows)
+Manual Reference: https://docs.docker.com/compose/reference/
+*****************************************************************
+Step-1 # Builds the image
+-------------------------------------------------------------------
+docker-compose build
+
+#Build a specific image
+docker-compose build <service-name>
+
+#Builds and run the containers
+docker-compose up --build -d
+
+Step-2 # Run the image in detached/non-detached mode (use -d) 
+-------------------------------------------------------------------
+docker-compose up -d
+docker-compose up
+docker-compose up -d <service-name>
+
+Step-3 # View the image (All started and stopped containers)
+-------------------------------------------------------------------
+docker-compose ps 
+
+Step-4 # View logs and Tail logs
+-------------------------------------------------------------------
+# View logs
+docker-compose logs <service-name>
+
+# Tail logs
+docker-compose  logs -ft <service-name>
+
+Step-5 # Login to the container
+-------------------------------------------------------------------
+docker-compose run <service-name> /bin/bash 
+
+Step-6 # Stops all containers related to the compose file
+-------------------------------------------------------------------
+Use a RESTFul Client to test the APIs
+
+Step-7 # Stops all containers related to the compose file
+--------------------------------------------------
+docker-compose stop
+
+#Stop and start specific container
+docker-compose stop <service-name>
+
+#Stop and remove containers
+docker-compose down
+```
+
+docker-compose
+
+```dockerfile
+version: '3.1' #version of Docker-compose
+services: #specifies 2 microservices "web" and "mysql"
+  mysql:
+    # NOTE: As of June, 2018 this has been updated to use the version of mysql 5.7.22  
+    image: mysql:5.7.22 # Expose a mysql image
+    ports: ["8888:3306"] # Expose port 8888
+    hostname: mysql # mysql hostname
+    environment: # root username and password
+        - MYSQL_ROOT_PASSWORD=root
+        - MYSQL_DATABASE=Users
+  web: # Web microservice
+    build: pictolearn-docker
+    image: pictolearn-docker
+    ports: ["5555:8080"] # expose port 5555 for the rest client to connect to
+    hostname: web
+    tty: true
+#    volumes: # you can include volumes, will be a TODO exercise
+#      - /Users/AGanesan/docker/docker-tutorial/resources/docker-compose-spring-boot/logs:/usr/local/pictolearn/logs
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    environment:
+      - DB_PORT=tcp://mysql:3306  
+```
+
+![image-20200621132805623](docker-java.assets/image-20200621132805623.png)  
+
+Dockerfile
+
+```dockerfile
+#Install from the same image built i usecase - 8
+FROM pictolearn/ubuntu-jdk8
+
+# add the directory to the path
+ADD . /usr/local/pictolearn
+
+# Run maven
+RUN cd /usr/local/pictolearn && mvn clean package
+
+#Spring boot initiation
+CMD ["java","-jar","-DlogPath=/usr/local/pictolearn", "/usr/local/pictolearn/target/docker-compose-pictolearn-1.0.0-SNAPSHOT.jar"]
+```
+
+![image-20200621133057165](docker-java.assets/image-20200621133057165.png)  
+
+![image-20200621133234462](docker-java.assets/image-20200621133234462.png)  
+
+import to eclipse
+
+![image-20200621133347903](docker-java.assets/image-20200621133347903.png)  
+
+![image-20200621134448479](docker-java.assets/image-20200621134448479.png)  
+
+
+
 ### 2. Building Spring Boot Microservice with Docker
+
+
+
 ## 14. Use Case 10 Service Discovery and Load Balancing
 ### 1. Use Case 10 Scaling up Microservices, Service Discovery and Load Balancing
 ### 2. Quick Code Overview
