@@ -171,15 +171,176 @@ Khi ấn nút build lại bên trái thì nhiều lần và f5 page => weather r
 
 ![image-20200621221852682](jenkins-bootcamp.assets/image-20200621221852682.png)  
 
-COnfig project có thể chọn disable
+Config project có thể chọn disable
 
 ![image-20200621221949215](jenkins-bootcamp.assets/image-20200621221949215.png)
 
 ### 5. Copy and Rename Jobs
+
+![image-20200621222737386](jenkins-bootcamp.assets/image-20200621222737386.png)  
+
+![image-20200621222935116](jenkins-bootcamp.assets/image-20200621222935116.png)  
+
+Sau khi ấn apply click vào button advanced tiếp
+
+![image-20200621223056848](jenkins-bootcamp.assets/image-20200621223056848.png)  
+
+The web URL remains the same short path from earlier but the display name is used for most other
+places, including on the bread crumb trail.
+
+localhost:8080/job/problem
+
+![image-20200621223405817](jenkins-bootcamp.assets/image-20200621223405817.png)  
+
+![image-20200621223425453](jenkins-bootcamp.assets/image-20200621223425453.png)  
+
+Problems World is displayed
+
+CLick on new Item
+
+![image-20200621223529121](jenkins-bootcamp.assets/image-20200621223529121.png)  
+
+choose copy from problem
+
+![image-20200621223624629](jenkins-bootcamp.assets/image-20200621223624629.png)  
+
+![image-20200621223655876](jenkins-bootcamp.assets/image-20200621223655876.png)  
+
+Click on Build Now
+
+![image-20200621223726020](jenkins-bootcamp.assets/image-20200621223726020.png)  
+
+![image-20200621223851359](jenkins-bootcamp.assets/image-20200621223851359.png)
+
 ### 6. Update Plugins
+
+Click on manage Jenkins
+
+![image-20200621223934196](jenkins-bootcamp.assets/image-20200621223934196.png)  
+
+choose manage plugins
+
+Vào jenkins.io => plugin
+
+![image-20200621224156888](jenkins-bootcamp.assets/image-20200621224156888.png)  
+
+Choose Git
+
+![image-20200621224231123](jenkins-bootcamp.assets/image-20200621224231123.png)  
+
+click install without restart
+
+![image-20200621224407462](jenkins-bootcamp.assets/image-20200621224407462.png)  
+
+Normally I'm happy with the latest version of plugins, but in some cases you might want to
+install an older version directly.
+
+Click on Archives
+
+![image-20200621225010199](jenkins-bootcamp.assets/image-20200621225010199.png)
+
+Choose 1.14
+
+![image-20200621225054293](jenkins-bootcamp.assets/image-20200621225054293.png)  
+
+scroll down
+
+![image-20200621225126176](jenkins-bootcamp.assets/image-20200621225126176.png)  
+
+trỏ tới file.hpi vừa mới tải
+
+vào url restart like below
+
+![image-20200621225237101](jenkins-bootcamp.assets/image-20200621225237101.png) 
+
+if ok green ball is displayed
+
+![image-20200621230317201](jenkins-bootcamp.assets/image-20200621230317201.png)  
+
+  
+
+![image-20200621225856100](jenkins-bootcamp.assets/image-20200621225856100.png)  
+
+Sau khi restart
+
+Click download now
+
+![image-20200621225944468](jenkins-bootcamp.assets/image-20200621225944468.png)  
+
+![image-20200621230002837](jenkins-bootcamp.assets/image-20200621230002837.png)  
+
+Check vào restart như hình
+
+If you don't want to use green ball, you can uncheck on install plugins
+
+![image-20200621230212188](jenkins-bootcamp.assets/image-20200621230212188.png)  
+
+Afterwards, choose restart
+
+
+
 ### 7. Delete a Job
+
+![image-20200621230350271](jenkins-bootcamp.assets/image-20200621230350271.png)   
+
+![image-20200621230514392](jenkins-bootcamp.assets/image-20200621230514392.png)  
+
+![image-20200621230556287](jenkins-bootcamp.assets/image-20200621230556287.png)  
+
+
+
 ### 8. Manage Jenkins
+
+![image-20200621230736040](jenkins-bootcamp.assets/image-20200621230736040.png)  
+
+The first item, which we will cover a bit later, is
+the main configuration page for the Jenkins server.
+
+Global security, also something we will cover later on in this course,
+is where we will configure how people log in and general security policies for the server.
+
+Credentials is where we set up and manage passwords, API keys, SSH keys and other credentials we would use with
+plugins or connecting to other systems from Jenkins.
+
+Global tools, which we will cover soon, is where we will configure the tools we will
+use with Jenkins, like Git, Java, and Maven
+"Reload Configuration from Disk" does exactly what you think:
+
+it reloads the Jenkins configuration from the system disk.
+
+
+
 ### 9. Jenkins Configuration
+
+![image-20200621232002996](jenkins-bootcamp.assets/image-20200621232002996.png)  
+
+save
+
+![image-20200621232059021](jenkins-bootcamp.assets/image-20200621232059021.png)  
+
+First we have the number of executors.
+
+That refers to the number of concurrent build threads or processes
+
+that we can have at the same time, specifically on the master.
+By default Jenkins sets this value to 2, which, for most systems, is rather low.
+
+![image-20200621232243988](jenkins-bootcamp.assets/image-20200621232243988.png)  
+
+click add jdk
+
+uncheck install automatically on jdk
+
+![image-20200621232425849](jenkins-bootcamp.assets/image-20200621232425849.png)  
+
+![image-20200621232454798](jenkins-bootcamp.assets/image-20200621232454798.png)  
+
+Click Apply
+
+![image-20200621232609411](jenkins-bootcamp.assets/image-20200621232609411.png)  
+
+
+
 ## 4. Maven Projects
 ### 1. Maven Projects Overview
 
