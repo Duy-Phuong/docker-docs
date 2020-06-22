@@ -718,11 +718,102 @@ Save
 
 ### 4. Build and Review
 
+Click on build now
+
+![image-20200622231822871](jenkins-bootcamp.assets/image-20200622231822871.png)  
+
+![image-20200622231916492](jenkins-bootcamp.assets/image-20200622231916492.png)  
+
+![image-20200622232002393](jenkins-bootcamp.assets/image-20200622232002393.png)  
+
+![image-20200622232128553](jenkins-bootcamp.assets/image-20200622232128553.png)  
+
+Click on time tracker 
+
+![image-20200622232229397](jenkins-bootcamp.assets/image-20200622232229397.png)  
+
+  
+
 ### 5. Unit Testing in Jenkins
+
+Ctrl F: surfile
+
+Check in console
+
+![image-20200622232941361](jenkins-bootcamp.assets/image-20200622232941361.png)  
+
+![image-20200622233217571](jenkins-bootcamp.assets/image-20200622233217571.png)  
+
+![image-20200622233529074](jenkins-bootcamp.assets/image-20200622233529074.png)  
+
+![image-20200622233602884](jenkins-bootcamp.assets/image-20200622233602884.png)  
+
+Click into module
+
+![image-20200622233641767](jenkins-bootcamp.assets/image-20200622233641767.png)  
+
+![image-20200622233701613](jenkins-bootcamp.assets/image-20200622233701613.png)  
+
+![image-20200622233901483](jenkins-bootcamp.assets/image-20200622233901483.png)  
+
+change to false to test
+
+![image-20200622234031696](jenkins-bootcamp.assets/image-20200622234031696.png)
 
 ### 6. Reviewing Quality Analysis
 
+click in last build #10
+
+![image-20200622234308386](jenkins-bootcamp.assets/image-20200622234308386.png)  
+
+bên trái cũng có link tương ứng vs 3 plugin
+
+![image-20200622234516524](jenkins-bootcamp.assets/image-20200622234516524.png)  
+
+Tương tự check vào từng tab để xem kĩ
+
+
+
 ### 7. Enforcing Minimum Quality Scores
+
+![image-20200623000340165](jenkins-bootcamp.assets/image-20200623000340165.png)  
+
+![image-20200623000418332](jenkins-bootcamp.assets/image-20200623000418332.png)  
+
+![image-20200623000443934](jenkins-bootcamp.assets/image-20200623000443934.png)  
+
+![image-20200623000526290](jenkins-bootcamp.assets/image-20200623000526290.png)  
+
+Sau đó check Build now
+
+![image-20200623000618356](jenkins-bootcamp.assets/image-20200623000618356.png)  
+
+![image-20200623001314249](jenkins-bootcamp.assets/image-20200623001314249.png)  
+
+The top row, with the yellow ball, refers to thresholds to consider the build unstable.
+
+The bottom row is the threshold to fail the build.
+
+For example, on this project, I want to consider the build unstable
+if we have more than 10 warnings, regardless of the priority.
+Placing a zero in the high priority column will trip the unstable status if one or more high priority warnings is found.
+
+I place a 5 for normal and 10 for low, making these unstable thresholds for those categories respectively.
+
+That means, provided we don't exceed 10 warnings total, the project can have up to five normal priority
+warnings and still get a success or green ball.
+
+Let's pick some reasonable thresholds for failing the build, which is the bottom row.
+
+For all priorities let's use 100. For high, normal, and low use 40, 75, and blank respectively.
+
+That means, if the project has more than 40 high priority warnings or more than 75 normal priority warnings
+
+Jenkins will automatically fail the build, which will also happen if any combination exceeds 100 warnings.
+
+The last field, for low priority warnings, is left blank
+
+
 
 ### 8. Improving Quality Scores
 
@@ -730,9 +821,47 @@ Save
 
 ### 1. Publishing Overview
 
+![image-20200623002011254](jenkins-bootcamp.assets/image-20200623002011254.png)
+
 ### 2. Maven Repository Plugin and Configuration
 
+![image-20200623002253883](jenkins-bootcamp.assets/image-20200623002253883.png)  
+
+![image-20200623002623947](jenkins-bootcamp.assets/image-20200623002623947.png)  
+
+Nếu xuất hiện như trên là success
+
+Rename
+
+![image-20200623002420179](jenkins-bootcamp.assets/image-20200623002420179.png)  
+
+Choose advanced
+
+![image-20200623002503890](jenkins-bootcamp.assets/image-20200623002503890.png)  
+
+![image-20200623002544249](jenkins-bootcamp.assets/image-20200623002544249.png)  
+
+
+
 ### 3. Build and Review Artifact Publishing
+
+Build now
+
+CHọn enable auto refresh
+
+![image-20200623002759357](jenkins-bootcamp.assets/image-20200623002759357.png)  
+
+![image-20200623002857901](jenkins-bootcamp.assets/image-20200623002857901.png)  
+
+copy Url paste
+
+Click bên trái cũng tương tự nhưng thêm 1 level
+
+![image-20200623003149644](jenkins-bootcamp.assets/image-20200623003149644.png)  
+
+![image-20200623003239981](jenkins-bootcamp.assets/image-20200623003239981.png)  
+
+project/ training/ time tracker core
 
 ## 7. Build Artifact Deployment with Jenkins
 
