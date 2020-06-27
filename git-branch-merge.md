@@ -678,6 +678,55 @@ $ git clone abc.git
 
 
 
+# Push change to a remote branch
+
+## Push change to a remote repo
+
+![image-20200627150234783](git-branch-merge.assets/image-20200627150234783.png)   
+
+compare remote branch and local branch
+
+![image-20200627150339368](git-branch-merge.assets/image-20200627150339368.png)  
+
+After tracking remote branch you call call `git push` no need origin master again
+
+![image-20200627150607232](git-branch-merge.assets/image-20200627150607232.png)  
+
+```shell
+# sync origin/master with master branch
+git fetch
+```
+
+![image-20200627150800308](git-branch-merge.assets/image-20200627150800308.png)  
+
+get info of new branch in  origin/master in local
+
+## Merge fetched change
+
+![image-20200627152904365](git-branch-merge.assets/image-20200627152904365.png)  
+
+Fast-forward
+
+![image-20200627153354252](git-branch-merge.assets/image-20200627153354252.png)  
+
+true
+
+![image-20200627154653649](git-branch-merge.assets/image-20200627154653649.png)  
+
+cách 1 fast 
+
+![image-20200627154754841](git-branch-merge.assets/image-20200627154754841.png)
+
+non fast
+
+![image-20200627154901237](git-branch-merge.assets/image-20200627154901237.png)  
+
+=> git pull
+
+## checkout remote branch
+
+## Delete remote branch
+
 
 
 
