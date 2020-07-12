@@ -740,6 +740,91 @@ Tương tự file .zip, để giải nén định dạng .rar trên Linux các b
 
 - tar -jxvf file.tbz2
 
+## Are you getting permission denied error message while removing directories?
+
+Only owners can delete their directories. However, a sysadmin can delete any directories created by anyone on the system. The syntax is:
+
+```shell
+sudo rmdir /path/to/dir/
+sudo rm -rf dir2
+```
+
+https://www.cyberciti.biz/faq/delete-or-remove-a-directory-linux-command/
+
+# Ubuntu Linux Install vim Text Editor using apt-get
+
+https://www.cyberciti.biz/faq/howto-install-vim-on-ubuntu-linux/
+
+## Ubuntu Linux install vim using apt
+
+The procedure is as follows:
+
+1. Open terminal application. You can also press CTRL+ALT+T keyboard shortcut
+2. Update package database by typing the **sudo apt update** command
+3. Search for vim packages run: **sudo apt search vim**
+4. Install vim on Ubuntu Linux, type: **sudo apt install vim**
+5. Verify vim installation by typing the **vim --version** command
+
+Let us see all steps in details to install vim on Ubuntu system.
+
+## How to install full version of Vim on Ubuntu
+
+First open the terminal application and then update package database using the [apt command](https://www.cyberciti.biz/faq/ubuntu-lts-debian-linux-apt-command-examples/) or [apt-get command](https://www.cyberciti.biz/tips/linux-debian-package-management-cheat-sheet.html):
+`sudo apt update`
+
+```
+Hit:1 http://us-central1.gce.archive.ubuntu.com/ubuntu focal InRelease
+Hit:2 http://us-central1.gce.archive.ubuntu.com/ubuntu focal-updates InRelease             
+Hit:3 http://us-central1.gce.archive.ubuntu.com/ubuntu focal-backports InRelease           
+Hit:4 http://security.ubuntu.com/ubuntu focal-security InRelease                           
+Hit:5 http://archive.canonical.com/ubuntu focal InRelease                                  
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+All packages are up to date.
+```
+
+[Apply all patches on Ubuntu Linux](https://www.cyberciti.biz/faq/how-do-i-update-ubuntu-linux-softwares/):
+`sudo apt upgrade`
+
+### Search for vim package
+
+Run any one of the following command:
+`sudo apt search vimsudo apt-cache search vimsudo apt-cache search vim | grep editor`
+
+```
+vim - Vi IMproved - enhanced vi editor
+vim-tiny - Vi IMproved - enhanced vi editor - compact version
+....
+```
+
+You don’t have to install above vim packages. Typically we eiter install vim or vim-tiny on Ubuntu Linux.
+
+### Get info about vim package of your choice
+
+Use the apt as follows:
+`apt show vim-tinyapt show vim`
+
+```
+Package: vim
+Version: 2:8.1.2269-1ubuntu5
+Priority: optional
+Section: editors
+....
+```
+
+### Installing vim text editor on Ubuntu
+
+Open a terminal and/or login to the remote Ubuntu server using the ssh client. Type the following apt-get command to install vim text editor (when promoted type your own password):
+`sudo apt-get updatesudo apt-get install vim`
+OR
+`sudo -ssudo apt-get updateapt-get install vim`  
+
+### How do I edit file with vim
+
+You can now use vim text editor:
+`$ vi file.c$ vim file.c$ sudo vim /etc/sysctl.conf`
+
 
 
 # Others
@@ -766,7 +851,9 @@ https://vinasupport.com/tim-va-thay-the-ky-tu-trong-mot-file-su-dung-sed-linux-c
 
 
 
+https://www.omgubuntu.co.uk/2019/09/ubuntu-19-10-default-wallpaper-download
 
+Git
 
-
+https://linuxize.com/post/how-to-install-git-on-ubuntu-18-04/
 
