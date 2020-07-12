@@ -437,15 +437,267 @@ export class JwtClientService {
 
 ```
 
+![image-20200710001522506](spring-security.assets/image-20200710001522506.png)  
+
+# Spring Security using JWT in Spring Boot App | Tech Primers
+
+This video covers the Spring Security using JWT in Spring Boot App with an example. 
+
+https://www.youtube.com/watch?v=-HYrUs1ZCLI
+
+🔗Github Code for the example:
+
+https://github.com/TechPrimers/jwt-security-example
+
+This Project uses JWT to secure the REST endpoints.
+
+The Following are the REST end points available in the example.
+
+- `/token` - Generates the JWT token based on the JSON sent. Its a POST method which expects the JSON: `{ "username": "name", "id": 123, "role": "admin"}`
+- `/rest/hello` - Requires a JWT Token with Header `key - "Authorisation"` and `value - "Token <JWT_Token>"`
 
 
 
 
 
+https://www.youtube.com/watch?v=X80nJ5T7YpE
+
+https://www.youtube.com/watch?v=sm-8qfMWEV8&list=PLqq-6Pq4lTTYTEooakHchTGglSvkZAjnE
 
 
 
+# Spring Security | FULL COURSE -4h
 
+https://www.youtube.com/watch?v=her_7pa0vrg
+
+https://www.youtube.com/watch?v=yefmcX57Eyg
+
+many branch
+
+https://github.com/amigoscode/spring-boot-security-course
+
+## Branch 1
+
+StudentController
+
+```java
+package com.example.demo.student;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Arrays;
+import java.util.List;
+
+@RestController
+@RequestMapping("api/v1/students")
+public class StudentController {
+
+    private static final List<Student> STUDENTS = Arrays.asList(
+      new Student(1, "James Bond"),
+      new Student(2, "Maria Jones"),
+      new Student(3, "Anna Smith")
+    );
+
+    @GetMapping(path = "{studentId}")
+    public Student getStudent(@PathVariable("studentId") Integer studentId) {
+        return STUDENTS.stream()
+                .filter(student -> studentId.equals(student.getStudentId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Student " + studentId + " does not exists"
+                ));
+    }
+}
+
+```
+
+## Branch 2
+
+ApplicationSecurityConfig.java
+
+```java
+package com.example.demo.security;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+
+@Configuration
+@EnableWebSecurity
+public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests()
+                .antMatchers("/", "index", "/css/*", "/js/*")
+                .permitAll()
+                .anyRequest()
+                .authenticated()
+                .and()
+                .httpBasic();
+    }
+
+}
+
+```
+
+## Branch 3
+
+PasswordConfig
+
+```java
+package com.example.demo.security;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@Configuration
+public class PasswordConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(10);
+    }
+}
+
+```
+
+ApplicationUserPermission
+
+```java
+package com.example.demo.security;
+
+public enum ApplicationUserPermission {
+    STUDENT_READ("student:read"),
+    STUDENT_WRITE("student:write"),
+    COURSE_READ("course:read"),
+    COURSE_WRITE("course:write");
+
+    private final String permission;
+
+    ApplicationUserPermission(String permission) {
+        this.permission = permission;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+}
+
+```
+
+ApplicationUserRole
+
+```java
+package com.example.demo.security;
+
+import com.google.common.collect.Sets;
+
+import java.util.Set;
+
+import static com.example.demo.security.ApplicationUserPermission.*;
+
+public enum ApplicationUserRole {
+    STUDENT(Sets.newHashSet()),
+    ADMIN(Sets.newHashSet(COURSE_READ, COURSE_WRITE, STUDENT_READ, STUDENT_WRITE)),
+    ADMINTRAINEE(Sets.newHashSet(COURSE_READ, STUDENT_READ));
+
+    private final Set<ApplicationUserPermission> permissions;
+
+    ApplicationUserRole(Set<ApplicationUserPermission> permissions) {
+        this.permissions = permissions;
+    }
+
+    public Set<ApplicationUserPermission> getPermissions() {
+        return permissions;
+    }
+}
+
+```
+
+ApplicationSecurityConfig
+
+```java
+package com.example.demo.security;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+
+import static com.example.demo.security.ApplicationUserRole.*;
+
+
+@Configuration
+@EnableWebSecurity
+public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public ApplicationSecurityConfig(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests()
+                .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
+                .antMatchers("/api/**").hasRole(STUDENT.name())
+                .anyRequest()
+                .authenticated()
+                .and()
+                .httpBasic();
+    }
+
+    @Override
+    @Bean
+    protected UserDetailsService userDetailsService() {
+        UserDetails annaSmithUser = User.builder()
+                .username("annasmith")
+                .password(passwordEncoder.encode("password"))
+                .roles(STUDENT.name()) // ROLE_STUDENT
+                .build();
+
+        UserDetails lindaUser = User.builder()
+                .username("linda")
+                .password(passwordEncoder.encode("password123"))
+                .roles(ADMIN.name()) // ROLE_ADMIN
+                .build();
+
+        UserDetails tomUser = User.builder()
+                .username("tom")
+                .password(passwordEncoder.encode("password123"))
+                .roles(ADMINTRAINEE.name()) // ROLE_ADMINTRAINEE
+                .build();
+
+        return new InMemoryUserDetailsManager(
+                annaSmithUser,
+                lindaUser,
+                tomUser
+        );
+
+    }
+}
+
+```
 
 
 
