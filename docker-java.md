@@ -210,6 +210,22 @@ https://github.com/pictolearn/docker-tutorial
 ## 2. Docker Fundamentals and Introduction
 ### 1. What is Docker
 
+1.1 Docker Quick Introduction.pptx
+
+![image-20201018203012113](docker-java.assets/image-20201018203012113.png)
+
+![image-20201018203026491](docker-java.assets/image-20201018203026491.png)
+
+Google on “[How ](http://stackoverflow.com/questions/16047306/how-is-docker-different-from-a-normal-virtual-machine)[is Docker different from a normal virtual machine](http://stackoverflow.com/questions/16047306/how-is-docker-different-from-a-normal-virtual-machine)[?](http://stackoverflow.com/questions/16047306/how-is-docker-different-from-a-normal-virtual-machine)” , click on the first link on stackoverflow.com to get a more detailed understanding of docker vs virtual machines.
+
+
+
+**http://stackoverflow.com/questions/16047306/how-is-docker-different-from-a-normal-virtual-machine**
+
+
+
+
+
 ```shell
 # Once you install docker, try the following command
 # This should output the version of docker
@@ -379,18 +395,80 @@ docker system prune -af
 
 
 ### 2. Docker Engine
+
+2.1 Docker Engine.pptx
+
+![image-20201018203333848](docker-java.assets/image-20201018203333848.png)
+
+![image-20201018203402457](docker-java.assets/image-20201018203402457.png)
+
 ### 3. Real World Use case - The problem
+
+3.1 Real World Use Case - The Problem.pptx
+
+![image-20201018203607582](docker-java.assets/image-20201018203607582.png)
+
+![image-20201018203629316](docker-java.assets/image-20201018203629316.png)
+
+![image-20201018203706103](docker-java.assets/image-20201018203706103.png)
+
+![image-20201018203805956](docker-java.assets/image-20201018203805956.png)
+
+![image-20201018203819069](docker-java.assets/image-20201018203819069.png)
+
+![image-20201018203843505](docker-java.assets/image-20201018203843505.png)
+
+
+
 ### 4. Real World Use case - Docker to the rescue
+
+![image-20201018203909811](docker-java.assets/image-20201018203909811.png)
+
+![image-20201018203945013](docker-java.assets/image-20201018203945013.png)
+
+![image-20201018204003257](docker-java.assets/image-20201018204003257.png)
+
+**SUMMARY**
+
+Simple and easily Configurable.
+
+Easy to Develop on.
+
+Faster Release Cycles.
+
+Faster Deployment Times.
+
+Reduced bloat as compared to other virtualization techniques.
+
+Consistent development of software across all environments.
+
 ## 3. Docker Installation on the MAC and Windows
 ### 1. Docker installation on the MAC
+
+- Download docker extension on vs code in MAC
+- https://hub.docker.com/editions/community/docker-ce-desktop-mac/
+- Run command: `docker run -it hello-world`
+
+1.1 Installation of Code samples.pptx
+
+![image-20201018204257983](docker-java.assets/image-20201018204257983.png)
+
+1.2 Docker hello-world.pptx
+
+![image-20201018204325957](docker-java.assets/image-20201018204325957.png)
+
+![image-20201018204402940](docker-java.assets/image-20201018204402940.png)
+
+![image-20201018205107428](docker-java.assets/image-20201018205107428.png)
+
 ### 1.4 Installation on the MAC
 ### 2. Docker installation on Windows 10 Professional
 
 ![image-20200620112104403](docker-java.assets/image-20200620112104403.png)  
 
-Cài extension docker
+- Cài extension docker
 
-gg: windows hypervisor enable
+- gg: windows hypervisor enable
 
 https://techcommunity.microsoft.com/t5/itops-talk-blog/step-by-step-enabling-hyper-v-for-use-on-windows-10/ba-p/267945
 
@@ -400,15 +478,16 @@ https://techcommunity.microsoft.com/t5/itops-talk-blog/step-by-step-enabling-hyp
 
 2.**Execute the following command in the terminal**
 
-**docker** 
+```shell
+docker version
+docker run –it hello-world
+```
 
-`run –it hello-world`
+
 
 ### 3. Docker Summary Break - 1
 
-**What is the Docker platform?**
-
-Docker provides the ability to **package** and **run** an application in a **loosely isolated environment called a container****.** The isolation and security allow you to run **many containers simultaneously on a given** **host**.
+![image-20201018205713331](docker-java.assets/image-20201018205713331.png)
 
 ![image-20200620113325918](docker-java.assets/image-20200620113325918.png)  
 
@@ -416,6 +495,8 @@ Docker provides the ability to **package** and **run** an application in a **loo
 
 ## 4. Important-Note  Before you start the use cases
 ### 1. Windows only Before you start the use case
+
+> Make sure docker run in linux container
 
 ![image-20200620113514100](docker-java.assets/image-20200620113514100.png)  
 
@@ -429,6 +510,9 @@ Docker provides the ability to **package** and **run** an application in a **loo
 
 ## 5. Use Case 1   Host a website on Apache httpd Server
 ### 1. What are we going to do
+
+`HANDS ON DOCKER for JAVA Developers\PPTS-FULL\5-Windows10\3- Use case - 1`
+
 ### 2. What is a Docker Image
 
 ![image-20200620123503330](docker-java.assets/image-20200620123503330.png)  
@@ -527,7 +611,7 @@ docker rmi $(docker images -q)
 
 Dockerfile
 
-```dockerfile
+```ini
 # Updated as of Aug 16, 2017
 # FROM specified which image i want to download
 # Needs to be provided before any other section of code.
@@ -565,7 +649,16 @@ COPY httpd.conf /usr/local/apache2/conf
 
 ![image-20200620133319555](docker-java.assets/image-20200620133319555.png)  
 
-![image-20200620133448082](docker-java.assets/image-20200620133448082.png)
+![image-20200620133448082](docker-java.assets/image-20200620133448082.png)  
+
+```shell
+#note if you run this it will NOT run in detached mode.
+docker run -it --name my-http-container-not-detached-mode -p 5557:80 my-httpd:latest
+
+==> click CTRL C => stop running
+```
+
+
 
 Nhược điểm của cách chạy cuối k có detach mode is if you CTRL C, you will cannot access this page
 
@@ -581,7 +674,9 @@ http://localhost:32768
 
 ![image-20200620134905532](docker-java.assets/image-20200620134905532.png)  
 
-![image-20200620135243391](docker-java.assets/image-20200620135243391.png)  
+![image-20200620135243391](docker-java.assets/image-20200620135243391.png)
+
+>  Có thể nhập vài characters đầu của container id 
 
 ![image-20200620135419797](docker-java.assets/image-20200620135419797.png)  
 
@@ -604,6 +699,15 @@ So you need to stop a container container.
 ![image-20200620140509105](docker-java.assets/image-20200620140509105.png)
 
 ### 7. Usecase-1 Quick Summary and Recap
+
+![image-20201018215735481](docker-java.assets/image-20201018215735481.png)
+
+![image-20201018215752451](docker-java.assets/image-20201018215752451.png)
+
+![image-20201018215807890](docker-java.assets/image-20201018215807890.png)
+
+![image-20201018215818688](docker-java.assets/image-20201018215818688.png)
+
 ## 6. Use Case 2   Host a website on NGINX HTTP Server
 ### 1. Introduction to Use Case 2
 
