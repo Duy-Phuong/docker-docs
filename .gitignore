@@ -6,4 +6,4 @@ logs/
 .class
 .settings/
 
-*.pptx
+# *.pptx
