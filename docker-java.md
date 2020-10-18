@@ -713,7 +713,7 @@ So you need to stop a container container.
 
 ![image-20200620144719367](docker-java.assets/image-20200620144719367.png)  
 
-
+![image-20201018222935292](docker-java.assets/image-20201018222935292.png)
 
 ### 2. Build-Tag-Push & Pull images
 
@@ -806,11 +806,21 @@ docker rmi $(docker images -q)
 
 FROM nginx:1.14 => search version trên docker hub
 
+Check trong file config
+
+![image-20201018234659552](docker-java.assets/image-20201018234659552.png)
+
+specify location in here and copy it in DOCKER FILE
+
+
+
 ![image-20200620150103895](docker-java.assets/image-20200620150103895.png)  
 
 Go to termial
 
-![image-20200620150246474](docker-java.assets/image-20200620150246474.png)  
+![image-20200620150246474](docker-java.assets/image-20200620150246474.png)
+
+Type `clear` to clear screen  and run `exit` to quit the exec mode in the terminal 
 
 ![image-20200620150414183](docker-java.assets/image-20200620150414183.png)  
 
@@ -822,9 +832,27 @@ Vào page dockerhub log in
 
 ![image-20200620153703411](docker-java.assets/image-20200620153703411.png)  
 
-![image-20200620154034473](docker-java.assets/image-20200620154034473.png)  
+![image-20201019000503834](docker-java.assets/image-20201019000503834.png)  
 
 remove image in order
+
+```shell
+docker tag my-nginx:latest pictolearn/nginx:1.0
+
+docker push pictolearn/nginx:1.0
+docker commit <container-id> <repository-name>/<image-name>:<tag>
+# list all tag and images
+docker images
+
+# remove tag
+docker rm pictolearn/nginx:1.0
+
+docker pull pictolearn/nginx:1.0
+
+docker run -itd --name my-nginx-container-3 -p 7777:80 nginx:1.0
+```
+
+
 
 Afterwards, pull images
 
