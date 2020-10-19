@@ -878,7 +878,11 @@ Afterwards, pull images
 
 ![image-20200620161210807](docker-java.assets/image-20200620161210807.png)  
 
-![image-20200620161228850](docker-java.assets/image-20200620161228850.png)  
+![image-20200620161228850](docker-java.assets/image-20200620161228850.png)
+
+![image-20201020012315333](docker-java.assets/image-20201020012315333.png)
+
+  
 
 **Step 1:** **Open Github desktop and create a dummy Project, check it into GIT HUB**
 
@@ -960,13 +964,25 @@ docker run -itd --name my-java-docker-container my-java-docker:latest
 docker logs -ft <container-id>
 ```
 
+#### Step 1: create new repo
+
 Xài docker-desktop sau khi create new repo thì publish
+
+![image-20201020013155653](docker-java.assets/image-20201020013155653.png)
+
+
+
+#### Step2: install plug in docker in eclipse
 
 ![image-20200620162428877](docker-java.assets/image-20200620162428877.png)  
 
 setting jdk
 
-![image-20200620162519911](docker-java.assets/image-20200620162519911.png)  
+![image-20200620162519911](docker-java.assets/image-20200620162519911.png)
+
+
+
+File new maven project/ choose maven achetype quickstart  
 
 ![image-20200620162610079](docker-java.assets/image-20200620162610079.png)  
 
@@ -1014,13 +1030,11 @@ Update pom.xml và xóa file nằm trong test folder
 
 And we're going to create an image from ubuntu. So what we are doing here is we are installing all the software required for us to run Java.
 
-Now what this is going to do is it copies all the files into that directory it's gonna run Mavin assembly
+Now what this is going to do is it copies all the files into that directory it's gonna run Maven assembly target and it's going to generate a jar file.
 
-target and it's going to generate a jar file.
+The command apparently tells doc the dock engine that this is the first command to run once a container is started from the image. => dòng cuối
 
-The command apparently tells doc the dock engine that this is the first command to run once a container
-
-is started from the image. => dòng cuối
+#### Step 3: build an image
 
 ```shell
 #Build the image.
@@ -1034,6 +1048,10 @@ docker run -itd --name my-java-docker-container my-java-docker:latest
 docker logs -ft <container-id>
 ```
 
+![image-20201020013926239](docker-java.assets/image-20201020013926239.png)  
+
+
+
 ![image-20200620163713295](docker-java.assets/image-20200620163713295.png)  
 
 :!q => exit
@@ -1042,7 +1060,7 @@ docker logs -ft <container-id>
 
 ### 3. Docker-GIT-Integration
 
-commit and sync
+commit and sync by push onto the server
 
 Vào dockerhub and vào setting 
 
@@ -1050,17 +1068,21 @@ Chọn github và đăng nhập
 
 ![image-20200620164551518](docker-java.assets/image-20200620164551518.png)  
 
- Chọn dropdown value thứ 2
+ Chọn dropdown value thứ 2: Create automated builds
 
 ![image-20200620164643110](docker-java.assets/image-20200620164643110.png)  
 
-Sau đó chọn icon gỉhub
+Sau đó chọn icon github
 
 ![image-20200620164804995](docker-java.assets/image-20200620164804995.png)  
 
 Chọn hello-world-java
 
-copy ![image-20200620164903115](docker-java.assets/image-20200620164903115.png)  
+copy ![image-20200620164903115](docker-java.assets/image-20200620164903115.png)
+
+
+
+![image-20201020014646022](docker-java.assets/image-20201020014646022.png)  
 
 ![image-20200620164928383](docker-java.assets/image-20200620164928383.png)  
 
@@ -1070,23 +1092,64 @@ Vào build settings choose trigger
 
 ![image-20200620165040817](docker-java.assets/image-20200620165040817.png)  
 
-Ấn vào building 
+Ấn vào build detail
+
+![image-20201020014848864](docker-java.assets/image-20201020014848864.png)
+
+Then click on Building icon restart
 
 ![image-20200620165149834](docker-java.assets/image-20200620165149834.png)  
 
-DOcker file is displayed
+DOCKER FILE is displayed
 
 ![image-20200620165336299](docker-java.assets/image-20200620165336299.png)  
 
-refresh and wait after a few minutes
+refresh and wait after a few minutes to see success icon
 
-![image-20200620165515345](docker-java.assets/image-20200620165515345.png)  
+![image-20200620165515345](docker-java.assets/image-20200620165515345.png)
 
-![image-20200620165542684](docker-java.assets/image-20200620165542684.png)  
+Then we click on Repo Info  
+
+![image-20200620165542684](docker-java.assets/image-20200620165542684.png)
+
+
+
+Command
+
+```shell
+Remove all the containers and images
+-------------------------------------------------------------------
+#Note: To remove an image the corresponding container built from that image will need to be removed.
+# stop all containers
+docker stop $(docker ps -a -q)
+
+#Remove a specific container
+docker rm <container-id>
+
+#Remove all containers
+docker rm $(docker ps -a -q)
+
+# remove image (note: no containers for this image should be running)
+docker rmi <image-id>
+
+# remove all images
+docker rmi $(docker images -q)
+
+docker login
+docker pull pictolearn/hello-world-java:latest
+docker run -itd --name pictolearn/hello-world-java
+
+```
+
+
+
+  
 
 ![image-20200620165620116](docker-java.assets/image-20200620165620116.png)  
 
-![image-20200620165701379](docker-java.assets/image-20200620165701379.png)  
+![image-20200620165701379](docker-java.assets/image-20200620165701379.png)
+
+Change a little bit in source and see it will be automatically built   
 
 ![image-20200620165952149](docker-java.assets/image-20200620165952149.png)  
 
