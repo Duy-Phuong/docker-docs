@@ -23,7 +23,8 @@ public class SpringSecurityJwtExampleApplication {
     @PostConstruct
     public void initUsers() {
         List<User> users = Stream.of(
-                new User(101, "javatechie", "password", "javatechie@gmail.com")
+                new User(101, "javatechie", "password", "javatechie@gmail.com"),
+                new User(102, "user1", "pwd1", "user1@gmail.com")
         ).collect(Collectors.toList());
         repository.saveAll(users);
     }
@@ -35,4 +36,4 @@ public class SpringSecurityJwtExampleApplication {
 }
 ```
 
-commit A
+commit B
