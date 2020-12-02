@@ -243,7 +243,7 @@ Scripts
 docker build -t <image-name> <location-of-Dockerfile>
 
 # run an image or run a container directly from a specific image
-docker run -it -d -p<host-port>:<container-port> --name <container-name> <image-name>:tag
+docker run -it -d -p <host-port>:<container-port> --name <container-name> <image-name>:tag
 
 -i (interactive)
 -t (TTY)
@@ -279,7 +279,7 @@ docker stop $(docker ps -a -q)
 docker rmi <image-id>
 
 # remove all images
-docker rmi $(docker images -a)
+docker rmi $(docker images -q)
 
 #Remove a specific container
 docker rm <container-id>
@@ -500,6 +500,12 @@ docker run –it hello-world
 
 ![image-20200620113514100](docker-java.assets/image-20200620113514100.png)  
 
+
+
+https://docs.docker.com/machine/install-machine/
+
+
+
 ![image-20200620113620272](docker-java.assets/image-20200620113620272.png)  
 
 
@@ -647,7 +653,13 @@ COPY httpd.conf /usr/local/apache2/conf
 
 ### 4. Running Containers, listing, starting and stopping containers
 
-![image-20200620133319555](docker-java.assets/image-20200620133319555.png)  
+![image-20200620133319555](docker-java.assets/image-20200620133319555.png)
+
+
+
+http://localhost:5555/
+
+  
 
 ![image-20200620133448082](docker-java.assets/image-20200620133448082.png)  
 
