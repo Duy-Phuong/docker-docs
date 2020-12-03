@@ -1,0 +1,9 @@
+<p>In the last section we added on some Nginx config to the client side project, but I neglected to add one line that would get the Nginx server to work correctly when using React Router!</p><p>In the <strong>client/nginx/default.conf</strong> file, please add the following line:</p><pre class="prettyprint linenums">server {
+  listen 3000;
+
+  location / {
+    root /usr/share/nginx/html;
+    index index.html index.htm;
+    try_files $uri $uri/ /index.html;  &lt;&lt;------Add this!!!!
+  }
+}</pre>

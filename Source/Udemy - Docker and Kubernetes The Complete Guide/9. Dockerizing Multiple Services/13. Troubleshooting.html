@@ -1,0 +1,4 @@
+<p>Hi!  Its entirely possible that you might run into a bug or two when you start up this set of containers with docker-compose.</p><p>Are you able to enter a number into the react app, but it appears to never be calculated, as seen in this screenshot?</p><figure><img height="209" src="https://udemy-images.s3.amazonaws.com:443/redactor/raw/2018-08-29_21-36-24-cb753d15a2fee49472da9f97c83ef850.png" width="234"></figure><p>If that's the case, then you can try adding in environment variables to the 'worker' entry in the docker-compose file, like so:</p><pre class="prettyprint linenums">worker:
+  environment:
+    - REDIS_HOST=redis
+    - REDIS_PORT=6379</pre><p>Then restart docker-compose.</p><p>The next section also has a couple of other possible troubleshooting tips.</p>
