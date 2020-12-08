@@ -599,53 +599,534 @@ Crash in node app
 
 ### 1. Development Workflow
 
-### 10. Quick Note for Windows Users.html
+Process of dev
 
-### 11. Docker Volumes
+![image-20201208225038845](docker-and-kubernetes-the-complete-guide.assets/image-20201208225038845.png)
 
-### 12. Bookmarking Volumes
 
-### 13. Shorthand with Docker Compose
 
-### 14. Overriding Dockerfile Selection
+### 2. Flow specifics
 
-### 15. Do We Need Copy
+![image-20201208225351688](docker-and-kubernetes-the-complete-guide.assets/image-20201208225351688.png)
 
-### 16. Executing Tests
+Travis CI will deploy your application to AWS
 
-### 17. Live Updating Tests
+![image-20201208230039645](docker-and-kubernetes-the-complete-guide.assets/image-20201208230039645.png)
 
-### 18. Docker Compose for Running Tests
 
-### 19. Shortcomings on Testing
-
-### 2. Flow Specifics
-
-### 20. Need for Nginx
-
-### 21. Multi-Step Docker Builds
-
-### 22. Implementing Multi-Step Builds
-
-### 23. Running Nginx
 
 ### 3. Docker's Purpose
 
+![image-20201208230641488](docker-and-kubernetes-the-complete-guide.assets/image-20201208230641488.png)
+
+=> you have to install node js
+
+
+
 ### 4. Project Generation
 
+
+
 ### 5. More on Project Generation
+
+```shell
+npm install -g create-react-app
+create-react-app frontend
+
+```
+
+command with react app
+
+![image-20201208231304090](docker-and-kubernetes-the-complete-guide.assets/image-20201208231304090.png)
+
+
+
+```shell
+npm run build
+npm run test
+
+```
+
+![image-20201208231729764](docker-and-kubernetes-the-complete-guide.assets/image-20201208231729764.png)
+
+create one file for production in build folder
+
+![image-20201208232053140](docker-and-kubernetes-the-complete-guide.assets/image-20201208232053140.png)
+
+open application in the browser
+
+
+
+
 
 ### 6. Necessary Commands
 
 ### 7. Creating the Dev Dockerfile
 
+Create 2 Dockerfile
+
+![image-20201208232428386](docker-and-kubernetes-the-complete-guide.assets/image-20201208232428386.png)
+
+![image-20201208232553510](docker-and-kubernetes-the-complete-guide.assets/image-20201208232553510.png)
+
+
+
+Build
+
+![image-20201208234923294](docker-and-kubernetes-the-complete-guide.assets/image-20201208234923294.png)
+
+> You have to add `-f` flag to specify the name of the docker file
+
+
+
+![image-20201208234937570](docker-and-kubernetes-the-complete-guide.assets/image-20201208234937570.png)
+
+You can see some warning
+
+
+
 ### 8. Duplicating Dependencies
 
+You will remove the node modules in the working directory since we have install it in the docker file => run again
+
+
+
 ### 9. Starting the Container
+
+run docker
+
+![image-20201208235752366](docker-and-kubernetes-the-complete-guide.assets/image-20201208235752366.png)
+
+
+
+![image-20201208235820635](docker-and-kubernetes-the-complete-guide.assets/image-20201208235820635.png)
+
+Navigate to localhost:3000 => err
+
+So we must mount the port from the container to your machine => run command again
+
+![image-20201208235952013](docker-and-kubernetes-the-complete-guide.assets/image-20201208235952013.png)
+
+
+
+
+
+### 10. Quick Note for Windows Users.html
+
+If you are running on **Windows, please read this:** Create-React-App has some issues detecting when files get changed on Windows based machines. To fix this, please do the following:
+
+1. In the root project directory, create a file called `.env`
+2. Add the following text to the file and save it: `CHOKIDAR_USEPOLLING=true`
+3. That's all!
+
+For more on why this is required, you can check out: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-start-doesn-t-detect-changes
+
+### 11. Docker Volumes
+
+![image-20201209000238245](docker-and-kubernetes-the-complete-guide.assets/image-20201209000238245.png)
+
+![image-20201209000412320](docker-and-kubernetes-the-complete-guide.assets/image-20201209000412320.png)
+
+```shell
+docker build -f Dockerfile.dev .
+
+```
+
+![image-20201209000905299](docker-and-kubernetes-the-complete-guide.assets/image-20201209000905299.png)
+
+You can see some errors
+
+![image-20201209000946122](docker-and-kubernetes-the-complete-guide.assets/image-20201209000946122.png)
+
+
+
+### 12. Bookmarking Volumes
+
+When we set up a mapping current dir to /app folder => we don't have /node_modules folder => override
+
+ ![image-20201209001504488](docker-and-kubernetes-the-complete-guide.assets/image-20201209001504488.png)
+
+=> automatically change if we change code in the app
+
+
+
+### 13. Shorthand with Docker Compose
+
+docker-compose.yml
+
+```ini
+version: '3'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports: 
+      - "3000:3000"
+    volumes:
+      - /app/node_modules
+      - .:/app
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /app/node_modules
+      - .:/app
+    command: ["npm", "run", "test"]
+
+```
+
+
+
+### 14. Overriding Dockerfile Selection
+
+default: `build: .`
+
+![image-20201209002652441](docker-and-kubernetes-the-complete-guide.assets/image-20201209002652441.png)
+
+### 15. Do We Need Copy
+
+Dockerfile
+
+```ini
+FROM node:alpine
+
+WORKDIR '/app'
+
+COPY package.json .
+RUN npm install
+
+COPY . .
+
+CMD ["npm", "run", "start"]
+```
+
+`COPY . .` you can keep it since in the future you can don't want to use the docker-compose anymore
+
+
+
+### 16. Executing Tests
+
+```shell
+docker build -f Dockerfile.dev .
+# copy image id
+
+```
+
+![image-20201209003336995](docker-and-kubernetes-the-complete-guide.assets/image-20201209003336995.png)
+
+The second way
+
+![image-20201209003649225](docker-and-kubernetes-the-complete-guide.assets/image-20201209003649225.png)
+
+
+
+
+
+### 17. Live Updating Tests
+
+Change in App.test.js
+
+```js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+
+it('renders without crashing', () => {
+  const div = document.createElement('div');
+  ReactDOM.render(<App />, div);
+  ReactDOM.unmountComponentAtNode(div);
+});
+
+// add new
+it('renders without crashing', () => {
+  const div = document.createElement('div');
+  ReactDOM.render(<App />, div);
+  ReactDOM.unmountComponentAtNode(div);
+});
+
+```
+
+=> the test will not be updated
+
+
+
+Run
+
+![image-20201209004251244](docker-and-kubernetes-the-complete-guide.assets/image-20201209004251244.png)
+
+Reuse
+
+![image-20201209004418669](docker-and-kubernetes-the-complete-guide.assets/image-20201209004418669.png)
+
+![image-20201209004450810](docker-and-kubernetes-the-complete-guide.assets/image-20201209004450810.png)
+
+If we remove the last one to test it will be updated
+
+
+
+### 18. Docker Compose for Running Tests
+
+Update content for docker compose file
+
+![image-20201209005151336](docker-and-kubernetes-the-complete-guide.assets/image-20201209005151336.png)
+
+If we remove or add the last one, the test it will be updated
+
+
+
+### 19. Shortcomings on Testing
+
+![image-20201209005451134](docker-and-kubernetes-the-complete-guide.assets/image-20201209005451134.png)
+
+![image-20201209005720080](docker-and-kubernetes-the-complete-guide.assets/image-20201209005720080.png)
+
+Input q, t, ... => not work 
+
+![image-20201209005856040](docker-and-kubernetes-the-complete-guide.assets/image-20201209005856040.png)
+
+I want to open up a second or now a third terminal window inside of here.
+We're going to start up a shell instance inside that run a container and we're going to explore some
+of the different running processes.
+So I'm going to again do `docker ps` again.
+So remember what this does this is going to run a new command inside the container with this ID with
+I-T right here.
+We are starting up a connection to standard in on this new command that we are going to run.
+And then S.H. over here on the very end is going to start up essentially a new shell or a kind of a
+command prompt inside the terminal shell is very similar to bash or Z shell if you use that.
+It's essentially just allowing us to enter some commands directly into the container.
+So I get to run that you see that we get our command prompt right here and then we're going to run P.S.
+which is going to print out all the running processes that we have going on inside the container.
+So this is the reason why Docker attached did not quite work the way we expected.
+
+
+
+![image-20201209005955892](docker-and-kubernetes-the-complete-guide.assets/image-20201209005955892.png)
+
+
+
+![image-20201209010125462](docker-and-kubernetes-the-complete-guide.assets/image-20201209010125462.png)
+
+
+
+
+Notice how we have a PID right here.
+One for the command NPM.
+We've then got a separate process running for re-act script starts and yet another idea for some other
+scripts start thing right here.
+All right.
+So why is the text that we're entering into the attached window over here not showing up.
+It all comes down to the different processes that have been created inside the container.
+You see when we run into them run tests we're not actually running directly NPM run test.
+In reality what is running is the process and PM and then NPM looks at the additional arguments we are
+providing specifically run test and it uses those additional arguments to decide what to do.
+So it's going to eventually start up a second process that is actually running our tests and that is
+one of these two right here.
+I'll be honest I don't actually know which one it is.
+It's essentially just one of the two.
+And so we might imagine that hey let's just say it's this one right here.
+That's a process that is running our test suite so we can kind of imagine that there is a second process
+in here called Start.
+And this is the process that is actually executing our test suite and receiving commands over standard
+in to understand when to filter down the test suite or rerun them or whatever it might be.
+The problem is that when we when we run dock or attach we always attach to standard in the primary process
+of the container or the process with the process id of one.
+And so that's always going to be the direct NPM command.
+But it's not the NPM command that is in charge of receiving those key presses and interpreting all those
+kind of different options we have of the P T and q an end to right here.
+It's the secondary process that was started by NPM.
+
+> And so ideally to be able to interact with that test suite we would want to attach to that other command
+> or that other running process.
+> Then of course the with docker attached that is just not an option any time we'd run docker or attached. 
+
+=> 2 way: docker compose or run exec
+
+
+
+### 20. Need for Nginx
+
+![image-20201209011058404](docker-and-kubernetes-the-complete-guide.assets/image-20201209011058404.png)
+
+![image-20201209011113277](docker-and-kubernetes-the-complete-guide.assets/image-20201209011113277.png)
+
+
+
+### 21. Multi-Step Docker Builds
+
+![image-20201209011409844](docker-and-kubernetes-the-complete-guide.assets/image-20201209011409844.png)
+
+![image-20201209011522029](docker-and-kubernetes-the-complete-guide.assets/image-20201209011522029.png)
+
+![image-20201209011539061](docker-and-kubernetes-the-complete-guide.assets/image-20201209011539061.png)
+
+
+
+Dockerfile
+
+```ini
+FROM node:alpine as builder
+WORKDIR '/app'
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM nginx
+EXPOSE 80
+COPY --from=builder /app/build /usr/share/nginx/html
+```
+
+
+
+### 22. Implementing Multi-Step Builds
+
+### 23. Running Nginx
+
+Run
+
+![image-20201209012208803](docker-and-kubernetes-the-complete-guide.assets/image-20201209012208803.png)
+
+![image-20201209012251725](docker-and-kubernetes-the-complete-guide.assets/image-20201209012251725.png)
+
+![image-20201209012407352](docker-and-kubernetes-the-complete-guide.assets/image-20201209012407352.png)
+
+
 
 ## 7. Continuous Integration and Deployment with AWS
 
 ### 1. Services Overview
+
+![image-20201209013118885](docker-and-kubernetes-the-complete-guide.assets/image-20201209013118885.png)
+
+
+
+### 2. Github Setup
+
+
+
+### 3. Travis CI Setup
+
+![image-20201209013919387](docker-and-kubernetes-the-complete-guide.assets/image-20201209013919387.png)
+
+Create an account on travis-ci, turn on dashboard on the setting
+
+![image-20201209014203766](docker-and-kubernetes-the-complete-guide.assets/image-20201209014203766.png)
+
+Filter and find your repo => enable button setting for this repo
+
+
+
+
+
+### 4. Travis YML File Configuration
+
+Create a .yml file to teach travis ci how to do
+
+![image-20201209014512983](docker-and-kubernetes-the-complete-guide.assets/image-20201209014512983.png)
+
+![image-20201209014541671](docker-and-kubernetes-the-complete-guide.assets/image-20201209014541671.png)
+
+.travis.yml
+
+```ini
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t stephengrider/docker-react -f Dockerfile.dev .
+
+# show the metrics
+script:
+  - docker run stephengrider/docker-react npm run test -- --coverage
+
+
+```
+
+
+
+### 5. A Touch More Travis Setup
+
+### 6. Automatic Build Creation
+
+![image-20201209015021936](docker-and-kubernetes-the-complete-guide.assets/image-20201209015021936.png)
+
+
+
+### 7. AWS Elastic Beanstalk
+
+![image-20201209015349843](docker-and-kubernetes-the-complete-guide.assets/image-20201209015349843.png)
+
+![image-20201209015437839](docker-and-kubernetes-the-complete-guide.assets/image-20201209015437839.png)
+
+> Easiest way to get started with production docker instance, run single container
+
+Click create new app
+
+![image-20201209015719398](docker-and-kubernetes-the-complete-guide.assets/image-20201209015719398.png)
+
+![image-20201209015807040](docker-and-kubernetes-the-complete-guide.assets/image-20201209015807040.png)
+
+![image-20201209015852769](docker-and-kubernetes-the-complete-guide.assets/image-20201209015852769.png)
+
+
+
+Only change platform to docker and click create new
+
+![image-20201209015949130](docker-and-kubernetes-the-complete-guide.assets/image-20201209015949130.png)
+
+### 8. More on Elastic Beanstalk
+
+### 9. Travis Config for Deployment
+
+.yml
+
+```ini
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t stephengrider/docker-react -f Dockerfile.dev .
+
+script:
+  - docker run stephengrider/docker-react npm run test -- --coverage
+
+deploy:
+  provider: elasticbeanstalk
+  region: "us-west-2"
+  app: "docker"
+  env: "Docker-env"
+  bucket_name: "elasticbeanstalk-us-west-2-306476627547"
+  bucket_path: "docker"
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key:
+    secure: "$AWS_SECRET_KEY"
+
+
+```
+
+![image-20201209020348287](docker-and-kubernetes-the-complete-guide.assets/image-20201209020348287.png)
+
+Copy url, Docker-env is env
+
+
+
+![image-20201209020622596](docker-and-kubernetes-the-complete-guide.assets/image-20201209020622596.png)
+
+Looking for us-west-2
+
+![image-20201209020728267](docker-and-kubernetes-the-complete-guide.assets/image-20201209020728267.png)
+
+bucket path by default is equal to the app name
+
+
+
+
 
 ### 10. Automated Deployments
 
@@ -660,22 +1141,6 @@ Crash in node app
 ### 15. Deployment Wrapup
 
 ### 16. Environment Cleanup.html
-
-### 2. Github Setup
-
-### 3. Travis CI Setup
-
-### 4. Travis YML File Configuration
-
-### 5. A Touch More Travis Setup
-
-### 6. Automatic Build Creation
-
-### 7. AWS Elastic Beanstalk
-
-### 8. More on Elastic Beanstalk
-
-### 9. Travis Config for Deployment
 
 ## 8. Building a Multi-Container Application
 
