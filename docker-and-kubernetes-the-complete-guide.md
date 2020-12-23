@@ -1,8 +1,11 @@
 
 
-
+# Docker and Kubernetes: The Complete Guide
 
 ## 1. Dive Into Docker!
+
+https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/
+
 ### 1. Why Use Docker
 
 https://github.com/StephenGrider/DockerCasts
@@ -149,6 +152,34 @@ Folder 2
 
 ![image-20201203224857196](docker-and-kubernetes-the-complete-guide.assets/image-20201203224857196.png)
 
+```shell
+Admin@LAPTOP-QO8E8EAL MINGW64 ~
+$ docker run busybox echo hi
+Unable to find image 'busybox:latest' locally
+latest: Pulling from library/busybox
+ea97eb0eb3ec: Pulling fs layer
+ea97eb0eb3ec: Verifying Checksum
+ea97eb0eb3ec: Download complete
+ea97eb0eb3ec: Pull complete
+Digest: sha256:bde48e1751173b709090c2539fdf12d6ba64e88ec7a4301591227ce925f3c678
+Status: Downloaded newer image for busybox:latest
+hi
+
+Admin@LAPTOP-QO8E8EAL MINGW64 ~
+$ docker run busybox ls
+bin
+dev
+etc
+home
+proc
+root
+sys
+tmp
+usr
+var
+
+```
+
 
 
 ![image-20201203224927142](docker-and-kubernetes-the-complete-guide.assets/image-20201203224927142.png)
@@ -172,15 +203,57 @@ Then we run `docker ps` => see container; if we stop, we cannot see any containe
 docker ps --all
 ```
 
+https://docs.docker.com/compose/reference/ps/
 
 
-### 4. Container Lifecycle
 
 ![image-20201203225503678](docker-and-kubernetes-the-complete-guide.assets/image-20201203225503678.png)
 
 ![image-20201203225518665](docker-and-kubernetes-the-complete-guide.assets/image-20201203225518665.png)
 
 ![image-20201203225704610](docker-and-kubernetes-the-complete-guide.assets/image-20201203225704610.png)
+
+```shell
+Admin@LAPTOP-QO8E8EAL MINGW64 /d/git-docs/docker/Source/HANDS ON DOCKER for JAVA Developers (master)
+$ docker ps -a
+CONTAINER ID   IMAGE         COMMAND     CREATED          STATUS                      PORTS     NAMES
+419d39c28a05   hello-world   "/hello"    2 minutes ago    Created                               sharp_noether
+a05f6883e86b   busybox       "ls"        16 minutes ago   Exited (0) 16 minutes ago             fervent_lewin
+15244a63f5c2   busybox       "echo hi"   16 minutes ago   Exited (0) 16 minutes ago             pensive_davinci
+
+Admin@LAPTOP-QO8E8EAL MINGW64 /d/git-docs/docker/Source/HANDS ON DOCKER for JAVA Developers (master)
+$ docker start -a 419d39c28a05
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+    (amd64)
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+ https://hub.docker.com/
+
+For more examples and ideas, visit:
+ https://docs.docker.com/get-started/
+
+Admin@LAPTOP-QO8E8EAL MINGW64 /d/git-docs/docker/Source/HANDS ON DOCKER for JAVA Developers (master)
+$ docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+Admin@LAPTOP-QO8E8EAL MINGW64 /d/git-docs/docker/Source/HANDS ON DOCKER for JAVA Developers (master)
+$ docker start -a 15244a63f5c2
+hi
+
+```
 
 
 
@@ -203,6 +276,31 @@ The second time run without `-a` flag, if we have `-a` docker will observe outpu
 ![image-20201203231952859](docker-and-kubernetes-the-complete-guide.assets/image-20201203231952859.png)
 
 
+
+```shell
+Admin@LAPTOP-QO8E8EAL MINGW64 /d/git-docs/docker/Source/HANDS ON DOCKER for JAVA Developers (master)
+$ docker ps -a
+CONTAINER ID   IMAGE         COMMAND     CREATED          STATUS                      PORTS     NAMES
+419d39c28a05   hello-world   "/hello"    2 minutes ago    Created                               sharp_noether
+a05f6883e86b   busybox       "ls"        16 minutes ago   Exited (0) 16 minutes ago             fervent_lewin
+15244a63f5c2   busybox       "echo hi"   16 minutes ago   Exited (0) 16 minutes ago             pensive_davinci
+
+
+Admin@LAPTOP-QO8E8EAL MINGW64 /d/git-docs/docker/Source/HANDS ON DOCKER for JAVA Developers (master)
+$ docker system prune
+WARNING! This will remove:
+  - all stopped containers
+  - all networks not used by at least one container
+  - all dangling images
+  - all dangling build cache
+
+Are you sure you want to continue? [y/N] y
+Deleted Containers:
+419d39c28a054eccf01669a1093e55cb145eb388d8583e22e615288a44b3ccb8
+c2be1203bd4293081f04ce4c4d29b848a642e4d47d8b3ad6bbc0d3500215222c
+15244a63f5c2c60066aec71ef857bb3ee02152fa8da1604262c1fdd21ae739ae
+
+```
 
 
 
@@ -359,6 +457,10 @@ If we had build it, it will be stored in the cache
 
 ![image-20201204004018915](docker-and-kubernetes-the-complete-guide.assets/image-20201204004018915.png)
 
+
+
+Now we open the second terminal on windows
+
 ![image-20201204004203586](docker-and-kubernetes-the-complete-guide.assets/image-20201204004203586.png)
 
 Create new image
@@ -451,6 +553,8 @@ CMD ["npm", "start"]
 
 ### 9. Specifying a Working Directory
 
+![image-20201224002256524](docker-and-kubernetes-the-complete-guide.assets/image-20201224002256524.png)
+
 ![image-20201204010945976](docker-and-kubernetes-the-complete-guide.assets/image-20201204010945976.png)
 
 ![image-20201204011016156](docker-and-kubernetes-the-complete-guide.assets/image-20201204011016156.png)
@@ -468,13 +572,21 @@ COPY ./ ./
 
 When we run again to see change in file index(adjust constantly), we don't have to rebuild by the way that we copy package.json to current working directory
 
+Adjust content in index.js file => run build command =>Adjust content in index.js file => run build command => it use cache and run faster
+
 ## 5. Docker Compose with Multiple Local Containers
 
 ### 1. App Overview
 
+![image-20201224004230115](docker-and-kubernetes-the-complete-guide.assets/image-20201224004230115.png)
 
+=> There is no need to create multiple instance with redis, scale up and the result like below:
+
+![image-20201224004641671](docker-and-kubernetes-the-complete-guide.assets/image-20201224004641671.png)
 
 ### 2. App Server Code
+
+D:\git-docs\docker\Source\Udemy - Docker and Kubernetes The Complete Guide\git repo\DockerCasts\complex\server
 
 package.json
 
@@ -517,6 +629,8 @@ app.listen(8081, () => {
 
 ### 3. Completed Node Code.html
 
+D:\git-docs\docker\Source\Udemy - Docker and Kubernetes The Complete Guide\5. Docker Compose with Multiple Local Containers
+
 ### 4. Assembling a Dockerfile
 
 Dockerfile
@@ -529,6 +643,45 @@ RUN npm install
 COPY . .
 CMD ["npm", "start"]
 ```
+
+Run
+
+```shell
+docker build .
+# get container id and user
+# or 
+
+docker build -t test:latest . 
+docker run test
+```
+
+You can see some error
+
+![image-20201224005722807](docker-and-kubernetes-the-complete-guide.assets/image-20201224005722807.png)
+
+app attempt to to start but there's no register server running for it to connect
+
+![image-20201224005950913](docker-and-kubernetes-the-complete-guide.assets/image-20201224005950913.png)
+
+Run to pull down redis => start on local machine
+
+Open the second terminal run 
+
+```shell
+docker run test
+```
+
+Then we also see an error again
+
+![image-20201224010155733](docker-and-kubernetes-the-complete-guide.assets/image-20201224010155733.png)
+
+Even though you run a redis server inside a separate container
+
+What's the problem?
+
+![image-20201224010306285](docker-and-kubernetes-the-complete-guide.assets/image-20201224010306285.png)
+
+![image-20201224010349832](docker-and-kubernetes-the-complete-guide.assets/image-20201224010349832.png)
 
 
 
@@ -551,13 +704,171 @@ CMD ["npm", "start"]
 `build .`: find and build form this image
 
 ```js
-const redisClient = redis.createClient({
+const client = redis.createClient({
   host: 'redis-server',
   port: 6379 // default port in redis
 });
 ```
 
 run `docker-compose up`
+
+### A Docker/docker-compose setup with Redis and Node/Express
+
+https://codewithhugo.com/setting-up-express-and-redis-with-docker-compose/
+
+Docker-compose
+
+```ini
+version: '3'
+services:
+  redis-server:
+    image: 'redis'
+    expose: 
+      - 6379
+  node_app:
+    build: .
+    ports: 
+      - "4001:8081"
+
+```
+
+```shell
+Admin@LAPTOP-QO8E8EAL MINGW64 /d/git-docs/docker/Source/Udemy - Docker and Kubernetes The Complete Guide/5. Docker Compose with Multiple Local Containers/3.1 visits.zip/visits (master)
+$ docker-compose up                                                                                                     Creating network "visits_default" with the default driver
+Building node_app
+Step 1/6 : FROM node:alpine
+alpine: Pulling from library/node
+0a6724ff3fcd: Pull complete                                                                                             8817a809f361: Pull complete                                                                                             7ded8c6c28da: Pull complete                                                                                             9639362e749c: Pull complete                                                                                             Digest: sha256:deac0ca3214e4fde93179b5444ec20d46c06fba58cc2c08dd10d98fbd60cb6d5
+Status: Downloaded newer image for node:alpine
+ ---> 46437a676663
+Step 2/6 : WORKDIR "/app"
+ ---> Running in a7263a6d9097
+Removing intermediate container a7263a6d9097
+ ---> c0afa729644b
+Step 3/6 : COPY ./package.json ./
+ ---> e8cfb29fa58a
+Step 4/6 : RUN npm install
+ ---> Running in 9ed52155d9be
+
+added 54 packages, and audited 54 packages in 2s
+
+found 0 vulnerabilities
+npm notice
+npm notice New minor version of npm available! 7.0.15 -> 7.3.0
+npm notice Changelog: <https://github.com/npm/cli/releases/tag/v7.3.0>
+npm notice Run `npm install -g npm@7.3.0` to update!
+npm notice
+Removing intermediate container 9ed52155d9be
+ ---> 6d5ae3b8be7f
+Step 5/6 : COPY . .
+ ---> 6e3844629f8b
+Step 6/6 : CMD ["npm", "start"]
+ ---> Running in 6c979adc5102
+Removing intermediate container 6c979adc5102
+ ---> 533de53e64d4
+
+Successfully built 533de53e64d4
+Successfully tagged visits_node_app:latest
+WARNING: Image for service node_app was built because it did not already exist. To rebuild this image you must use `docker-compose build` or `docker-compose up --build`.
+Creating visits_node_app_1     ... done                                                                                 Creating visits_redis_server_1 ... done                                                                                 Attaching to visits_node_app_1, visits_redis_server_1
+redis_server_1  | 1:C 23 Dec 2020 18:14:12.681 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+redis_server_1  | 1:C 23 Dec 2020 18:14:12.681 # Redis version=6.0.9, bits=64, commit=00000000, modified=0, pid=1, just started
+redis_server_1  | 1:C 23 Dec 2020 18:14:12.681 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+redis_server_1  | 1:M 23 Dec 2020 18:14:12.684 * Running mode=standalone, port=6379.
+redis_server_1  | 1:M 23 Dec 2020 18:14:12.684 # WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.
+redis_server_1  | 1:M 23 Dec 2020 18:14:12.684 # Server initialized
+redis_server_1  | 1:M 23 Dec 2020 18:14:12.684 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
+redis_server_1  | 1:M 23 Dec 2020 18:14:12.684 # WARNING you have Transparent Huge Pages (THP) support enabled in your kernel. This will create latency and memory usage issues with Redis. To fix this issue run the command 'echo madvise > /sys/kernel/mm/transparent_hugepage/enabled' as root, and add it to your /etc/rc.local in order to retain the setting after a reboot. Redis must be restarted after THP is disabled (set to 'madvise' or 'never').
+redis_server_1  | 1:M 23 Dec 2020 18:14:12.685 * Ready to accept connections
+node_app_1      |
+node_app_1      | > start
+node_app_1      | > node index.js
+node_app_1      |
+node_app_1      | Listening on port 8081
+node_app_1      | node:events:353
+node_app_1      |       throw er; // Unhandled 'error' event
+node_app_1      |       ^
+node_app_1      |
+node_app_1      | Error: getaddrinfo ENOTFOUND redis-server
+node_app_1      |     at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:67:26)
+node_app_1      | Emitted 'error' event on RedisClient instance at:
+node_app_1      |     at RedisClient.on_error (/app/node_modules/redis/index.js:406:14)
+node_app_1      |     at Socket.<anonymous> (/app/node_modules/redis/index.js:279:14)
+node_app_1      |     at Socket.emit (node:events:376:20)
+node_app_1      |     at emitErrorNT (node:internal/streams/destroy:188:8)
+node_app_1      |     at emitErrorCloseNT (node:internal/streams/destroy:153:3)
+node_app_1      |     at processTicksAndRejections (node:internal/process/task_queues:80:21) {
+node_app_1      |   errno: -3008,
+node_app_1      |   code: 'ENOTFOUND',
+node_app_1      |   syscall: 'getaddrinfo',
+node_app_1      |   hostname: 'redis-server'
+node_app_1      | }
+node_app_1      | npm ERR! code 1
+node_app_1      | npm ERR! path /app
+node_app_1      | npm ERR! command failed
+node_app_1      | npm ERR! command sh -c node index.js
+node_app_1      |
+node_app_1      | npm ERR! A complete log of this run can be found in:
+node_app_1      | npm ERR!     /root/.npm/_logs/2020-12-23T18_14_14_021Z-debug.log
+visits_node_app_1 exited with code 1
+```
+
+=> Create visits_default network
+
+> If we have an error when connecting => change docker file => run `docker-compose up -- build` to fix
+
+```shell
+Admin@LAPTOP-QO8E8EAL MINGW64 /d/git-docs/docker/Source/Udemy - Docker and Kubernetes The Complete Guide/git repo/DockerCasts/visits-5 (master)
+$ docker-compose up --build
+WARNING: Found orphan containers (visits-5_redis_server_1) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it 
+up.
+Building node_app
+Step 1/6 : FROM node:alpine
+ ---> 46437a676663
+Step 2/6 : WORKDIR "/app"
+ ---> Using cache
+ ---> c0afa729644b
+Step 3/6 : COPY ./package.json ./
+ ---> Using cache
+ ---> e8cfb29fa58a
+Step 4/6 : RUN npm install
+ ---> Using cache
+ ---> 6d5ae3b8be7f
+Step 5/6 : COPY . .
+ ---> 659a8bb21bce
+Step 6/6 : CMD ["npm", "start"]
+ ---> Running in 20671cdded28
+Removing intermediate container 20671cdded28
+ ---> e5eccdb95278
+
+Successfully built e5eccdb95278
+Successfully tagged visits-5_node_app:latest
+Starting visits-5_redis-server_1 ... done
+Recreating visits-5_node_app_1   ... done
+Attaching to visits-5_redis-server_1, visits-5_node_app_1
+redis-server_1  | 1:C 23 Dec 2020 18:33:48.327 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+redis-server_1  | 1:C 23 Dec 2020 18:33:48.327 # Redis version=6.0.9, bits=64, commit=00000000, modified=0, pid=1, just started
+redis-server_1  | 1:C 23 Dec 2020 18:33:48.327 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+redis-server_1  | 1:M 23 Dec 2020 18:33:48.328 * Running mode=standalone, port=6379.
+redis-server_1  | 1:M 23 Dec 2020 18:33:48.328 # WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.
+redis-server_1  | 1:M 23 Dec 2020 18:33:48.328 # Server initialized
+redis-server_1  | 1:M 23 Dec 2020 18:33:48.328 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
+redis-server_1  | 1:M 23 Dec 2020 18:33:48.329 # WARNING you have Transparent Huge Pages (THP) support enabled in your kernel. This will create latency and memory usage issues with Redis. To fix this issue 
+run the command 'echo madvise > /sys/kernel/mm/transparent_hugepage/enabled' as root, and add it to your /etc/rc.local in order to retain the setting after a reboot. Redis must be restarted after THP is disabled (set to 'madvise' or 'never').
+redis-server_1  | 1:M 23 Dec 2020 18:33:48.329 * Ready to accept connections
+node_app_1      | 
+node_app_1      | > start
+node_app_1      | > node index.js
+node_app_1      |
+node_app_1      | Listening on port 8081
+Gracefully stopping... (press Ctrl+C again to force)
+Stopping visits-5_node_app_1     ... 
+Stopping visits-5_redis-server_1 ... 
+```
+
+
+
+![image-20201224013434959](docker-and-kubernetes-the-complete-guide.assets/image-20201224013434959.png)
 
 ### 8. Docker Compose Commands
 
@@ -581,7 +892,7 @@ run `docker-compose up`
 
 Crash in node app
 
-
+![image-20201224014319851](docker-and-kubernetes-the-complete-guide.assets/image-20201224014319851.png)
 
 ### 11. Automatic Container Restarts
 
@@ -681,7 +992,7 @@ Build
 
 ![image-20201208234937570](docker-and-kubernetes-the-complete-guide.assets/image-20201208234937570.png)
 
-You can see some warning
+You can see some warning => ok
 
 
 
@@ -766,14 +1077,6 @@ services:
     volumes:
       - /app/node_modules
       - .:/app
-  tests:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    volumes:
-      - /app/node_modules
-      - .:/app
-    command: ["npm", "run", "test"]
 
 ```
 
@@ -787,7 +1090,7 @@ default: `build: .`
 
 ### 15. Do We Need Copy
 
-Dockerfile
+Dockerfile.dev
 
 ```ini
 FROM node:alpine
@@ -816,11 +1119,17 @@ docker build -f Dockerfile.dev .
 
 ![image-20201209003336995](docker-and-kubernetes-the-complete-guide.assets/image-20201209003336995.png)
 
+![image-20201224021445365](docker-and-kubernetes-the-complete-guide.assets/image-20201224021445365.png)
+
+
+
 The second way
 
 ![image-20201209003649225](docker-and-kubernetes-the-complete-guide.assets/image-20201209003649225.png)
 
+![image-20201224021524222](docker-and-kubernetes-the-complete-guide.assets/image-20201224021524222.png)
 
+=> full
 
 
 
@@ -850,6 +1159,24 @@ it('renders without crashing', () => {
 
 => the test will not be updated
 
+**Solution**: Using docker compose with volume
+
+> Docker-compose currently only have one service is web
+
+```ini
+version: '3'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports: 
+      - "3000:3000"
+    volumes:
+      - /app/node_modules
+      - .:/app
+```
+
 
 
 Run
@@ -867,6 +1194,31 @@ If we remove the last one to test it will be updated
 
 
 ### 18. Docker Compose for Running Tests
+
+```ini
+version: '3'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports: 
+      - "3000:3000"
+    volumes:
+      - /app/node_modules
+      - .:/app
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /app/node_modules
+      - .:/app
+    command: ["npm", "run", "test"]
+
+```
+
+=> add new service: test
 
 Update content for docker compose file
 
@@ -1130,6 +1482,24 @@ bucket path by default is equal to the app name
 
 ### 10. Automated Deployments
 
+![image-20201209220849521](docker-and-kubernetes-the-complete-guide.assets/image-20201209220849521.png)
+
+Search IAM in the service(use to manage API keys)
+
+
+
+![image-20201209223604817](docker-and-kubernetes-the-complete-guide.assets/image-20201209223604817.png)
+
+Go to tab User => click add user
+
+![image-20201209225648442](docker-and-kubernetes-the-complete-guide.assets/image-20201209225648442.png)
+
+click next
+
+
+
+
+
 ### 11. Exposing Ports Through the Dockerfile
 
 ### 12. Build Still Failing.html
@@ -1146,6 +1516,296 @@ bucket path by default is equal to the app name
 
 ### 1. Single Container Deployment Issues
 
+![image-20201209235524414](docker-and-kubernetes-the-complete-guide.assets/image-20201209235524414.png)
+
+Problems
+
+![image-20201209235609048](docker-and-kubernetes-the-complete-guide.assets/image-20201209235609048.png)
+
+
+
+
+
+### 2. Application Overview
+
+![image-20201209235722370](docker-and-kubernetes-the-complete-guide.assets/image-20201209235722370.png)
+
+Fibonacy sequence
+
+![image-20201209235752145](docker-and-kubernetes-the-complete-guide.assets/image-20201209235752145.png)
+
+Mock
+
+### 3. A Quick Note.html
+
+In the next few videos we're going to write a lot of Javascript code. You might not be interested in writing Javascript - ***if you don't want to put the app together from scratch then skip to Section #9\***. Over there you'll find the completed code ready to download, so you can focus just on the Docker stuff and not worry about any Javascript!
+
+
+
+### 4. Application Architecture
+
+![image-20201210000116877](docker-and-kubernetes-the-complete-guide.assets/image-20201210000116877.png)
+
+![image-20201210000236903](docker-and-kubernetes-the-complete-guide.assets/image-20201210000236903.png)
+
+![image-20201210000329775](docker-and-kubernetes-the-complete-guide.assets/image-20201210000329775.png)
+
+
+
+### 5. Worker Process Setup
+
+![image-20201210000446198](docker-and-kubernetes-the-complete-guide.assets/image-20201210000446198.png)
+
+
+
+### 6. Express API Setup
+
+![image-20201210001421254](docker-and-kubernetes-the-complete-guide.assets/image-20201210001421254.png)
+
+
+
+package.json
+
+```json
+{
+  "dependencies": {
+    "nodemon": "1.18.3",
+    "redis": "2.8.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon"
+  }
+}
+```
+
+worker/ index.js
+
+```js
+const keys = require('./keys');
+const redis = require('redis');
+
+const redisClient = redis.createClient({
+  host: keys.redisHost,
+  port: keys.redisPort,
+  retry_strategy: () => 1000
+});
+const sub = redisClient.duplicate();
+
+function fib(index) {
+  if (index < 2) return 1;
+  return fib(index - 1) + fib(index - 2);
+}
+
+sub.on('message', (channel, message) => {
+  redisClient.hset('values', message, fib(parseInt(message)));
+});
+sub.subscribe('insert');
+
+// listen and calculate => insert into a hash of values
+
+```
+
+worker/keys.js
+
+```js
+module.exports = {
+  redisHost: process.env.REDIS_HOST,
+  redisPort: process.env.REDIS_PORT
+};
+
+```
+
+![image-20201210002227426](docker-and-kubernetes-the-complete-guide.assets/image-20201210002227426.png)
+
+=> mean ok
+
+
+
+### 7. Connecting to Postgres
+
+server/keys.js
+
+```js
+module.exports = {
+  redisHost: process.env.REDIS_HOST,
+  redisPort: process.env.REDIS_PORT,
+  pgUser: process.env.PGUSER,
+  pgHost: process.env.PGHOST,
+  pgDatabase: process.env.PGDATABASE,
+  pgPassword: process.env.PGPASSWORD,
+  pgPort: process.env.PGPORT
+};
+
+```
+
+index.js
+
+```js
+const keys = require('./keys');
+
+// Express App Setup
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+
+// Postgres Client Setup
+const { Pool } = require('pg');
+const pgClient = new Pool({
+  user: keys.pgUser,
+  host: keys.pgHost,
+  database: keys.pgDatabase,
+  password: keys.pgPassword,
+  port: keys.pgPort
+});
+pgClient.on('error', () => console.log('Lost PG connection'));
+
+pgClient
+  .query('CREATE TABLE IF NOT EXISTS values (number INT)')
+  .catch(err => console.log(err));
+
+// Redis Client Setup
+const redis = require('redis');
+const redisClient = redis.createClient({
+  host: keys.redisHost,
+  port: keys.redisPort,
+  retry_strategy: () => 1000
+});
+const redisPublisher = redisClient.duplicate(); // => pub or sub
+
+// Express route handlers
+
+app.get('/', (req, res) => {
+  res.send('Hi');
+});
+
+app.get('/values/all', async (req, res) => {
+  // const values = await pgClient.query('SELECT * from values');
+
+  res.send([1, 2, 3]);
+});
+
+app.get('/values/current', async (req, res) => {
+  redisClient.hgetall('values', (err, values) => {
+    res.send(values);
+  });
+});
+
+app.post('/values', async (req, res) => {
+  const index = req.body.index;
+
+  if (parseInt(index) > 40) {
+    return res.status(422).send('Index too high');
+  }
+
+  redisClient.hset('values', index, 'Nothing yet!');
+  redisPublisher.publish('insert', index);
+  pgClient.query('INSERT INTO values(number) VALUES($1)', [index]);
+
+  res.send({ working: true });
+});
+
+app.listen(5000, err => {
+  console.log('Listening');
+});
+
+```
+
+
+
+### 8. More Express API Setup
+
+### 9. Generating the React App
+
+Fib.js
+
+```js
+import React, { Component } from 'react';
+import axios from 'axios';
+
+class Fib extends Component {
+  state = {
+    seenIndexes: [],
+    values: {},
+    index: ''
+  };
+
+  componentDidMount() {
+    this.fetchValues();
+    this.fetchIndexes();
+  }
+
+  async fetchValues() {
+    const values = await axios.get('/api/values/current');
+    this.setState({ values: values.data });
+  }
+
+  async fetchIndexes() {
+    const seenIndexes = await axios.get('/api/values/all');
+    this.setState({
+      seenIndexes: seenIndexes.data
+    });
+  }
+
+  handleSubmit = async event => {
+    event.preventDefault();
+
+    await axios.post('/api/values', {
+      index: this.state.index
+    });
+    this.setState({ index: '' });
+  };
+
+  renderSeenIndexes() {
+    return this.state.seenIndexes.map(({ number }) => number).join(', ');
+  }
+
+  renderValues() {
+    const entries = [];
+
+    for (let key in this.state.values) {
+      entries.push(
+        <div key={key}>
+          For index {key} I calculated {this.state.values[key]}
+        </div>
+      );
+    }
+
+    return entries;
+  }
+
+  render() {
+    return (
+      <div>
+        <form onSubmit={this.handleSubmit}>
+          <label>Enter your index:</label>
+          <input
+            value={this.state.index}
+            onChange={event => this.setState({ index: event.target.value })}
+          />
+          <button>Submit</button>
+        </form>
+
+        <h3>Indexes I have seen:</h3>
+        {this.renderSeenIndexes()}
+
+        <h3>Calculated Values:</h3>
+        {this.renderValues()}
+      </div>
+    );
+  }
+}
+
+export default Fib;
+
+```
+
+
+
 ### 10. Fetching Data in the React App
 
 ### 11. Rendering Logic in the App
@@ -1154,53 +1814,359 @@ bucket path by default is equal to the app name
 
 ### 13. Routing in the React App
 
-### 2. Application Overview
+App.js
 
-### 3. A Quick Note.html
+```js
+import React, { Component } from 'react';
+import logo from './logo.svg';
+import './App.css';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import OtherPage from './OtherPage';
+import Fib from './Fib';
 
-### 4. Application Architecture
+class App extends Component {
+  render() {
+    return (
+      <Router>
+        <div className="App">
+          <header className="App-header">
+            <img src={logo} className="App-logo" alt="logo" />
+            <h1 className="App-title">Fib Calculator UPDATED!</h1>
+            <Link to="/">Home</Link>
+            <Link to="/otherpage">Other Page</Link>
+          </header>
+          <div>
+            <Route exact path="/" component={Fib} />
+            <Route path="/otherpage" component={OtherPage} />
+          </div>
+        </div>
+      </Router>
+    );
+  }
+}
 
-### 5. Worker Process Setup
+export default App;
 
-### 6. Express API Setup
+```
 
-### 7. Connecting to Postgres
 
-### 8. More Express API Setup
-
-### 9. Generating the React App
 
 ## 9. Dockerizing Multiple Services
 
 ### 1. Checkpoint Files.html
 
-### 10. Routing with Nginx
 
-### 11. Building a Custom Nginx Image
-
-### 12. Starting Up Docker Compose
-
-### 13. Troubleshooting.html
-
-### 14. Troubleshooting Startup Bugs
-
-### 15. Opening Websocket Connections
 
 ### 2. Checkpoint Catchup
 
+![image-20201210082745669](docker-and-kubernetes-the-complete-guide.assets/image-20201210082745669.png)
+
+![image-20201210082833545](docker-and-kubernetes-the-complete-guide.assets/image-20201210082833545.png)
+
+
+
 ### 3. Dockerizing a React App - Again!
+
+![image-20201210082944676](docker-and-kubernetes-the-complete-guide.assets/image-20201210082944676.png)
+
+client/Dockerfile.dev
+
+```ini
+FROM node:alpine
+WORKDIR '/app'
+COPY ./package.json ./
+RUN npm install
+COPY . .
+CMD ["npm", "run", "start"]
+```
+
+![image-20201210083119504](docker-and-kubernetes-the-complete-guide.assets/image-20201210083119504.png)
+
+If we have some warning, it is ok
+
+
+
+![image-20201210083217286](docker-and-kubernetes-the-complete-guide.assets/image-20201210083217286.png)
+
+Run container 
 
 ### 4. Dockerizing Generic Node Apps
 
+server/Dockerfile.dev
+
+```ini
+FROM node:alpine
+WORKDIR "/app"
+COPY ./package.json ./
+RUN npm install
+COPY . .
+CMD ["npm", "run", "dev"]
+```
+
+package.json
+
+```json
+{
+  "dependencies": {
+    "express": "4.16.3",
+    "pg": "7.4.3",
+    "redis": "2.8.0",
+    "cors": "2.8.4",
+    "nodemon": "1.18.3",
+    "body-parser": "*"
+  },
+  "scripts": {
+    "dev": "nodemon",
+    "start": "node index.js"
+  }
+}
+
+```
+
+nodemon make app auto restart if we have any change
+
+worker/Dockerfile.dev
+
+```ini
+FROM node:alpine
+WORKDIR "/app"
+COPY ./package.json ./
+RUN npm install
+COPY . .
+CMD ["npm", "run", "dev"]
+```
+
+![image-20201210234751759](docker-and-kubernetes-the-complete-guide.assets/image-20201210234751759.png)
+
+Copy image id after build and run
+
+![image-20201210234844532](docker-and-kubernetes-the-complete-guide.assets/image-20201210234844532.png)
+
+=> result like that is ok then CTRL C
+
+Do similarly with worker
+
+![image-20201210235019662](docker-and-kubernetes-the-complete-guide.assets/image-20201210235019662.png)
+
+
+
+
+
 ### 5. Adding Postgres as a Service
+
+![image-20201210235203165](docker-and-kubernetes-the-complete-guide.assets/image-20201210235203165.png)
+
+![image-20201210235617368](docker-and-kubernetes-the-complete-guide.assets/image-20201210235617368.png)
+
+![image-20201210235642788](docker-and-kubernetes-the-complete-guide.assets/image-20201210235642788.png)
+
+https://hub.docker.com/_/postgres
+
+Summary
+
+# How to use this image
+
+## start a postgres instance
+
+```
+$ docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+```
+
+The default `postgres` user and database are created in the entrypoint with `initdb`.
+
+> The postgres database is a default database meant for use by users, utilities and third party applications.
+>
+> [postgresql.org/docs](http://www.postgresql.org/docs/9.5/interactive/app-initdb.html)
+
+## ... or via `psql`
+
+```
+$ docker run -it --rm --network some-network postgres psql -h some-postgres -U postgres
+psql (9.5.0)
+Type "help" for help.
+
+postgres=# SELECT 1;
+ ?column? 
+----------
+        1
+(1 row)
+```
+
+## ... via [`docker stack deploy`](https://docs.docker.com/engine/reference/commandline/stack_deploy/) or [`docker-compose`](https://github.com/docker/compose)
+
+Example `stack.yml` for `postgres`:
+
+```
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+```
+
+
+
+
 
 ### 6. Docker-compose Config
 
+![image-20201211000055146](docker-and-kubernetes-the-complete-guide.assets/image-20201211000055146.png)
+
 ### 7. Environment Variables with Docker Compose
+
+![image-20201211001055105](docker-and-kubernetes-the-complete-guide.assets/image-20201211001055105.png)
+
+When we set up env in docker-compose file => apply at runtime
+
+https://hub.docker.com/_/redis
+
+![image-20201211001833781](docker-and-kubernetes-the-complete-guide.assets/image-20201211001833781.png)
+
+port 6379 default 
+
+Add new env
+
+![image-20201211002024470](docker-and-kubernetes-the-complete-guide.assets/image-20201211002024470.png)
+
+![image-20201211002058865](docker-and-kubernetes-the-complete-guide.assets/image-20201211002058865.png)
+
+Rebuild it again
+
+![image-20201211002130402](docker-and-kubernetes-the-complete-guide.assets/image-20201211002130402.png)
+
+=> ok
+
+
+
+
+
+
 
 ### 8. The Worker and Client Services
 
+![image-20201211003004241](docker-and-kubernetes-the-complete-guide.assets/image-20201211003004241.png)
+
+=> missing setting port mapping ?? => nginx
+
+
+
 ### 9. Nginx Path Routing
+
+![image-20201211005817883](docker-and-kubernetes-the-complete-guide.assets/image-20201211005817883.png)
+
+![image-20201211005925760](docker-and-kubernetes-the-complete-guide.assets/image-20201211005925760.png)
+
+
+
+### 10. Routing with Nginx
+
+![image-20201211010253862](docker-and-kubernetes-the-complete-guide.assets/image-20201211010253862.png)
+
+To tell nginx location of the upstream => use directive `server`
+
+After sever directive we declare service name in the docker-compose file
+
+e.g: server api:5000;
+
+![image-20201211011134144](docker-and-kubernetes-the-complete-guide.assets/image-20201211011134144.png)
+
+![image-20201211011243979](docker-and-kubernetes-the-complete-guide.assets/image-20201211011243979.png)
+
+
+
+
+
+### 11. Building a Custom Nginx Image
+
+![image-20201211011536659](docker-and-kubernetes-the-complete-guide.assets/image-20201211011536659.png)
+
+Add some values
+
+![image-20201211011712696](docker-and-kubernetes-the-complete-guide.assets/image-20201211011712696.png)
+
+
+
+### 12. Starting Up Docker Compose
+
+Force to rebuild everythings
+
+![image-20201211012004003](docker-and-kubernetes-the-complete-guide.assets/image-20201211012004003.png)
+
+=> every maybe crash => but it is ok we'll fix it
+
+### 13. Troubleshooting.html
+
+Hi! Its entirely possible that you might run into a bug or two when you start up this set of containers with docker-compose.
+
+Are you able to enter a number into the react app, but it appears to never be calculated, as seen in this screenshot?
+
+![img](https://udemy-images.s3.amazonaws.com:443/redactor/raw/2018-08-29_21-36-24-cb753d15a2fee49472da9f97c83ef850.png)
+
+If that's the case, then you can try adding in environment variables to the 'worker' entry in the docker-compose file, like so:
+
+```
+worker:
+  environment:
+    - REDIS_HOST=redis
+    - REDIS_PORT=6379
+```
+
+Then restart docker-compose.
+
+The next section also has a couple of other possible troubleshooting tips.
+
+
+
+### 14. Troubleshooting Startup Bugs
+
+Run again `docker-compose up` in the `complex` folder
+
+![image-20201211012147652](docker-and-kubernetes-the-complete-guide.assets/image-20201211012147652.png)
+
+Test
+
+![image-20201211012311156](docker-and-kubernetes-the-complete-guide.assets/image-20201211012311156.png)
+
+![image-20201211012341085](docker-and-kubernetes-the-complete-guide.assets/image-20201211012341085.png)
+
+F12
+
+Essentially we're seeing this error message because any time our re-act application boots up in development
+
+mode it wants to keep a active connection to the development server and be notified of any time that some file changes now.
+
+You know normally we wouldn't really worry about that too much but as it stands by not setting up this
+
+Web socket connection we're actually going to very significantly impact the performance of our application
+
+which we can see by entering in a value to this input right here.
+
+
+
+### 15. Opening Websocket Connections
+
+![image-20201211012741338](docker-and-kubernetes-the-complete-guide.assets/image-20201211012741338.png)
+
+Ctrl c => `docker-compose up --build`
+
+![image-20201211012906581](docker-and-kubernetes-the-complete-guide.assets/image-20201211012906581.png)
+
+Run `docker-compose up` again
+
+
+
+
 
 ## 10. A Continuous Integration Workflow for Multiple Images
 ### 1. Production Multi-Container Deployments
@@ -1243,10 +2209,43 @@ bucket path by default is equal to the app name
 ### 9. RDS Database Creation
 ## 12. Onwards to Kubernetes!
 ### 1. The Why's and What's of Kubernetes
-### 10. Connecting to Running Containers
-### 11. The Entire Deployment Flow
-### 12. Imperative vs Declarative Deployments
+
+![image-20201211015210115](docker-and-kubernetes-the-complete-guide.assets/image-20201211015210115.png)
+
+We have 4 container running at the same time
+
+![image-20201211015304472](docker-and-kubernetes-the-complete-guide.assets/image-20201211015304472.png)
+
+scale up => multiple users access worker at the same time
+
+![image-20201211015612817](docker-and-kubernetes-the-complete-guide.assets/image-20201211015612817.png)
+
+What is behind the sence?
+
+![image-20201211015903839](docker-and-kubernetes-the-complete-guide.assets/image-20201211015903839.png)
+
+![image-20201211020157924](docker-and-kubernetes-the-complete-guide.assets/image-20201211020157924.png)
+
+
+
 ### 2. Kubernetes in Development and Production
+
+![image-20201211020410456](docker-and-kubernetes-the-complete-guide.assets/image-20201211020410456.png)
+
+Multiple container type
+
+
+
+![image-20201211020810553](docker-and-kubernetes-the-complete-guide.assets/image-20201211020810553.png)
+
+kubectl: is used for local and production
+
+![image-20201211021029571](docker-and-kubernetes-the-complete-guide.assets/image-20201211021029571.png)
+
+
+
+
+
 ### 3. Setup on MacOS
 ### 4. Setup on Linux.html
 ### 5. Mapping Existing Knowledge
@@ -1254,6 +2253,15 @@ bucket path by default is equal to the app name
 ### 7. Object Types and API Versions
 ### 8. Running Containers in Pods
 ### 9. Service Config Files in Depth
+
+
+
+### 10. Connecting to Running Containers
+
+### 11. The Entire Deployment Flow
+
+### 12. Imperative vs Declarative Deployments
+
 ## 13. Maintaining Sets of Containers with Deployments
 ### 1. Updating Existing Objects
 ### 10. Updating Deployment Images

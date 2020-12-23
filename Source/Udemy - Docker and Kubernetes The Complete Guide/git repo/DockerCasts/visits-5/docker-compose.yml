@@ -1,0 +1,10 @@
+version: '3'
+services:
+  redis-server:
+    image: 'redis'
+    expose: 
+      - 6379
+  node_app:
+    build: .
+    ports: 
+      - "4001:8081"
