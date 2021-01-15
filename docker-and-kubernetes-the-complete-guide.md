@@ -114,13 +114,69 @@ https://docs.docker.com/install/linux/linux-postinstall/#configure-docker-to-sta
 
 ![image-20201203223226256](docker-and-kubernetes-the-complete-guide.assets/image-20201203223226256.png)
 
+That starts up that docker client or the Dockers CLI.
 
+Again the docker cli is in charge of taking commands from you kind of doing a little bit of processing
+
+on them and then communicating the commands over to something called the Dockers server and it's that
+
+Docker server that is really in charge of the heavy lifting.
+
+When we ran the command docker run Hello world.
+
+That meant that we wanted to start up a new container using the image with the name of hello world the
+
+hello world image has a tiny little program inside of it whose sole purpose sole job is to print out
+
+the message that you see right here.
+
+The first thing that the Dockers server did was check to see if it already had a local copy like a copy
+
+on your personal machine of the hello world image or hello world file.
+
+So the docker server looked into something called the image cache.
+
+Now because you and I just installed docker on our personal computers that image cache is currently
+
+empty.
+
+We have no images that have already been downloaded before.
+
+So because the image cache was empty the Dockers server decided to reach out to a free service called
+
+docker hub the Docker hub is a repository of free public images that you can freely download and run
+
+on your personal computer so server or reach out to docker hub and said hey I'm looking for an image
+
+called Hello world.
 
 ### 11. But Really...What's a Container
 
+![image-20210115005514032](docker-and-kubernetes-the-complete-guide.assets/image-20210115005514032.png)
+
+e.g: Chrome need python v2 but node js need python v3???
+
+=> name spacing or control groups technical solve problems
+
 ![image-20201203223810511](docker-and-kubernetes-the-complete-guide.assets/image-20201203223810511.png)
 
+![image-20210115010040924](docker-and-kubernetes-the-complete-guide.assets/image-20210115010040924.png)
 
+=> name spacing: direct it to specific area on the hardware
+
+These are all things that we can use **named spacing** for to essentially limit the resources we're kind
+of redirect requests for resource from a particular process very closely related to this idea of some
+name spacing is another feature called **control groups** a control group can be used to limit the amount
+of resources that a particular process can use.
+So name spacing is for saying hey this area of the harddrive is for this process a control group can
+be used to limit the amount of memory that a process can use the amount of CPU the amount of hard drive
+input input or the input output and the amount of network bandwidth as we
+
+So these two features put together it can be used to really kind of isolate a single process and limit
+the amount of resources it can talk to and the amount of bandwidth essentially that it can make use
+of.
+
+> 2 cách trên chỉ apply for linux, not macs and windows
 
 ### 12. How's Docker Running on Your Computer
 
@@ -570,9 +626,17 @@ RUN npm install
 COPY ./ ./
 ```
 
-When we run again to see change in file index(adjust constantly), we don't have to rebuild by the way that we copy package.json to current working directory
+When we run again to see change in file index(adjust constantly), we don't have to rebuild by the way that we copy `package.json` to current working directory
 
-Adjust content in index.js file => run build command =>Adjust content in index.js file => run build command => it use cache and run faster
+Adjust content in `index.js` file => run build command =>Adjust content in `index.js` file => run build command => it use cache and run faster
+
+```js
+app.get('/', (req, res) => {
+  res.send('How are you doing'); // change content in this line to see the effect on the website
+});
+```
+
+
 
 ## 5. Docker Compose with Multiple Local Containers
 
@@ -701,16 +765,18 @@ What's the problem?
 
 ![image-20201204014102641](docker-and-kubernetes-the-complete-guide.assets/image-20201204014102641.png)
 
-`build .`: find and build form this image
+`docker build .`: find and build form this image
 
 ```js
+// add
+// const client = redis.createClient();
 const client = redis.createClient({
-  host: 'redis-server',
+  host: 'redis-server',     // get host name from docker-compose file
   port: 6379 // default port in redis
 });
 ```
 
-run `docker-compose up`
+You ony need to run this command: `docker-compose up`
 
 ### A Docker/docker-compose setup with Redis and Node/Express
 
@@ -813,9 +879,15 @@ node_app_1      | npm ERR!     /root/.npm/_logs/2020-12-23T18_14_14_021Z-debug.l
 visits_node_app_1 exited with code 1
 ```
 
-=> Create visits_default network
+=> Create **visits_default** network
 
-> If we have an error when connecting => change docker file => run `docker-compose up -- build` to fix
+Now I want to take a look at the very first line right here.
+The very first line says creating network visits underscore default.
+It's like I said before when you just create a new set of containers or services with Docker compose
+**it's going to automatically make a network for you that's going to join those different containers together.**
+After that we can see that it is creating an image for our node application.
+
+> If we have an error when connecting => change docker file => run `docker-compose up --build` to fix
 
 ```shell
 Admin@LAPTOP-QO8E8EAL MINGW64 /d/git-docs/docker/Source/Udemy - Docker and Kubernetes The Complete Guide/git repo/DockerCasts/visits-5 (master)
@@ -876,6 +948,8 @@ Stopping visits-5_redis-server_1 ...
 
 ### 9. Stopping Docker Compose Containers
 
+Create an image run in the background: redis
+
 ![image-20201204014418365](docker-and-kubernetes-the-complete-guide.assets/image-20201204014418365.png)
 
 
@@ -890,13 +964,45 @@ Stopping visits-5_redis-server_1 ...
 
 ### 10. Container Maintenance with Compose
 
+Add line 13
+
+![image-20210115223723194](docker-and-kubernetes-the-complete-guide.assets/image-20210115223723194.png)
+
+![image-20210115223759476](docker-and-kubernetes-the-complete-guide.assets/image-20210115223759476.png)
+
+
+
 Crash in node app
 
 ![image-20201224014319851](docker-and-kubernetes-the-complete-guide.assets/image-20201224014319851.png)
 
 ### 11. Automatic Container Restarts
 
+Adjust in docker-compose file
+
 ![image-20201204014859392](docker-and-kubernetes-the-complete-guide.assets/image-20201204014859392.png)
+
+
+
+Add line 6
+
+![image-20210115223851300](docker-and-kubernetes-the-complete-guide.assets/image-20210115223851300.png)
+
+
+
+Another case: Replace on-failure on line 6
+
+run `docker-compose up`
+
+![image-20210115224505037](docker-and-kubernetes-the-complete-guide.assets/image-20210115224505037.png)
+
+You need to change status != 0 => see restart
+
+![image-20210115224611666](docker-and-kubernetes-the-complete-guide.assets/image-20210115224611666.png)
+
+In this case, I use 100 number to replace 0 by 100
+
+If you don't see node app is restarted => Run `docker-compose up --build` to rebuild 
 
 
 
@@ -960,7 +1066,7 @@ npm run test
 
 ![image-20201208231729764](docker-and-kubernetes-the-complete-guide.assets/image-20201208231729764.png)
 
-create one file for production in build folder
+create one file for production in `build/` folder
 
 ![image-20201208232053140](docker-and-kubernetes-the-complete-guide.assets/image-20201208232053140.png)
 
@@ -1004,7 +1110,7 @@ You will remove the node modules in the working directory since we have install 
 
 ### 9. Starting the Container
 
-run docker
+run `docker build -f Dockerfile.dev .`
 
 ![image-20201208235752366](docker-and-kubernetes-the-complete-guide.assets/image-20201208235752366.png)
 
@@ -1053,7 +1159,7 @@ You can see some errors
 
 ### 12. Bookmarking Volumes
 
-When we set up a mapping current dir to /app folder => we don't have /node_modules folder => override
+When we set up a mapping current dir to `/app` folder => we don't have `/node_modules` folder => override since it is empty
 
  ![image-20201209001504488](docker-and-kubernetes-the-complete-guide.assets/image-20201209001504488.png)
 
@@ -1084,7 +1190,9 @@ services:
 
 ### 14. Overriding Dockerfile Selection
 
-default: `build: .`
+![image-20210116000028974](docker-and-kubernetes-the-complete-guide.assets/image-20210116000028974.png)
+
+default: `build: .` but now we add `dockerfile: Dockerfile.dev` to docker-compose file to specify the file when we run `docker-compose up`
 
 ![image-20201209002652441](docker-and-kubernetes-the-complete-guide.assets/image-20201209002652441.png)
 
@@ -1113,7 +1221,7 @@ CMD ["npm", "run", "start"]
 
 ```shell
 docker build -f Dockerfile.dev .
-# copy image id
+# copy image id in the last line
 
 ```
 
@@ -1123,13 +1231,23 @@ docker build -f Dockerfile.dev .
 
 
 
-The second way
+> Now once you try hitting enter right now if you do so you'll notice that **the tests appear to not run**.
+>
+> When we run docker run by default we get a connection to standard out inside the container.
+>
+> But for us to actually trigger where we get any input into the container itself we have to hook up to
+>
+> standard in as well.
+>
+> We can do so by adding on the `-it` options to see docker run.
+
+Then run
 
 ![image-20201209003649225](docker-and-kubernetes-the-complete-guide.assets/image-20201209003649225.png)
 
 ![image-20201224021524222](docker-and-kubernetes-the-complete-guide.assets/image-20201224021524222.png)
 
-=> full
+=> full screen
 
 
 
@@ -1232,6 +1350,10 @@ If we remove or add the last one, the test it will be updated
 
 ![image-20201209005451134](docker-and-kubernetes-the-complete-guide.assets/image-20201209005451134.png)
 
+It's very hard to set up input from command in the terminal to docker
+
+Now we try to attach to stdin of container:
+
 ![image-20201209005720080](docker-and-kubernetes-the-complete-guide.assets/image-20201209005720080.png)
 
 Input q, t, ... => not work 
@@ -1243,14 +1365,14 @@ We're going to start up a shell instance inside that run a container and we're g
 of the different running processes.
 So I'm going to again do `docker ps` again.
 So remember what this does this is going to run a new command inside the container with this ID with
-I-T right here.
+`-it` right here.
 We are starting up a connection to standard in on this new command that we are going to run.
-And then S.H. over here on the very end is going to start up essentially a new shell or a kind of a
+And then `sh` over here on the very end is going to start up essentially a new shell or a kind of a
 command prompt inside the terminal shell is very similar to bash or Z shell if you use that.
 It's essentially just allowing us to enter some commands directly into the container.
 So I get to run that you see that we get our command prompt right here and then we're going to run P.S.
 which is going to print out all the running processes that we have going on inside the container.
-So this is the reason why Docker attached did not quite work the way we expected.
+So this is the reason why `docker attach` did not quite work the way we expected.
 
 
 
@@ -1262,17 +1384,16 @@ So this is the reason why Docker attached did not quite work the way we expected
 
 
 
-
 Notice how we have a PID right here.
-One for the command NPM.
-We've then got a separate process running for re-act script starts and yet another idea for some other
-scripts start thing right here.
+`1` for the command `npm`. => line 1
+We've then got a separate process running for `react-script starts` and yet another id for some other
+scripts `start.js` thing right here.
 All right.
 So why is the text that we're entering into the attached window over here not showing up.
 It all comes down to the different processes that have been created inside the container.
-You see when we run into them run tests we're not actually running directly NPM run test.
-In reality what is running is the process and PM and then NPM looks at the additional arguments we are
-providing specifically run test and it uses those additional arguments to decide what to do.
+You see when we run `npm run test` we're not actually running directly `npm run test`.
+In reality what is running is the process NPM and then NPM looks at the additional arguments we are
+providing specifically `run test` and it uses those additional arguments to decide what to do.
 So it's going to eventually start up a second process that is actually running our tests and that is
 one of these two right here.
 I'll be honest I don't actually know which one it is.
@@ -1315,6 +1436,9 @@ It's the secondary process that was started by NPM.
 
 
 
+D:\git-docs\docker\Source\Udemy-Docker ....\git repo\DockerCasts\frontend\Dockerfile
+
+
 Dockerfile
 
 ```ini
@@ -1327,10 +1451,18 @@ RUN npm run build
 
 FROM nginx
 EXPOSE 80
+# See in https://hub.docker.com/_/nginx
 COPY --from=builder /app/build /usr/share/nginx/html
 ```
 
+https://hub.docker.com/_/nginx
 
+> Check copy folder in above link
+>
+> So this is saying I want to copy over something from that other phase that we just we're working on
+> in this case we want to copy something over from the builder phase.
+>
+> Copy app/build to nginx folder
 
 ### 22. Implementing Multi-Step Builds
 
@@ -1364,11 +1496,21 @@ Run
 
 Create an account on travis-ci, turn on dashboard on the setting
 
+https://travis-ci.org/
+
+![image-20210116010136950](docker-and-kubernetes-the-complete-guide.assets/image-20210116010136950.png)
+
+Sign in and authorize travis ci
+
+Create app name `docker`
+
+click on logo/ Profile
+
 ![image-20201209014203766](docker-and-kubernetes-the-complete-guide.assets/image-20201209014203766.png)
 
 Filter and find your repo => enable button setting for this repo
 
-
+![image-20210116010400108](docker-and-kubernetes-the-complete-guide.assets/image-20210116010400108.png)
 
 
 
@@ -1379,6 +1521,8 @@ Create a .yml file to teach travis ci how to do
 ![image-20201209014512983](docker-and-kubernetes-the-complete-guide.assets/image-20201209014512983.png)
 
 ![image-20201209014541671](docker-and-kubernetes-the-complete-guide.assets/image-20201209014541671.png)
+
+D:\git-docs\docker\Source\Udemy - Docker and Kubernetes The Complete Guide\git repo\DockerCasts\frontend
 
 .travis.yml
 
@@ -1401,11 +1545,23 @@ script:
 
 ### 5. A Touch More Travis Setup
 
+RUN `docker run <container-id> npm run test -- --coverage`
+
+để xem result được displayed
+
+
+
 ### 6. Automatic Build Creation
 
-![image-20201209015021936](docker-and-kubernetes-the-complete-guide.assets/image-20201209015021936.png)
+![image-20210116010905990](docker-and-kubernetes-the-complete-guide.assets/image-20210116010905990.png)
 
 
+
+![image-20201209015021936](docker-and-kubernetes-the-complete-guide.assets/image-20201209015021936.png)  
+
+
+
+![image-20210116010938516](docker-and-kubernetes-the-complete-guide.assets/image-20210116010938516.png)
 
 ### 7. AWS Elastic Beanstalk
 
@@ -1414,6 +1570,14 @@ script:
 ![image-20201209015437839](docker-and-kubernetes-the-complete-guide.assets/image-20201209015437839.png)
 
 > Easiest way to get started with production docker instance, run single container
+>
+> Now to be clear elastic beanstalk is most appropriate when you're running exactly one container at a
+>
+> time.
+>
+> We can start up multiple copies of the same container but at the end of the day.
+>
+> Easiest way to run one single container.
 
 Click create new app
 
@@ -1425,11 +1589,53 @@ Click create new app
 
 
 
-Only change platform to docker and click create new
+Only change platform to docker and click **create environment**
 
-![image-20201209015949130](docker-and-kubernetes-the-complete-guide.assets/image-20201209015949130.png)
+![image-20201209015949130](docker-and-kubernetes-the-complete-guide.assets/image-20201209015949130.png)  
+
+![image-20210116011609361](docker-and-kubernetes-the-complete-guide.assets/image-20210116011609361.png)
+
+
 
 ### 8. More on Elastic Beanstalk
+
+![image-20210116012025362](docker-and-kubernetes-the-complete-guide.assets/image-20210116012025362.png)
+
+Open this link to see
+
+
+
+The benefit to elastic beanstalk is that it monitors the amount of traffic that's come in to our virtual
+
+machine right here.
+
+And as soon as that traffic reaches a certain threshold elastic beanstalk is going to automatically
+
+add in additional virtual machines to handle that traffic.
+
+So as soon as they request comes in it's going to go to the load balancer load balancers going to find
+
+the note here with the least amount of traffic and that will route that request to that particular virtual
+
+machine.
+
+Our application running inside of the dock or container will then respond to that request and the user
+
+will eventually get the file that they are looking for.
+
+So that's pretty much it.
+
+The benefit to plastic beanstalk is that it's going to automatically scale everything up for us.
+
+All right so now we've got a better idea of how elastic things stock is doing things for us.
+
+![image-20210116011751916](docker-and-kubernetes-the-complete-guide.assets/image-20210116011751916.png)
+
+
+
+![image-20210116011902815](docker-and-kubernetes-the-complete-guide.assets/image-20210116011902815.png)
+
+
 
 ### 9. Travis Config for Deployment
 
@@ -1466,7 +1672,11 @@ deploy:
 
 Copy url, Docker-env is env
 
+![image-20210116012701694](docker-and-kubernetes-the-complete-guide.assets/image-20210116012701694.png)
 
+
+
+Go back service
 
 ![image-20201209020622596](docker-and-kubernetes-the-complete-guide.assets/image-20201209020622596.png)
 
@@ -1488,6 +1698,12 @@ Search IAM in the service(use to manage API keys)
 
 
 
+![image-20210116012913313](docker-and-kubernetes-the-complete-guide.assets/image-20210116012913313.png)
+
+AIM is the service that is used to manage API keys
+
+
+
 ![image-20201209223604817](docker-and-kubernetes-the-complete-guide.assets/image-20201209223604817.png)
 
 Go to tab User => click add user
@@ -1496,13 +1712,115 @@ Go to tab User => click add user
 
 click next
 
+![image-20210116013053086](docker-and-kubernetes-the-complete-guide.assets/image-20210116013053086.png)
 
+
+
+Search beanstack
+
+![image-20210116013244057](docker-and-kubernetes-the-complete-guide.assets/image-20210116013244057.png)
+
+![image-20210116013510359](docker-and-kubernetes-the-complete-guide.assets/image-20210116013510359.png)
+
+Then we click create user
+
+![image-20210116013607690](docker-and-kubernetes-the-complete-guide.assets/image-20210116013607690.png)
+
+> Click on show chỉ show 1 lần
+
+![image-20210116013757658](docker-and-kubernetes-the-complete-guide.assets/image-20210116013757658.png)
+
+Scroll down
+
+![image-20210116013946800](docker-and-kubernetes-the-complete-guide.assets/image-20210116013946800.png)
+
+Save key to travis ci
+
+![image-20210116014035469](docker-and-kubernetes-the-complete-guide.assets/image-20210116014035469.png)
+
+![image-20210116014133811](docker-and-kubernetes-the-complete-guide.assets/image-20210116014133811.png)
+
+Check result
 
 
 
 ### 11. Exposing Ports Through the Dockerfile
 
+![image-20210116014229836](docker-and-kubernetes-the-complete-guide.assets/image-20210116014229836.png)
+
+See spinner
+
+>NOTE
+>
+>So the reason that I'm showing you this kind of spinner right here before the deploy actually finishes
+>
+>up is that when this finishes there's actually going to be a little bit of an issue.
+>
+>We're going to see that after deploy completes successfully if we tried navigating to URL in the title => page it's
+>
+>just not going to load up.
+
+If you recall every time that we've ran a Web server inside of a docker container we've had to do something
+
+like `docker run -p 3000:3000 sfdfd`
+
+And then we did that port mapping and then specified the container or whatever it might have been.
+
+So the port mapping right there is done because by default no can port inside of the container gets
+
+exposed to the outside world.
+
+=> We have to very directly set up that port mapping ourselves.
+
+![image-20210116014656163](docker-and-kubernetes-the-complete-guide.assets/image-20210116014656163.png)
+
+add line 9
+
+And actually in most environments the expose instruction is really supposed to be communication to you
+
+and I as developers this is really something for you and I to read inside of a docker file and understand
+
+oh this container probably needs to get a port mapped to port 80.
+
+> Now AWS elastic beanstalk is just a little bit different elastic beanstalk when it starts up your docker
+>
+> container.
+>
+> It's going to look at this Dockerfile and it's going to look for the Expose instruction and then whatever
+>
+> port you list in there is what elastic beanstalk is going to map directly **automatically**.
+
+![image-20210116015133351](docker-and-kubernetes-the-complete-guide.assets/image-20210116015133351.png)
+
+
+
+Result something like that
+
+![image-20210116015216511](docker-and-kubernetes-the-complete-guide.assets/image-20210116015216511.png)
+
+
+
 ### 12. Build Still Failing.html
+
+If you still see a failed deployment, try the following two steps:
+
+**Fix One:**
+
+The `npm install` command frequently times out on the t2.micro instance that we are using. An easy fix is to bump up the instance type that Elastic Beanstalk is using to a t2.small.
+
+Note that a t2.small is outside of the free tier, so you will pay a tiny bit of money (likely less than one dollar if you leave it running for a few hours) for this instance. Don't forget to close it down! Directions for this are a few videos ahead in the lecture titled 'Environment Cleanup'.
+
+
+
+**Fix Two:**
+
+Try editing the 'COPY' line of your Dockerfile like so:
+
+```
+COPY package*.json ./
+```
+
+Sometimes AWS has a tough time with the '.' folder designation and prefers the long form `./`
 
 ### 13. Workflow With Github
 
@@ -1511,6 +1829,26 @@ click next
 ### 15. Deployment Wrapup
 
 ### 16. Environment Cleanup.html
+
+Remember, we need to delete the resources we created or you might end up paying real money for them. To clean up the Elastic Beanstalk instance we created, do the following:
+
+***1) Go to the Elastic Beanstalk dashboard, where you should see a page that looks like this:\***
+
+![img](https://udemy-images.s3.amazonaws.com:443/redactor/raw/2018-08-20_15-06-39-cb872a3081bf7b5fbea2e740dccefff0.png)
+
+
+
+***2) On the top right hand side click the 'Actions' button\***
+
+![img](https://udemy-images.s3.amazonaws.com:443/redactor/raw/2018-08-20_15-07-03-f7d52bafeb7d581f01993e8116e775d5.png)
+
+3) ***Click on 'Delete Application' then confirm the delete\***
+
+![img](https://udemy-images.s3.amazonaws.com:443/redactor/raw/2018-08-20_15-07-41-5ea33b279ac62df45f6ddc4e0fdcc166.png)
+
+
+
+#### ***Note: it might take a few minutes for the dashboard to update and show that your app is being deleted. Be a little patient!\***
 
 ## 8. Building a Multi-Container Application
 
