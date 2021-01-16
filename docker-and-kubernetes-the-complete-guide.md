@@ -3617,9 +3617,9 @@ metadata:
 spec:
   containers:
     - name: client
-      image: stephengrider/multi-worker
+      image: stephengrider/multi-client
       ports:
-        - containerPort: 9999
+        - containerPort: 3000
 
 ```
 
@@ -3930,43 +3930,449 @@ responsibilities is 100 percent balanced out.
 
 ## 13. Maintaining Sets of Containers with Deployments
 ### 1. Updating Existing Objects
-### 10. Updating Deployment Images
-### 11. Rebuilding the Client Image
-### 12. Triggering Deployment Updates
-### 13. Imperatively Updating a Deployment's Image
-### 14. Multiple Docker Installations
-### 15. Reconfiguring Docker CLI
-### 16. Why Mess with Docker in the Node
+
+D:\git-docs\docker\Source\Udemy - Docker and Kubernetes The Complete Guide\git repo\DockerCasts\diagrams\14
+
+![image-20210116202621711](docker-and-kubernetes-the-complete-guide.assets/image-20210116202621711.png)
+
+![image-20210116202706880](docker-and-kubernetes-the-complete-guide.assets/image-20210116202706880.png)
+
+![image-20210116202900099](docker-and-kubernetes-the-complete-guide.assets/image-20210116202900099.png)
+
+![image-20210116203015763](docker-and-kubernetes-the-complete-guide.assets/image-20210116203015763.png)
+
+
+
+
+
+
+
 ### 2. Declarative Updates in Action
+
+```ini
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client-pod
+  labels:
+    component: web
+spec:
+  containers:
+    - name: client
+    # change
+      image: stephengrider/multi-worker 
+      ports:
+        - containerPort: 9999
+
+```
+
+![image-20210116203708686](docker-and-kubernetes-the-complete-guide.assets/image-20210116203708686.png)
+
+
+
+![image-20210116203749609](docker-and-kubernetes-the-complete-guide.assets/image-20210116203749609.png)
+
+Run
+
+![image-20210116203917004](docker-and-kubernetes-the-complete-guide.assets/image-20210116203917004.png)
+
+![image-20210116204039742](docker-and-kubernetes-the-complete-guide.assets/image-20210116204039742.png)
+
+
+
 ### 3. Limitations in Config Updates
+
+Change `containerPort: 9999` to 9999
+
+![image-20210116205816987](docker-and-kubernetes-the-complete-guide.assets/image-20210116205816987.png)
+
+so you will see errors
+
+
+
+
+
+
+
+
+
 ### 4. Running Containers with Deployments
+
+![image-20210116210026673](docker-and-kubernetes-the-complete-guide.assets/image-20210116210026673.png)
+
+![image-20210116210117566](docker-and-kubernetes-the-complete-guide.assets/image-20210116210117566.png)
+
+![image-20210116210906772](docker-and-kubernetes-the-complete-guide.assets/image-20210116210906772.png)
+
+![image-20210116211330228](docker-and-kubernetes-the-complete-guide.assets/image-20210116211330228.png)
+
+
+
+
+
+
+
 ### 5. Deployment Configuration Files
+
+Create file client-deployment.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: web
+  template:
+    metadata:
+      labels:
+        component: web
+    spec:
+      containers:
+        - name: client
+          image: stephengrider/multi-client
+          ports:
+            - containerPort: 3000
+
+```
+
+So first off **replicas** as you might guess this is specifying the number of different pods that this deployment
+
+is supposed to make.
+
+And remember every one of those pods that it creates are going to be absolutely identical in nature.
+
+So at this point we are saying hey deployment create exactly one pod using this template down here.
+
+If we wanted to we could very easily change this up to something like five.
+
+
+
+**selector**:
+
+14
+
+![image-20210116212703338](docker-and-kubernetes-the-complete-guide.assets/image-20210116212703338.png)
+
+=> master will create pods for you
+
+
+
 ### 6. Walking Through the Deployment Config
 ### 7. Applying a Deployment
+
+![image-20210116213030888](docker-and-kubernetes-the-complete-guide.assets/image-20210116213030888.png)
+
+
+
+![image-20210116213151450](docker-and-kubernetes-the-complete-guide.assets/image-20210116213151450.png)
+
+Remember when you delete a container or stop a container I should say the containers given 10 seconds
+
+to resolve and then eventually it just gets killed.
+
+That's what happens in the docker world.
+
+And the same thing is what happens when we delete a running pod.
+
+It's gets 10 seconds to resolve and eventually turn itself off and then after those 10 seconds the thing
+
+automatically just gets axed entirely.
+
+![image-20210116213327891](docker-and-kubernetes-the-complete-guide.assets/image-20210116213327891.png)
+
+![image-20210116213412581](docker-and-kubernetes-the-complete-guide.assets/image-20210116213412581.png)
+
+We have ones across the board for **desired** current up to date and available desired is a reference to
+the **number of replicas** or the **number of pods** that this deployment wants to eventually have.
+So at present inside of our configuration file we said that we want exactly 1 replica running and so
+we have desired of one.
+We then see **current** sets the number of pods that are up and running.
+We have up to date which is also one.
+So at any point in time that you make a configuration change to your deployment specifically a configuration
+change the template down here the deployment would automatically mark all the existing pods as being
+out of date.
+And so we might see up to date go down to zero.
+
+And then finally **available** right here is the number of pods controlled by this deployment that are ready
+
+and available to accept incoming client traffic or essentially just successfully running their containers
+
+with the appropriate configuration for each one OK.
+
+![image-20210116213821478](docker-and-kubernetes-the-complete-guide.assets/image-20210116213821478.png)
+
+
+
 ### 8. Why Use Services
+
+![image-20210116213935966](docker-and-kubernetes-the-complete-guide.assets/image-20210116213935966.png)
+
+See react app works 
+
+![image-20210116214015023](docker-and-kubernetes-the-complete-guide.assets/image-20210116214015023.png)
+
+![image-20210116214029602](docker-and-kubernetes-the-complete-guide.assets/image-20210116214029602.png)
+
+![image-20210116214101909](docker-and-kubernetes-the-complete-guide.assets/image-20210116214101909.png)
+
+> Giả sử bên ngoài có ip của pods những sẽ k access được or pod có ip khác => don't care since we have service find by selector
+
+![image-20210116214134109](docker-and-kubernetes-the-complete-guide.assets/image-20210116214134109.png)
+
+Now the really important column to take notice of here is the IP column.
+Every single pod that we create gets its own IP address assigned to it.
+So we just deployed our deployment just two seconds ago and that created a pod.
+It was randomly assigned an IP address of 1 7 2 1 7 0 6.
+This is an IP address that is internal to our virtual machine.
+So you and I cannot visit that IP or at least we cannot visit it very easily.
+It is an IP address that has been assigned to the pod inside of our node right here.
+
+
+
+
+
 ### 9. Scaling and Changing Deployments
+
+Thay port `- containerPort: 9999` test
+
+![image-20210116214851485](docker-and-kubernetes-the-complete-guide.assets/image-20210116214851485.png)
+
+> App sẽ k work vì xài port 3000
+
+It saw that we changed the container port.
+
+And so rather than trying to update the existing pod that already existed it deleted that pod and completely
+
+recreated it with a new container port value right here.
+
+![image-20210116215107552](docker-and-kubernetes-the-complete-guide.assets/image-20210116215107552.png)
+
+It will print out information of pods
+
+You can see
+
+![image-20210116215138508](docker-and-kubernetes-the-complete-guide.assets/image-20210116215138508.png)
+
+
+
+Change `replicas: 5`
+
+![image-20210116215244770](docker-and-kubernetes-the-complete-guide.assets/image-20210116215244770.png)
+
+Change
+
+```ini
+spec:
+      containers:
+        - name: client
+          image: stephengrider/multi-worker 
+          ports:
+            - containerPort: 9999
+```
+
+![image-20210116220545291](docker-and-kubernetes-the-complete-guide.assets/image-20210116220545291.png)
+
+
+
+
+
+### 10. Updating Deployment Images
+
+How would we somehow get our deployment to pull down that latest version and recreate all of our pods
+
+using that latest version.
+
+![image-20210116220746335](docker-and-kubernetes-the-complete-guide.assets/image-20210116220746335.png)
+
+
+
+Change back
+
+```ini
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: web
+  template:
+    metadata:
+      labels:
+        component: web
+    spec:
+      containers:
+        - name: client
+          image: stephengrider/multi-client
+          ports:
+            - containerPort: 3000
+
+```
+
+![image-20210116220943827](docker-and-kubernetes-the-complete-guide.assets/image-20210116220943827.png)
+
+![image-20210116221007633](docker-and-kubernetes-the-complete-guide.assets/image-20210116221007633.png)
+
+### 11. Rebuilding the Client Image
+
+![image-20210116221135808](docker-and-kubernetes-the-complete-guide.assets/image-20210116221135808.png)
+
+Change app title
+
+Navigate to client folder `docker build -t ___/multiclient .`
+
+![image-20210116221230522](docker-and-kubernetes-the-complete-guide.assets/image-20210116221230522.png)
+
+push to docker hub
+
+![image-20210116221330588](docker-and-kubernetes-the-complete-guide.assets/image-20210116221330588.png)
+
+
+
+
+
+### 12. Triggering Deployment Updates
+
+![image-20210116221516720](docker-and-kubernetes-the-complete-guide.assets/image-20210116221516720.png)
+
+![image-20210116221744704](docker-and-kubernetes-the-complete-guide.assets/image-20210116221744704.png)
+
+=> unchange
+
+![image-20210116221917239](docker-and-kubernetes-the-complete-guide.assets/image-20210116221917239.png)
+
+Delete: Our users would essentially not be able to access our application entirely.
+
+And so everything about deleting these pods just kind of seems like a bad idea.
+
+![image-20210116222231667](docker-and-kubernetes-the-complete-guide.assets/image-20210116222231667.png)
+
+Cách 2 phải change file config để chỉ ra version với command phải attached version
+
+
+
+### 13. Imperatively Updating a Deployment's Image
+
+14-19
+
+![image-20210116223519672](docker-and-kubernetes-the-complete-guide.assets/image-20210116223519672.png)
+
+![image-20210116223641584](docker-and-kubernetes-the-complete-guide.assets/image-20210116223641584.png)
+
+![image-20210116223852840](docker-and-kubernetes-the-complete-guide.assets/image-20210116223852840.png)
+
+![image-20210116223910049](docker-and-kubernetes-the-complete-guide.assets/image-20210116223910049.png)
+
+RUN
+
+![image-20210116223946677](docker-and-kubernetes-the-complete-guide.assets/image-20210116223946677.png)
+
+![image-20210116224026487](docker-and-kubernetes-the-complete-guide.assets/image-20210116224026487.png)
+
+
+
+![image-20210116224134246](docker-and-kubernetes-the-complete-guide.assets/image-20210116224134246.png)
+
+Disable cache and reload
+
+### 14. Multiple Docker Installations
+
+![image-20210116224312393](docker-and-kubernetes-the-complete-guide.assets/image-20210116224312393.png)
+
+Run
+
+![image-20210116224450283](docker-and-kubernetes-the-complete-guide.assets/image-20210116224450283.png)
+
+pull from docker hub => save to cache
+
+![image-20210116225029167](docker-and-kubernetes-the-complete-guide.assets/image-20210116225029167.png)
+
+Terminal thứ 2 run docker ps => nothing
+
+My first terminal window over here this one where I run `docker ps` and I see no running containers whatsoever.
+This copy of the docker client or the doc Seelye is connecting to the Dockers server that is running
+on my local computer.
+And again this is the copy of Dockers server that was installed with docker from Mac in the second terminal
+window.
+I bet you can guess what's going on in the second terminal window over here.
+I have configured my local copy of doc or client not to connect to my local doc or server.
+Instead I have reconfigured it to talk to the copy of Dockers server running inside of the virtual machine.
+So inside of this very specific terminal window right here when I do a docker P.S. My copy of docker
+client the doctor client is reaching into the virtual machine.
+It's getting in contact with the copy of docker server inside there and it's asking it hey what different
+containers are you running.
+And so that's why inside of this terminal window right here I see this big list of Kubernetes related
+containers including the multiclass and container right here.
+
+
+
+
+
+### 15. Reconfiguring Docker CLI
+
+![image-20210116225426688](docker-and-kubernetes-the-complete-guide.assets/image-20210116225426688.png)
+
+
+
+![image-20210116225623997](docker-and-kubernetes-the-complete-guide.assets/image-20210116225623997.png)
+
+![image-20210116225720453](docker-and-kubernetes-the-complete-guide.assets/image-20210116225720453.png)
+
+=> see all containers
+
+> Only apply for the current terminal
+
+Open new terminal
+
+![image-20210116230002234](docker-and-kubernetes-the-complete-guide.assets/image-20210116230002234.png)
+
+When docker is invoked it's going to look at a set of environment variables to decide what copy of docker 
+server it is supposed to connect to an attempt to execute this command.
+So when we run this minikube docker and command with the eval command especially it's going to set up
+some new environment variables that we're going to tell Docker cli to reach into the virtual machine
+to find the copy of docker server that is supposed to work work with.
+And if you look at this docker host variable right here you might even be able to recognize the IP address.
+It's actually the IP address of your Minikube server.
+
+![image-20210116230307330](docker-and-kubernetes-the-complete-guide.assets/image-20210116230307330.png)
+
+![image-20210116230503647](docker-and-kubernetes-the-complete-guide.assets/image-20210116230503647.png)
+
+Especially since I told you when we first started looking at Kubernetes that you and I as developers
+do not mess around with the inner workings of the virtual machine.
+Remember I told you we don't mess around with the virtual machine ourselves.
+We leave it up to the master to change the configuration of the virtual machine or change the different
+containers running inside there.
+
+### 16. Why Mess with Docker in the Node
+
+![image-20210116230930613](docker-and-kubernetes-the-complete-guide.assets/image-20210116230930613.png)
+
+![image-20210116231159930](docker-and-kubernetes-the-complete-guide.assets/image-20210116231159930.png)
+
+copy id
+
+![image-20210116231429453](docker-and-kubernetes-the-complete-guide.assets/image-20210116231429453.png)
+
+![image-20210116231533813](docker-and-kubernetes-the-complete-guide.assets/image-20210116231533813.png)
+
+![image-20210116232739460](docker-and-kubernetes-the-complete-guide.assets/image-20210116232739460.png)
+
 ## 14. A Multi-Container App with Kubernetes
 ### 1. The Path to Production
-### 10. Combining Config Into Single Files
-### 11. The Worker Deployment
-### 12. Reapplying a Batch of Config Files
-### 13. Creating and Applying Redis Config
-### 14. Last Set of Boring Config!
-### 15. The Need for Volumes with Databases
-### 16. Kubernetes Volumes
-### 17. Volumes vs Persistent Volumes
-### 18. Persistent Volumes vs Persistent Volume Claims
-### 19. Claim Config Files
+
+
+
 ### 2. Checkpoint Files.html
-### 20. Persistent Volume Access Modes
-### 21. Where Does Kubernetes Allocate Persistent Volumes
-### 22. Designating a PVC in a Pod Template
-### 23. Applying a PVC
-### 24. Defining Environment Variables
-### 25. Adding Environment Variables to Config
-### 26. Creating an Encoded Secret
-### 27. Passing Secrets as Environment Variables
-### 28. Environment Variables as Strings
+
+
+
 ### 3. A Quick Checkpoint
 ### 4. Recreating the Deployment
 ### 5. NodePort vs ClusterIP Services
@@ -3974,6 +4380,47 @@ responsibilities is 100 percent balanced out.
 ### 7. Applying Multiple Files with Kubectl
 ### 8. Express API Deployment Config
 ### 9. Cluster IP for the Express API
+
+
+
+### 10. Combining Config Into Single Files
+
+### 11. The Worker Deployment
+
+### 12. Reapplying a Batch of Config Files
+
+### 13. Creating and Applying Redis Config
+
+### 14. Last Set of Boring Config!
+
+### 15. The Need for Volumes with Databases
+
+### 16. Kubernetes Volumes
+
+### 17. Volumes vs Persistent Volumes
+
+### 18. Persistent Volumes vs Persistent Volume Claims
+
+### 19. Claim Config Files
+
+### 20. Persistent Volume Access Modes
+
+### 21. Where Does Kubernetes Allocate Persistent Volumes
+
+### 22. Designating a PVC in a Pod Template
+
+### 23. Applying a PVC
+
+### 24. Defining Environment Variables
+
+### 25. Adding Environment Variables to Config
+
+### 26. Creating an Encoded Secret
+
+### 27. Passing Secrets as Environment Variables
+
+### 28. Environment Variables as Strings
+
 ## 15. Handling Traffic with Ingress Controllers
 ### 1. Load Balancer Services
 ### 10. Testing Ingress Locally
