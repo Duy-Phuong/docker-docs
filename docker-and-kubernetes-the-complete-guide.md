@@ -1482,6 +1482,10 @@ Run
 
 ### 1. Services Overview
 
+[GitHub - StephenGrider/docker-react](https://github.com/StephenGrider/docker-react)
+
+
+
 ![image-20201209013118885](docker-and-kubernetes-the-complete-guide.assets/image-20201209013118885.png)
 
 
@@ -2237,7 +2241,7 @@ C:\Users\Admin\Downloads\[FreeCourseSite.com] Udemy - Docker and Kubernetes The 
 
 
 
-complex-elastic-beanstalk
+folder complex-elastic-beanstalk
 
 client/Dockerfile.dev
 
@@ -2600,42 +2604,795 @@ Run `docker-compose up` again
 ## 10. A Continuous Integration Workflow for Multiple Images
 ### 1. Production Multi-Container Deployments
 
+D:\git-docs\docker\Source\Udemy - Docker and Kubernetes The Complete Guide\git repo\DockerCasts\complex-elastic-beanstalk
+
+[GitHub - StephenGrider/multi-docker](https://github.com/StephenGrider/multi-docker)
+
+![image-20210116111312651](docker-and-kubernetes-the-complete-guide.assets/image-20210116111312651.png)
+
+![image-20210116111348050](docker-and-kubernetes-the-complete-guide.assets/image-20210116111348050.png)
+
 
 
 ### 2. Production Dockerfiles
+
+create /worker/Dockerfile
+
+```ini
+FROM node:alpine
+WORKDIR "/app"
+COPY ./package.json ./
+RUN npm install
+COPY . .
+CMD ["npm", "run", "start"]
+```
+
+Do similarly for server and nginx folder
+
+
+
 ### 3. Multiple Nginx Instances
+
+client/Dockerfile
+
+```ini
+FROM node:alpine as builder
+WORKDIR '/app'
+COPY ./package.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM nginx
+EXPOSE 3000
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/build /usr/share/nginx/html
+```
+
+![image-20210116114748822](docker-and-kubernetes-the-complete-guide.assets/image-20210116114748822.png)
+
+
+
+![image-20210116114804172](docker-and-kubernetes-the-complete-guide.assets/image-20210116114804172.png)
+
+
+
+![image-20210116114938404](docker-and-kubernetes-the-complete-guide.assets/image-20210116114938404.png)
+
+
+
 ### 4. Altering Nginx's Listen Port
+
+client/nginx/
+
+```ini
+server {
+  listen 3000;
+
+  location / {
+    # We copy build in dockerfile in folder client/
+    root /usr/share/nginx/html; 
+    index index.html index.htm;
+  }
+}
+```
+
+client/Dockerfile
+
+```ini
+FROM node:alpine as builder
+WORKDIR '/app'
+COPY ./package.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM nginx
+EXPOSE 3000
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/build /usr/share/nginx/html
+```
+
+
+
 ### 5. A Quick Fix.html
+
+In the last section we added on some Nginx config to the client side project, but I neglected to add one line that would get the Nginx server to work correctly when using React Router!
+
+In the **client/nginx/default.conf** file, please add the following line:
+
+```ini
+server {
+  listen 3000;
+
+  location / {
+    root /usr/share/nginx/html;
+    index index.html index.htm;
+    try_files $uri $uri/ /index.html;  <<------Add this!!!!
+  }
+}
+```
+
 ### 6. Cleaning Up Tests
+
+App.test.js change content in this file to run without error
+
+```js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+
+it('renders without crashing', () => {});
+
+```
+
+
+
 ### 7. Github and Travis CI Setup
+
+![image-20210116124623022](docker-and-kubernetes-the-complete-guide.assets/image-20210116124623022.png)
+
+Run these commands
+
+
+
+![image-20210116124056816](docker-and-kubernetes-the-complete-guide.assets/image-20210116124056816.png)
+
 ### 8. Travis Configuration Setup
+
+![image-20210116123601112](docker-and-kubernetes-the-complete-guide.assets/image-20210116123601112.png)
+
+
+
+.travis.yml
+
+```ini
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t stephengrider/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run stephengrider/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t stephengrider/multi-client ./client
+  - docker build -t stephengrider/multi-nginx ./nginx
+  - docker build -t stephengrider/multi-server ./server
+  - docker build -t stephengrider/multi-worker ./worker
+  # Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images and push them to docker hub
+  - docker push stephengrider/multi-client
+  - docker push stephengrider/multi-nginx
+  - docker push stephengrider/multi-server
+  - docker push stephengrider/multi-worker
+
+deploy:
+  provider: elasticbeanstalk
+  region: us-west-1
+  app: multi-docker
+  env: MultiDocker-env
+  bucket_name: elasticbeanstalk-us-west-1-306476627547
+  bucket_path: docker-multi
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key:
+    secure: $AWS_SECRET_KEY
+
+```
+
+
+
 ### 9. Pushing Images to Docker Hub
+
+![image-20210116124451871](docker-and-kubernetes-the-complete-guide.assets/image-20210116124451871.png)
+
+
+
+![image-20210116124221066](docker-and-kubernetes-the-complete-guide.assets/image-20210116124221066.png)
+
+Scroll down
+
+![image-20210116124312634](docker-and-kubernetes-the-complete-guide.assets/image-20210116124312634.png)
+
+Add new DOCKER ID
+
+![image-20210116124356222](docker-and-kubernetes-the-complete-guide.assets/image-20210116124356222.png)
 
 ### 10. Successful Image Building
 
+![image-20210116124546193](docker-and-kubernetes-the-complete-guide.assets/image-20210116124546193.png)
 
+
+
+![image-20210116124729194](docker-and-kubernetes-the-complete-guide.assets/image-20210116124729194.png)
+
+![image-20210116124745197](docker-and-kubernetes-the-complete-guide.assets/image-20210116124745197.png)
 
 ## 11. Multi-Container Deployments to AWS
 ### 1. Multi-Container Definition Files
-### 10. ElastiCache Redis Creation
-### 11. Creating a Custom Security Group
-### 12. Applying Security Groups to Resources
-### 13. Setting Environment Variables
-### 14. IAM Keys for Deployment
-### 15. Travis Deploy Script
-### 16. Container Memory Allocations
-### 17. Verifying Deployment
-### 18. A Quick App Change
-### 19. Making Changes
+![image-20210116124902485](docker-and-kubernetes-the-complete-guide.assets/image-20210116124902485.png)
+
+![image-20210116124959430](docker-and-kubernetes-the-complete-guide.assets/image-20210116124959430.png)
+
+Now we have many dockerfile => don't know what to run
+
+=> Create new file
+
+![image-20210116125051869](docker-and-kubernetes-the-complete-guide.assets/image-20210116125051869.png)
+
+Look like we set up docker-compose
+
+![image-20210116125202166](docker-and-kubernetes-the-complete-guide.assets/image-20210116125202166.png)
+
+The biggest difference that you're going to see between these two files is that in the docker compose
+
+file it's going to contain some information about how to build an image using a docker file.
+
+Right that's what we're doing inside of docker compose.
+
+If you go up the docker compose file right now you'll see that in each service we had the different
+
+build directions.
+
+
+
 ### 2. Finding Docs on Container Definitions
-### 20. Cleaning Up AWS Resources
+![image-20210116125536584](docker-and-kubernetes-the-complete-guide.assets/image-20210116125536584.png)
+
+So Elastic beanstalk doesn't actually know how to work with containers especially a multi container environment.
+
+Behind the scenes when you tell a Elastic beanstalk to host a set of containers it's actually delegating
+
+that hosting off to another service that is provided in Amazon called the **elastic container service**
+
+which is abbreviated very frequently as e.c.s you work with Amazon e.c.s by creating files that are
+
+called Task definitions and a task definition is essentially a file that tells us how to run one single
+
+container.
+
+Each of these task definition files are very similar almost identical to the container definitions that
+
+you and I are going to write inside of our docker run AWS json file.
+
+gg: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definitions.html
+
+https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html
+
+Format to follow
+
+https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#container_definitions
+
+
+
+
+
+
+
 ### 3. Adding Container Definitions to DockerRun
+
+And so when we say **hostname** right here we're essentially giving every other container in this group
+
+of containers the **ability to access this container right here by trying to make a request with a hostname**
+
+of client. - like name of service and it is accessed in the nginx folder
+
+Dockerrun.aws.json
+
+```json
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "client",
+      "image": "stephengrider/multi-client",
+      "hostname": "client",
+      "essential": false,
+      "memory": 128
+    },
+    {
+      "name": "server",
+      "image": "stephengrider/multi-server",
+      "hostname": "api",
+      "essential": false,
+      "memory": 128
+    },
+    {
+      "name": "worker",
+      "image": "stephengrider/multi-worker",
+      "hostname": "worker",
+      "essential": false,
+      "memory": 128
+    },
+    {
+      "name": "nginx",
+      "image": "stephengrider/multi-nginx",
+      "hostname": "nginx",
+      "essential": true,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 80
+        }
+      ],
+      "links": ["client", "server"],
+      "memory": 128
+    }
+  ]
+}
+
+```
+
+
+
 ### 4. More Container Definitions
+
+So the next one that we're going to put on is a flag called **essential** or we're going to set it to false
+
+by default the essential flag is something that we've not seen before in any other docker concept.
+
+The essential flag essentially means that this container right here is not considered to be as you might
+
+guess essential.
+
+So what would it mean if we mark this thing as is essential **true**.
+
+If we marked a container as essential true and this container ever crashes for any reason whatsoever
+
+then **all the other containers in this group of containers will be closed down** at the same time.
+
+
+
 ### 5. Forming Container Links
+
+```json
+ {
+      "name": "nginx",
+      "image": "stephengrider/multi-nginx",
+      "hostname": "nginx",
+      "essential": true,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 80
+        }
+      ],
+      "links": ["client", "server"], => communicate to other services by name of container definition in json file
+      "memory": 128
+    }
+```
+
+![image-20210116131330147](docker-and-kubernetes-the-complete-guide.assets/image-20210116131330147.png)
+
+https://jsonlint.com/
+
+validate json file is valid
+
+
+
 ### 6. Creating the EB Environment
+
+![image-20210116131731911](docker-and-kubernetes-the-complete-guide.assets/image-20210116131731911.png)
+
+
+
+![image-20210116131813562](docker-and-kubernetes-the-complete-guide.assets/image-20210116131813562.png)
+
+Create new app
+
+![image-20210116131848396](docker-and-kubernetes-the-complete-guide.assets/image-20210116131848396.png)
+
+![image-20210116131903823](docker-and-kubernetes-the-complete-guide.assets/image-20210116131903823.png)
+
+![image-20210116131945039](docker-and-kubernetes-the-complete-guide.assets/image-20210116131945039.png)
+
+![image-20210116132039407](docker-and-kubernetes-the-complete-guide.assets/image-20210116132039407.png)
+
+
+
+![image-20210116132205781](docker-and-kubernetes-the-complete-guide.assets/image-20210116132205781.png)
+
+
+
 ### 7. Managed Data Service Providers
+
+![image-20210116132245515](docker-and-kubernetes-the-complete-guide.assets/image-20210116132245515.png)
+
+
+
+> We miss redis and postgres
+
+![image-20210116132349543](docker-and-kubernetes-the-complete-guide.assets/image-20210116132349543.png)
+
+
+
+![image-20210116132636079](docker-and-kubernetes-the-complete-guide.assets/image-20210116132636079.png)
+
+
+
+![image-20210116132716721](docker-and-kubernetes-the-complete-guide.assets/image-20210116132716721.png)
+
+
+
+![image-20210116132750640](docker-and-kubernetes-the-complete-guide.assets/image-20210116132750640.png)
+
+
+
 ### 8. Overview of AWS VPC's and Security Groups
+
+![image-20210116132900731](docker-and-kubernetes-the-complete-guide.assets/image-20210116132900731.png)
+
+![image-20210116133007242](docker-and-kubernetes-the-complete-guide.assets/image-20210116133007242.png)
+
+![image-20210116133051623](docker-and-kubernetes-the-complete-guide.assets/image-20210116133051623.png)
+
+
+
+> Now in each of these different regions by default you get something created a that is called a virtual
+>
+> private cloud or VPC for short of the VPC essentially is kind of its own private little network so that
+>
+> any instance are any different service that you create is isolated to just your account and it doesn't
+>
+> get automatically shared with like someone else's AWS account.
+>
+> Now before we move on just one thing to make really clear here in each of the **different regions** or data
+>
+> centers around the world you automatically get **one default VPC created**.
+
+![image-20210116133853512](docker-and-kubernetes-the-complete-guide.assets/image-20210116133853512.png)
+
+
+
+![image-20210116133937555](docker-and-kubernetes-the-complete-guide.assets/image-20210116133937555.png)
+
+Click on your VPC on the left hand side you can see the default VPC
+
+![image-20210116134039574](docker-and-kubernetes-the-complete-guide.assets/image-20210116134039574.png)
+
+![image-20210116134400148](docker-and-kubernetes-the-complete-guide.assets/image-20210116134400148.png)
+
+![image-20210116134520833](docker-and-kubernetes-the-complete-guide.assets/image-20210116134520833.png)
+
+
+
 ### 9. RDS Database Creation
+
+![image-20210116134737616](docker-and-kubernetes-the-complete-guide.assets/image-20210116134737616.png)
+
+Search RDS
+
+![image-20210116134834096](docker-and-kubernetes-the-complete-guide.assets/image-20210116134834096.png)
+
+
+
+![image-20210116134946171](docker-and-kubernetes-the-complete-guide.assets/image-20210116134946171.png)
+
+Next
+
+Scroll down and enter your pass
+
+![image-20210116135659637](docker-and-kubernetes-the-complete-guide.assets/image-20210116135659637.png)
+
+Then we click next
+
+Enetr your db name
+
+![image-20210116135858821](docker-and-kubernetes-the-complete-guide.assets/image-20210116135858821.png)
+
+
+
+![image-20210116135959066](docker-and-kubernetes-the-complete-guide.assets/image-20210116135959066.png)
+
+See new db here
+
+
+
+
+
+### 10. ElastiCache Redis Creation
+
+![image-20210116140057187](docker-and-kubernetes-the-complete-guide.assets/image-20210116140057187.png)
+
+
+
+![image-20210116140145964](docker-and-kubernetes-the-complete-guide.assets/image-20210116140145964.png)
+
+Choose t2 and choose which we want to use
+
+![image-20210116140418288](docker-and-kubernetes-the-complete-guide.assets/image-20210116140418288.png)
+
+We don't need any replicas because we definitely do not have high performance demands for our application.
+
+So going to change replicas to none.
+
+![image-20210116140549304](docker-and-kubernetes-the-complete-guide.assets/image-20210116140549304.png)
+
+![image-20210116140649556](docker-and-kubernetes-the-complete-guide.assets/image-20210116140649556.png)
+
+Add name and choose 2 check box above
+
+![image-20210116140721829](docker-and-kubernetes-the-complete-guide.assets/image-20210116140721829.png)
+
+Then we click create
+
+![image-20210116140827045](docker-and-kubernetes-the-complete-guide.assets/image-20210116140827045.png)
+
+
+
+### 11. Creating a Custom Security Group
+
+![image-20210116140949342](docker-and-kubernetes-the-complete-guide.assets/image-20210116140949342.png)
+
+We see the new one
+
+![image-20210116141047093](docker-and-kubernetes-the-complete-guide.assets/image-20210116141047093.png)
+
+
+
+![image-20210116141151991](docker-and-kubernetes-the-complete-guide.assets/image-20210116141151991.png)
+
+
+
+![image-20210116141310480](docker-and-kubernetes-the-complete-guide.assets/image-20210116141310480.png)
+
+Port range base on the docker-compose file
+
+![image-20210116141435415](docker-and-kubernetes-the-complete-guide.assets/image-20210116141435415.png)
+
+> => Allow any traffic from any other AWS service that has this security group
+
+
+
+### 12. Applying Security Groups to Resources
+
+Search service name cache
+
+![image-20210116141642664](docker-and-kubernetes-the-complete-guide.assets/image-20210116141642664.png)
+
+Go to redis tab => click on check box => choose Modify
+
+![image-20210116141751638](docker-and-kubernetes-the-complete-guide.assets/image-20210116141751638.png)
+
+![image-20210116141809366](docker-and-kubernetes-the-complete-guide.assets/image-20210116141809366.png)
+
+Then we click Modify
+
+**Maintenance windows**
+
+Now normally when we make a change to a class cache cluster it's going to try to schedule that maintenance
+
+for some very specific time.
+
+Usually some overnight period where hopefully not a lot of people are using our service but making changes
+
+to a security group doesn't actually require a maintenance window.
+
+Even though the thing is going to tell you that it does.
+
+So we can just click on modify and it will immediately start to change the security groups on there.
+
+---
+
+![image-20210116142105084](docker-and-kubernetes-the-complete-guide.assets/image-20210116142105084.png)
+
+![image-20210116142134791](docker-and-kubernetes-the-complete-guide.assets/image-20210116142134791.png)
+
+![image-20210116142229747](docker-and-kubernetes-the-complete-guide.assets/image-20210116142229747.png)
+
+Scroll down
+
+![image-20210116142338276](docker-and-kubernetes-the-complete-guide.assets/image-20210116142338276.png)
+
+![image-20210116142415533](docker-and-kubernetes-the-complete-guide.assets/image-20210116142415533.png)
+
+![image-20210116142502569](docker-and-kubernetes-the-complete-guide.assets/image-20210116142502569.png)
+
+The result
+
+![image-20210116142553523](docker-and-kubernetes-the-complete-guide.assets/image-20210116142553523.png)
+
+![image-20210116142734101](docker-and-kubernetes-the-complete-guide.assets/image-20210116142734101.png)
+
+IN the dashboard
+
+![image-20210116142759990](docker-and-kubernetes-the-complete-guide.assets/image-20210116142759990.png)
+
+![image-20210116142822868](docker-and-kubernetes-the-complete-guide.assets/image-20210116142822868.png)
+
+![image-20210116142859259](docker-and-kubernetes-the-complete-guide.assets/image-20210116142859259.png)
+
+![image-20210116142920284](docker-and-kubernetes-the-complete-guide.assets/image-20210116142920284.png)
+
+Confirm
+
+
+
+### 13. Setting Environment Variables
+
+![image-20210116143056692](docker-and-kubernetes-the-complete-guide.assets/image-20210116143056692.png)
+
+Copy all except port
+
+![image-20210116143304661](docker-and-kubernetes-the-complete-guide.assets/image-20210116143304661.png)
+
+
+
+![image-20210116143418474](docker-and-kubernetes-the-complete-guide.assets/image-20210116143418474.png)
+
+Then we we will use it to create ENV
+
+![image-20210116143528169](docker-and-kubernetes-the-complete-guide.assets/image-20210116143528169.png)
+
+=> Apply
+
+
+
+
+
+### 14. IAM Keys for Deployment
+
+.travis.yml add
+
+```ini
+deploy:
+  provider: elasticbeanstalk
+  region: us-west-1
+  app: multi-docker
+  env: MultiDocker-env
+  bucket_name: elasticbeanstalk-us-west-1-306476627547
+  bucket_path: docker-multi
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key:
+    secure: $AWS_SECRET_KEY
+```
+
+![image-20210116144116533](docker-and-kubernetes-the-complete-guide.assets/image-20210116144116533.png)
+
+![image-20210116144213099](docker-and-kubernetes-the-complete-guide.assets/image-20210116144213099.png)
+
+![image-20210116144240714](docker-and-kubernetes-the-complete-guide.assets/image-20210116144240714.png)
+
+![image-20210116144339044](docker-and-kubernetes-the-complete-guide.assets/image-20210116144339044.png)
+
+Search 
+
+![image-20210116144420049](docker-and-kubernetes-the-complete-guide.assets/image-20210116144420049.png)
+
+Choose all checkboxs
+
+![image-20210116144446813](docker-and-kubernetes-the-complete-guide.assets/image-20210116144446813.png)
+
+![image-20210116144511931](docker-and-kubernetes-the-complete-guide.assets/image-20210116144511931.png)
+
+Store it
+
+Go to travis
+
+![image-20210116144641773](docker-and-kubernetes-the-complete-guide.assets/image-20210116144641773.png)
+
+![image-20210116144722621](docker-and-kubernetes-the-complete-guide.assets/image-20210116144722621.png)
+
+
+
+### 15. Travis Deploy Script
+
+
+
+We can copy subdomain to region
+
+![image-20210116144950629](docker-and-kubernetes-the-complete-guide.assets/image-20210116144950629.png)
+
+App, env name is multi-docker like image above
+
+```ini
+bucket_name: elasticbeanstalk-us-west-1-306476627547
+bucket_path: docker-multi
+```
+
+Search s3
+
+![image-20210116144822809](docker-and-kubernetes-the-complete-guide.assets/image-20210116144822809.png)
+
+![image-20210116145308954](docker-and-kubernetes-the-complete-guide.assets/image-20210116145308954.png)
+
+Find
+
+![image-20210116145341128](docker-and-kubernetes-the-complete-guide.assets/image-20210116145341128.png)
+
+Copy bucket name
+
+
+
+### 16. Container Memory Allocations
+
+![image-20210116145552674](docker-and-kubernetes-the-complete-guide.assets/image-20210116145552674.png)
+
+![image-20210116145637326](docker-and-kubernetes-the-complete-guide.assets/image-20210116145637326.png)
+
+128MB
+
+![image-20210116145744299](docker-and-kubernetes-the-complete-guide.assets/image-20210116145744299.png)
+
+![image-20210116145812305](docker-and-kubernetes-the-complete-guide.assets/image-20210116145812305.png)
+
+
+
+### 17. Verifying Deployment
+
+![image-20210116145925101](docker-and-kubernetes-the-complete-guide.assets/image-20210116145925101.png)
+
+Click download to see
+
+![image-20210116150055539](docker-and-kubernetes-the-complete-guide.assets/image-20210116150055539.png)
+
+Open app to check it is ok or not
+
+
+
+### 18. A Quick App Change
+
+Change title of the header in app.js => push
+
+observe
+
+### 19. Making Changes
+
+![image-20210116150336907](docker-and-kubernetes-the-complete-guide.assets/image-20210116150336907.png)
+
+![image-20210116150403558](docker-and-kubernetes-the-complete-guide.assets/image-20210116150403558.png)
+
+
+
+### 20. Cleaning Up AWS Resources
+
+![image-20210116152510370](docker-and-kubernetes-the-complete-guide.assets/image-20210116152510370.png)
+
+
+
+RDS
+
+![image-20210116152607968](docker-and-kubernetes-the-complete-guide.assets/image-20210116152607968.png)
+
+![image-20210116152656274](docker-and-kubernetes-the-complete-guide.assets/image-20210116152656274.png)
+
+
+
+![image-20210116152725729](docker-and-kubernetes-the-complete-guide.assets/image-20210116152725729.png)
+
+![image-20210116152756312](docker-and-kubernetes-the-complete-guide.assets/image-20210116152756312.png)
+
+
+
+ElasticCache
+
+![image-20210116152911652](docker-and-kubernetes-the-complete-guide.assets/image-20210116152911652.png)
+
+![image-20210116152948507](docker-and-kubernetes-the-complete-guide.assets/image-20210116152948507.png)
+
+
+
+![image-20210116153123309](docker-and-kubernetes-the-complete-guide.assets/image-20210116153123309.png)
+
+Delete 3 instance
+
+![image-20210116153216724](docker-and-kubernetes-the-complete-guide.assets/image-20210116153216724.png)
+
+Wait  a minutes
+
+![image-20210116153258336](docker-and-kubernetes-the-complete-guide.assets/image-20210116153258336.png)
+
+![image-20210116153403257](docker-and-kubernetes-the-complete-guide.assets/image-20210116153403257.png)
+
+![image-20210116153444655](docker-and-kubernetes-the-complete-guide.assets/image-20210116153444655.png)
+
 ## 12. Onwards to Kubernetes!
 ### 1. The Why's and What's of Kubernetes
 
