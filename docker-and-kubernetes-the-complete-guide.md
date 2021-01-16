@@ -4367,45 +4367,575 @@ copy id
 ## 14. A Multi-Container App with Kubernetes
 ### 1. The Path to Production
 
+15
+
+![image-20210116235937624](docker-and-kubernetes-the-complete-guide.assets/image-20210116235937624.png)
+
+So everything you see here is in a single node.
+
+When we deployed out there we'll have the option to expand to multiple notes so we won't necessarily
+just be limited to one single virtual machine for all these different objects that we're going to create.
+But right now we're just going to kind of imagine that it's all sitting on one single note.
+Now this diagram is showing the general overall architecture that we're going to use for us moving our
+multa container app into the world of Kubernetes
+You'll notice that there are some very familiar pieces in here.
+So we've got the multi client set of pods all being managed by deployment.
+We've got the multi server member that's the Express API being managed by deployment and they'll notice
+that I've also added in readiness as it did this time around.
+And postscripts as a POD this time around as well.
+So back on the multi container deployment on Amazon Web Services when we used elastic beanstalk we delegated
+to these outside services provided by AWS to manage our redis and postgres needs.
+Now that we're moving over to Kubernetes we're going to put things things put these things together
+in a production environment ourselves rather than relying upon some outside service to do it for us.
+The overall purpose of the app is going to stay the same.
+
+I know it's kind of a silly example but it works and it allows us to have a couple of different services
+that work together in a nice fashion and you will notice that inside this diagram there are a couple
+of new terms as well.
+So for example on the far left hand side is something called an **ingress service**.
+You'll notice that rather than having the node ports on our deployment for multi client that we had
+previously we now have a **cluster IP** and it looks like just about every deployment that we put together
+with the exception of the multi worker right here has a cluster IP Pena's somewhat attached to it.
+So of course we're going to talk about what an ingress is and what a cluster IP is as well.
+The other new piece of terminology that you'll notice inside of here is something called a postscripts
+PVC PVC stands for persistent volume claim.
+
+![image-20210117000553997](docker-and-kubernetes-the-complete-guide.assets/image-20210117000553997.png)
+
 
 
 ### 2. Checkpoint Files.html
 
+Attached to this section is a ZIP file with the current state of my 'complex' multi-container project. If you made any changes to your copy of the multi-container project, or if you didn't get it working, then download this zip file and use my copy. 
 
+Its extremely important that your project files are identical to mine at this point - if anything is different then a lot of the Kubernetes stuff is going to appear to just not "work" for some mysterious reason.
+
+C:\Users\Admin\Downloads\[FreeCourseSite.com] Udemy - Docker and Kubernetes The Complete Guide\14. A Multi-Container App with Kubernetes
 
 ### 3. A Quick Checkpoint
+
+![image-20210117000826834](docker-and-kubernetes-the-complete-guide.assets/image-20210117000826834.png)
+
+To make sure it work correctly
+
+Then click CTRL C => run `docker-compose up` in the second time
+
+See in run on port 3050
+
+
+
+
+
+
+
 ### 4. Recreating the Deployment
+
+![image-20210117001233126](docker-and-kubernetes-the-complete-guide.assets/image-20210117001233126.png)
+
+Remove folder nginx and add k8s
+
+D:\git-docs\docker\Source\Udemy - Docker and Kubernetes The Complete Guide\git repo\DockerCasts\complex\k8s
+
+client-deployment.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      component: web
+  template:
+    metadata:
+      labels:
+        component: web
+    spec:
+      containers:
+        - name: client
+          image: stephengrider/multi-client
+          ports:
+            - containerPort: 3000
+
+```
+
+
+
 ### 5. NodePort vs ClusterIP Services
+
+![image-20210117001618720](docker-and-kubernetes-the-complete-guide.assets/image-20210117001618720.png)
+
+ow we made use of a note port which is going to expose a single pod or a cluster of pods to the outside
+world.
+And that's why you and I were able to type in a IP or specifically the IP for our minikube virtual machine
+and then a port in the 3000 range.
+It was completely the node port that allowed us to access our running pod inside of our browser.
+Now the cluster IP is a little bit more restrictive form of networking the cluster IP is going to allow
+any other object inside of our cluster to access the object that the cluster IP is pointing at.
+But nobody from the outside world.
+So in other words people like you and me or anyone inside their web browser can access the object that
+the service is married up to or pointing to.
+
+Well it means that when we assign a cluster IP to any of these deployments you see here anything else
+running **inside of our cluster can access whatever object the cluster IP is pointing at**.
+So in other words this cluster IP right here is going to provide access for everything else inside of
+here to the redis deployment.
+It's what's going to allow the multi worker pod to eventually connect to the copy of redis that it's
+running gear.
+If we did not have this cluster IP service then the redis part would be completely unreachable and
+nothing inside of our cluster would be allowed to access that running pod.
+So that's what the cluster IP is all about.
+It provides access to an object most commonly a set of pods to everything else inside of our cluster.
+And the one thing I want to really clear about is that a cluster IP is not like a node port in that
+it does not allow traffic to come in from the outside world.
+
+
+
 ### 6. The ClusterIP Config
+
+client-cluster-ip-service.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: web
+  ports:
+    - port: 3000
+      targetPort: 3000
+
+```
+
+> Không có nodePort vì k access từ outside được
+
+
+
+
+
 ### 7. Applying Multiple Files with Kubectl
+
+![image-20210117003135201](docker-and-kubernetes-the-complete-guide.assets/image-20210117003135201.png)
+
+e.g
+
+Change `labels` to `label` => try to apply
+
+![image-20210117003327571](docker-and-kubernetes-the-complete-guide.assets/image-20210117003327571.png)
+
+If we have any errors, we can see the error
+
+![image-20210117003440046](docker-and-kubernetes-the-complete-guide.assets/image-20210117003440046.png)
+
+
+
+
+
 ### 8. Express API Deployment Config
+
+![image-20210117004031465](docker-and-kubernetes-the-complete-guide.assets/image-20210117004031465.png)
+
+server-deployment.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      component: server # you can use anything e.g partOfApp: label
+  template:
+    metadata:
+      labels:
+        component: server
+    spec:
+      containers:
+        - name: server
+          image: stephengrider/multi-server
+          ports:
+            - containerPort: 5000
+          env:
+            - name: REDIS_HOST
+              value: redis-cluster-ip-service
+            - name: REDIS_PORT
+              value: '6379'
+            - name: PGUSER
+              value: postgres
+            - name: PGHOST
+              value: postgres-cluster-ip-service
+            - name: PGPORT
+              value: '5432'
+            - name: PGDATABASE
+              value: postgres
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgpassword
+                  key: PGPASSWORD
+
+```
+
+
+
 ### 9. Cluster IP for the Express API
+
+server-cluster-ip-service.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: server # Khớp với labels bên kia
+  ports:
+    - port: 5000
+      targetPort: 5000
+
+```
 
 
 
 ### 10. Combining Config Into Single Files
 
+![image-20210117005036092](docker-and-kubernetes-the-complete-guide.assets/image-20210117005036092.png)
+
+Copy and paste => hard to find
+
+
+
 ### 11. The Worker Deployment
+
+worker-deployment.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: worker
+  template:
+    metadata:
+      labels:
+        component: worker
+    spec:
+      containers:
+        - name: worker
+          image: stephengrider/multi-worker # add tới đây
+          env:
+            - name: REDIS_HOST
+              value: redis-cluster-ip-service
+            - name: REDIS_PORT
+              value: '6379'
+
+```
+
+In other words there is no other object whatsoever no other service no other image no container no nothing
+that needs to directly connect to the multi worker and try to get some information out of it.
+The multi worker is going to connect to something else inside of application but nothing is going to
+make a unprompted request into the multi worker.
+And as such the multi worker does not need to have any port assigned to it and it does not need to have
+any service assigned to it either.
+We only make use of services when we want to have requests going into a set of pods or into a single
+pod for that matter.
+And because that's not the case here.
 
 ### 12. Reapplying a Batch of Config Files
 
+![image-20210117005626027](docker-and-kubernetes-the-complete-guide.assets/image-20210117005626027.png)
+
+![image-20210117005649424](docker-and-kubernetes-the-complete-guide.assets/image-20210117005649424.png)
+
+![image-20210117005740461](docker-and-kubernetes-the-complete-guide.assets/image-20210117005740461.png)
+
+Xem logs
+
+
+
 ### 13. Creating and Applying Redis Config
+
+redis-deployment.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: redis
+  template:
+    metadata:
+      labels:
+        component: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis
+          ports:
+            - containerPort: 6379
+
+```
+
+redis-cluster-ip-service.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+
+```
+
+![image-20210117010203541](docker-and-kubernetes-the-complete-guide.assets/image-20210117010203541.png)
+
+
+
+
 
 ### 14. Last Set of Boring Config!
 
+postgres-deployment.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: postgres
+  template:
+    metadata:
+      labels:
+        component: postgres
+    spec:
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: database-persistent-volume-claim
+      containers:
+        - name: postgres
+          image: postgres
+          ports:
+            - containerPort: 5432 # add tới đây
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+              subPath: postgres
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgpassword
+                  key: PGPASSWORD
+
+```
+
+postgres-cluster-ip-service.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+
+```
+
+Run command to check
+
 ### 15. The Need for Volumes with Databases
+
+![image-20210117010729002](docker-and-kubernetes-the-complete-guide.assets/image-20210117010729002.png)
+
+
+
+
+
+![image-20210117010749770](docker-and-kubernetes-the-complete-guide.assets/image-20210117010749770.png)
+
+![image-20210117010845753](docker-and-kubernetes-the-complete-guide.assets/image-20210117010845753.png)
+
+crash
+
+![image-20210117010918118](docker-and-kubernetes-the-complete-guide.assets/image-20210117010918118.png)
+
+volumes exist outside host machine
+
+replicas là 2 => dùng chung volumes => same problems
+
+Now I want you to recall that I told you yeah we can set up postscripts to have like some amount of
+replication or a clustering that's going to improve the availability and performance of our database
+just to make sure it's really clear.
+If we just like bump that up to replicas like to right there we would end up with a situation like this
+where we have two pods that might be accessing the same volume having two different databases access
+the same file system without them being aware of each other and have them very distinctly cooperate
+with each other is a recipe for disaster.
+So at no point in time are you ever going to want to just arbitrarily Dial-Up replicas to to like so
+and attempt to have two copies of postscripts accessing the same volume.
+Now that's not just isolated to the world of postscripts many other databases you're going to find the
+same problem.
+
+
 
 ### 16. Kubernetes Volumes
 
+![image-20210117011547633](docker-and-kubernetes-the-complete-guide.assets/image-20210117011547633.png)
+
+![image-20210117011651718](docker-and-kubernetes-the-complete-guide.assets/image-20210117011651718.png)
+
+![image-20210117011814055](docker-and-kubernetes-the-complete-guide.assets/image-20210117011814055.png)
+
+The volume is tied to the pod and so is the pod itself ever dies the volume dies and goes away as well.
+
+So a volume and Kubernetes will survive container restarts inside of a pod.
+
+But if the pod itself for whatever reason ever gets recreated or terminated deleted whatever happens
+
+then the pod and the volume inside of it poof totally gone.
+
+
+
 ### 17. Volumes vs Persistent Volumes
+
+xem lại
+
+![image-20210117013133026](docker-and-kubernetes-the-complete-guide.assets/image-20210117013133026.png)
+
+Last section we had said that a **volume is going to be some long term storage** that is tied to a pod when
+the pod is created the volume is created if a container crashes for any reason the volume will stick
+around.
+The **volume** will persist and so we had said that if we end up with a new postscripts container for whatever
+reason no problem it can really connect back to this existing volume that had been created.
+And so we can kind of imagine that the old container might fall away and it gets replaced with this
+new one still gets access to all that volume data.
+
+
+
+So now let's compare and contrast that against a **persistent volume** with a persistent falling whom we
+are creating some type of long term durable storage that is **not tied to any specific POD or any specific**
+**container.**
+So you can kind of imagine that that persistent volume is **outside the pod** completely separate from the pod.
+If this container crashes for any reason or if it needs to be created recreated for any reason no problem
+whatsoever.
+The old container will fall away and the new one it can connect to that persistent volume that exists
+outside the pot.
+
+
+
+So that's a big difference between a normal volume and a persistent volume.
+Essentially we're talking about the lifecycle of the volume itself with a normal volume.
+It's tied to the lifecycle of the pod with a persistent volume.
+It's going to last for all time or essentially until you and I as developers whereas the administrators
+decide to delete it for some reason or if they persist in volume we can recreate a container we can
+recreate a pod no problem.
+The volume is still going to stick around with all the data that you would expect to have.
+All right so that's the differences between a persistent volume and a volume.
 
 ### 18. Persistent Volumes vs Persistent Volume Claims
 
+
+
+
+
+![image-20210117012745372](docker-and-kubernetes-the-complete-guide.assets/image-20210117012745372.png)
+
+PVC: is advertisement, it cannot store anything
+
+If sale associate don't have 1T => request factory
+
+
+
 ### 19. Claim Config Files
+
+database-persistent-volume-claim.yaml
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-persistent-volume-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+```
+
+
 
 ### 20. Persistent Volume Access Modes
 
+![image-20210117014223357](docker-and-kubernetes-the-complete-guide.assets/image-20210117014223357.png)
+
+
+
 ### 21. Where Does Kubernetes Allocate Persistent Volumes
+
+![image-20210117014531046](docker-and-kubernetes-the-complete-guide.assets/image-20210117014531046.png)
+
+What's happen behind the scene
+
+![image-20210117015233698](docker-and-kubernetes-the-complete-guide.assets/image-20210117015233698.png)
+
+you run get storage class you're going to see all the
+different options on your computer that Cooper has for creating a persistent volume.
+Right now we have a single option called **standard**.
+It is the default option.
+So if we do not specify a storage class with our persistent volume claim the standard option will be
+used by default and the provision for or essentially how kubernetes is going to decide how to provision
+or create this persistent volume is by using the minikube host path option.
+I want you to also do a `kubectl. describe storageclass` as well and you'll see some more information
+about that option right there.
+So when you do so it tells you in very broad terms.
+Yes we have a provision for it that is minikube hostpath minikube hosts path means exactly what
+we saw over here minikube hostpath means that when we ask Kuber Nettie's to create this persistent volume
+it's going to look on the host machine to minikube hostpath And it's going to make a little slice of space on your
+personal harddrive.
+
+![image-20210117015450488](docker-and-kubernetes-the-complete-guide.assets/image-20210117015450488.png)
+
+So in other words right now inside of our local environment we are setting up this persistent volume
+claim without designating a storage class name.
+And we did not designate that option because we are relying upon the default.
+And like I just said the default for us is to create a little slice on our hard drive to use for this
+persistent volume.
+But when you put your application up to kubernetes on Google Cloud or AWS the standard option is
+not going to be minikube/hostpath.
 
 ### 22. Designating a PVC in a Pod Template
 
