@@ -1824,7 +1824,27 @@ Sometimes AWS has a tough time with the '.' folder designation and prefers the l
 
 ### 13. Workflow With Github
 
+Click on the URL and see app work
+
+![image-20210116090623275](docker-and-kubernetes-the-complete-guide.assets/image-20210116090623275.png)
+
+[GitHub - StephenGrider/docker-react](https://github.com/StephenGrider/docker-react)
+
+create feature branch and pull request
+
+![image-20210116090953759](docker-and-kubernetes-the-complete-guide.assets/image-20210116090953759.png)
+
+
+
 ### 14. Redeploy on Pull Request Merge
+
+![image-20210116091143893](docker-and-kubernetes-the-complete-guide.assets/image-20210116091143893.png)
+
+Merge PR if all check is ok
+
+
+
+
 
 ### 15. Deployment Wrapup
 
@@ -1848,7 +1868,7 @@ Remember, we need to delete the resources we created or you might end up paying 
 
 
 
-#### ***Note: it might take a few minutes for the dashboard to update and show that your app is being deleted. Be a little patient!\***
+>  **Note**: it might take a few minutes for the dashboard to update and show that your app is being deleted. Be a little patient!
 
 ## 8. Building a Multi-Container Application
 
@@ -1897,6 +1917,10 @@ In the next few videos we're going to write a lot of Javascript code. You might 
 
 
 ### 6. Express API Setup
+
+D:\git-docs\docker\Source\Udemy - Docker and Kubernetes The Complete Guide\git repo\DockerCasts\complex
+
+
 
 ![image-20201210001421254](docker-and-kubernetes-the-complete-guide.assets/image-20201210001421254.png)
 
@@ -2023,7 +2047,7 @@ app.get('/', (req, res) => {
 
 app.get('/values/all', async (req, res) => {
   // const values = await pgClient.query('SELECT * from values');
-
+  // res.send(values.rows);
   res.send([1, 2, 3]);
 });
 
@@ -2193,6 +2217,10 @@ export default App;
 
 ### 1. Checkpoint Files.html
 
+***If you skipped over putting the app together from scratch\***, download the attached Checkpoint.zip file. You'll need it in the next section to get all caught up.
+
+C:\Users\Admin\Downloads\[FreeCourseSite.com] Udemy - Docker and Kubernetes The Complete Guide\9. Dockerizing Multiple Services
+
 
 
 ### 2. Checkpoint Catchup
@@ -2207,6 +2235,10 @@ export default App;
 
 ![image-20201210082944676](docker-and-kubernetes-the-complete-guide.assets/image-20201210082944676.png)
 
+
+
+complex-elastic-beanstalk
+
 client/Dockerfile.dev
 
 ```ini
@@ -2217,6 +2249,8 @@ RUN npm install
 COPY . .
 CMD ["npm", "run", "start"]
 ```
+
+Run 
 
 ![image-20201210083119504](docker-and-kubernetes-the-complete-guide.assets/image-20201210083119504.png)
 
@@ -2296,11 +2330,25 @@ Do similarly with worker
 
 ![image-20201210235617368](docker-and-kubernetes-the-complete-guide.assets/image-20201210235617368.png)
 
+
+
+Run command
+
 ![image-20201210235642788](docker-and-kubernetes-the-complete-guide.assets/image-20201210235642788.png)
 
 https://hub.docker.com/_/postgres
 
-Summary
+
+
+You will see
+
+![image-20210116095801362](docker-and-kubernetes-the-complete-guide.assets/image-20210116095801362.png)
+
+=> mean ok
+
+
+
+**Summary**
 
 # How to use this image
 
@@ -2377,6 +2425,36 @@ Add new env
 
 ![image-20201211002024470](docker-and-kubernetes-the-complete-guide.assets/image-20201211002024470.png)
 
+
+
+```ini
+version: '3'
+services:
+  postgres:
+    image: 'postgres:latest'
+  redis:
+    image: 'redis:latest'
+  api:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./server
+    volumes:
+      - /app/node_modules
+      - ./server:/app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PGUSER=postgres
+      - PGHOST=postgres
+      - PGDATABASE=postgres
+      - PGPASSWORD=postgres_password
+      - PGPORT=5432
+```
+
+
+
+
+
 ![image-20201211002058865](docker-and-kubernetes-the-complete-guide.assets/image-20201211002058865.png)
 
 Rebuild it again
@@ -2426,6 +2504,17 @@ e.g: server api:5000;
 
 
 ### 11. Building a Custom Nginx Image
+
+Go to docker hub check nginx
+
+nginx/Dockerfile
+
+```ini
+FROM nginx
+COPY ./default.conf /etc/nginx/conf.d/default.conf
+```
+
+
 
 ![image-20201211011536659](docker-and-kubernetes-the-complete-guide.assets/image-20201211011536659.png)
 
@@ -2480,7 +2569,7 @@ Test
 
 F12
 
-Essentially we're seeing this error message because any time our re-act application boots up in development
+Essentially we're seeing this error message because any time our react application boots up in development
 
 mode it wants to keep a active connection to the development server and be notified of any time that some file changes now.
 
@@ -2493,6 +2582,8 @@ which we can see by entering in a value to this input right here.
 
 
 ### 15. Opening Websocket Connections
+
+Add line 16->21
 
 ![image-20201211012741338](docker-and-kubernetes-the-complete-guide.assets/image-20201211012741338.png)
 
@@ -2509,7 +2600,7 @@ Run `docker-compose up` again
 ## 10. A Continuous Integration Workflow for Multiple Images
 ### 1. Production Multi-Container Deployments
 
-2
+
 
 ### 2. Production Dockerfiles
 ### 3. Multiple Nginx Instances
