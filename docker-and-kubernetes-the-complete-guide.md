@@ -3396,6 +3396,8 @@ Wait  a minutes
 ## 12. Onwards to Kubernetes!
 ### 1. The Why's and What's of Kubernetes
 
+D:\git-docs\docker\Source\Udemy - Docker and Kubernetes The Complete Guide\git repo\DockerCasts\diagrams\12
+
 ![image-20201211015210115](docker-and-kubernetes-the-complete-guide.assets/image-20201211015210115.png)
 
 We have 4 container running at the same time
@@ -3416,6 +3418,19 @@ What is behind the sence?
 
 ### 2. Kubernetes in Development and Production
 
+https://kubernetes.io/vi/docs/tasks/tools/install-minikube/
+
+https://kubernetes.io/docs/tutorials/kubernetes-basics/create-cluster/cluster-intro/
+
+
+
+A Kubernetes cluster consists of two types of resources:
+
+- The **Master** coordinates the cluster
+- **Nodes** are the workers that run applications
+
+
+
 ![image-20201211020410456](docker-and-kubernetes-the-complete-guide.assets/image-20201211020410456.png)
 
 Multiple container type
@@ -3428,25 +3443,490 @@ kubectl: is used for local and production
 
 ![image-20201211021029571](docker-and-kubernetes-the-complete-guide.assets/image-20201211021029571.png)
 
+**minikube** is a program that is used to create this virtual machine
 
+or this single node on your computer in order to interact with this thing.
+
+You and I are going to be using a program called **kubectl** is that program that is used to
+
+interact with a kubernetes cluster in general and manage what all the different nodes are doing and what
+
+different containers they are running so the reason I'm showing you this diagram right here is that
+
+we're going to start using a lot of different programs to work with kubernetes.
 
 
 
 ### 3. Setup on MacOS
+
+![image-20210116172522383](docker-and-kubernetes-the-complete-guide.assets/image-20210116172522383.png)
+
+https://brew.sh/
+
+```shell
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+
+
+
+
+![image-20210116172657512](docker-and-kubernetes-the-complete-guide.assets/image-20210116172657512.png)
+
+![image-20210116172809705](docker-and-kubernetes-the-complete-guide.assets/image-20210116172809705.png)
+
+
+
+![image-20210116172846781](docker-and-kubernetes-the-complete-guide.assets/image-20210116172846781.png)
+
+Now we install VirtualBox and install minikube
+
+![image-20210116172932754](docker-and-kubernetes-the-complete-guide.assets/image-20210116172932754.png)
+
+
+
+![image-20210116173019440](docker-and-kubernetes-the-complete-guide.assets/image-20210116173019440.png)
+
+
+
 ### 4. Setup on Linux.html
+
+These instructions were tested on a laptop with the desktop version of Linux Mint 19 Cinnamon installed. Current Ubuntu desktop version's setup should be the same. Your experience may vary if using an RHEL / Arch / Other distribution or non desktop distribution like Ubuntu server, or lightweight distributions which may omit many expected tools.
+
+
+
+#### **Install VirtualBox:**
+
+Find your Linux distribution and download the .deb package, using a graphical installer here should be sufficient. If you use a package manager like apt to install from your terminal, you will likely get a fairly out of date version.
+
+https://www.virtualbox.org/wiki/Linux_Downloads
+
+After installing, check your installation to make sure it worked:
+
+```
+VBoxManage —version
+```
+
+
+
+As an alternative you can use (or maybe you have to use) KVM instead of VirtualBox. Here are some great instructions that can be found in this post (Thanks to Nick L. for sharing):
+
+https://computingforgeeks.com/install-kvm-centos-rhel-ubuntu-debian-sles-arch/
+
+
+
+#### **Install Kubectl**
+
+In your terminal run the following:
+
+```
+curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+```
+
+
+
+Check your Installation:
+
+```
+kubectl version
+```
+
+
+
+See also official docs:
+https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-linux
+
+
+
+#### **Install Minikube**
+
+In your terminal run the following:
+
+```
+curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube
+sudo install minikube /usr/local/bin
+```
+
+
+
+Check your installation:
+
+```
+minikube version
+```
+
+
+
+Start Minikube:
+
+```
+minikube start
+```
+
+
+
+See also official docs:
+
+https://kubernetes.io/docs/tasks/tools/install-minikube/
+
 ### 5. Mapping Existing Knowledge
+
+![image-20210116173233937](docker-and-kubernetes-the-complete-guide.assets/image-20210116173233937.png)
+
+
+
+Short term goal
+
+![image-20210116173330540](docker-and-kubernetes-the-complete-guide.assets/image-20210116173330540.png)
+
+![image-20210116173426758](docker-and-kubernetes-the-complete-guide.assets/image-20210116173426758.png)
+
+See how docker-compose works 
+
+![image-20210116173714211](docker-and-kubernetes-the-complete-guide.assets/image-20210116173714211.png)
+
+diagram-14 slide 2
+
+![image-20210116173946495](docker-and-kubernetes-the-complete-guide.assets/image-20210116173946495.png)
+
+
+
+![image-20210116174752007](docker-and-kubernetes-the-complete-guide.assets/image-20210116174752007.png)
+
+D:\git-docs\docker\Source\Udemy - Docker and Kubernetes The Complete Guide\git repo\DockerCasts\simplek8s
+
+
+
 ### 6. Adding Configuration Files
+
+![image-20210116175420844](docker-and-kubernetes-the-complete-guide.assets/image-20210116175420844.png)
+
+
+
+client-pod.yaml
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client-pod
+  labels:
+    component: web
+spec:
+  containers:
+    - name: client
+      image: stephengrider/multi-worker
+      ports:
+        - containerPort: 9999
+
+```
+
+I want to open up for connecting to from the outside world.
+
+Just as we did before over inside of our docker compose file going to have a single entry here and I'll
+
+say container port is 3000 like so I guess that's our first configuration file.
+
+
+
+client-node-port.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-node-port
+spec:
+  type: NodePort
+  ports:
+    - port: 3050
+      targetPort: 3000
+      nodePort: 31515
+  selector:
+    component: web
+
+```
+
+
+
 ### 7. Object Types and API Versions
+
+D:\git-docs\docker\Source\Udemy - Docker and Kubernetes The Complete Guide\git repo\DockerCasts\diagrams\12
+
+![image-20210116180149077](docker-and-kubernetes-the-complete-guide.assets/image-20210116180149077.png)
+
+![image-20210116180203383](docker-and-kubernetes-the-complete-guide.assets/image-20210116180203383.png)
+
+![image-20210116180210870](docker-and-kubernetes-the-complete-guide.assets/image-20210116180210870.png)
+
+Pod is object is used to run container
+
+Service => set up networking
+
+![image-20210116180547216](docker-and-kubernetes-the-complete-guide.assets/image-20210116180547216.png)
+
+
+
+
+
 ### 8. Running Containers in Pods
+
+![image-20210116180912858](docker-and-kubernetes-the-complete-guide.assets/image-20210116180912858.png)
+
+Create a pod in virtual machine 
+
+So the requirement of a POD is that we must run one or more containers inside of it.
+
+Now when I say one or more containers you might very quickly Think back to the multi container application
+
+that we put together as well as pull up a quick diagram of that thing.
+
+> The purpose of a POD is meant to group it.
+>
+> It is the purpose of a POD is to allow that grouping of containers with a very similar purpose or containers
+>
+> that absolutely positively must be deployed together and must be running together in order for application
+>
+> to work correctly.
+
+![image-20210116181453047](docker-and-kubernetes-the-complete-guide.assets/image-20210116181453047.png)
+
+If you remove one of it => still work 
+
+e.g
+
+![image-20210116181558233](docker-and-kubernetes-the-complete-guide.assets/image-20210116181558233.png)
+
+If the postgres container goes away the logger 100 percent worthless.
+
+No two ways about it.
+
+The logger is completely useless at that point in time.
+
+
+
+We're going to give that container an arbitrary **name** of client the name of and right here is for our
+
+purposes largely going to be related to logging and giving us the ability to reference this running
+
+container.
+
+But if we were running other containers inside of here as well we could also use this **name** property
+
+to get some networking or connections between these different containers that are running inside the
+
+single pod.
+
+The **image** property. That's the name of the image or the repository on docker hub that this container is going to be
+
+container ports: that on this container there we're going to create we want to expose port three thousand to the outside
+
+
+
 ### 9. Service Config Files in Depth
+
+Now very quickly on **metadata** the **name** is pretty much what you would expect it's going to name the pod
+
+that gets created.
+
+And this is mostly used for a lot of logging purposes.
+
+Now the other piece of information inside of metadata is **labels** right here with component web.
+
+And that's very tightly coupled to the other config file that we're going to start to discuss right
+
+now.
+
+So in this section we're going to focus on the second config file we put together the one with a kind of service.
+
+So let's talk about what's going on inside here.
+
+diagrams 13
+
+![image-20210116182804849](docker-and-kubernetes-the-complete-guide.assets/image-20210116182804849.png)
+
+
+
+![image-20210116182920568](docker-and-kubernetes-the-complete-guide.assets/image-20210116182920568.png)
+
+4 subtypes
+
+```ini
+spec:
+  type: NodePort
+```
+
+The purpose of the node port service is to expose a container to the outside world or in other words
+
+to be able to allow you like you as a developer on your computer to open up your web browser and access
+
+that running container a node port service is only good for development purposes.
+
+And we do not use node port as a service type in site of production environments outside of one or two
+
+very specific exceptions.
+
+![image-20210116183459835](docker-and-kubernetes-the-complete-guide.assets/image-20210116183459835.png)
+
+Now one show you a series of diagrams to give you a better idea of what this service is doing for us.
+
+its proxy is going to inspect the request and decide how to route it to different services or different
+
+pods that we may have created inside of this note.
+
+![image-20210116183730193](docker-and-kubernetes-the-complete-guide.assets/image-20210116183730193.png)
+
+![image-20210116184109079](docker-and-kubernetes-the-complete-guide.assets/image-20210116184109079.png)
+
+![image-20210116185301585](docker-and-kubernetes-the-complete-guide.assets/image-20210116185301585.png)
 
 
 
 ### 10. Connecting to Running Containers
 
+diagrams 12 - 18
+
+![image-20210116185351261](docker-and-kubernetes-the-complete-guide.assets/image-20210116185351261.png)
+
+![image-20210116185655421](docker-and-kubernetes-the-complete-guide.assets/image-20210116185655421.png)
+
+
+
+![image-20210116185711672](docker-and-kubernetes-the-complete-guide.assets/image-20210116185711672.png)
+
+> Nếu là pods thì thay `services = pods`
+
+![image-20210116190028406](docker-and-kubernetes-the-complete-guide.assets/image-20210116190028406.png)
+
+
+
+`1/1` So the first number right here is the number of pods that are running.
+
+And the second number is the number of copies that we want to have.
+
+As we start to scale our application we might want to have multiple copies of the exact same pod running.
+
+And so when that happens you would expect to see one right here change to two three four five whatever
+
+it might be.
+
+We then see that the status is running.
+
+
+
+> Access to localhost:35151 => not work
+
+![image-20210116190247607](docker-and-kubernetes-the-complete-guide.assets/image-20210116190247607.png)
+
+
+
+![image-20210116190350717](docker-and-kubernetes-the-complete-guide.assets/image-20210116190350717.png)
+
+ask minikube to get ip
+
+![image-20210116192301890](docker-and-kubernetes-the-complete-guide.assets/image-20210116192301890.png)
+
+
+
 ### 11. The Entire Deployment Flow
 
+D:\git-docs\docker\Source\Udemy - Docker and Kubernetes The Complete Guide\git repo\DockerCasts\diagrams\10
+
+10 - 8
+
+![image-20210116192434332](docker-and-kubernetes-the-complete-guide.assets/image-20210116192434332.png)
+
+Copy container id
+
+![image-20210116192618326](docker-and-kubernetes-the-complete-guide.assets/image-20210116192618326.png)
+
+![image-20210116192652092](docker-and-kubernetes-the-complete-guide.assets/image-20210116192652092.png)
+
+![image-20210116192728086](docker-and-kubernetes-the-complete-guide.assets/image-20210116192728086.png)
+
+Restart change to 1 => auto restart for us
+
+![image-20210116192836905](docker-and-kubernetes-the-complete-guide.assets/image-20210116192836905.png)
+
+It's going to reach out to docker hub and it's going to find the multi worker image right here.
+
+It's going to copy or download that image and store it on some local image cache inside each It's these
+
+notes.
+
+4 pods
+
+
+
+You see the master is always continuously pulling each of these different notes.
+
+It's watching every single one.
+
+And any time that something happens inside one of these nodes the master gets all notification so we
+
+can kind of imagine that when I ran `docker kill` and then I killed that container we can imagine that one
+
+of these containers essentially fell away like so.
+
+So the Master then got a little notification that said hey little issue here.
+
+One of our containers just up and died completely gone.
+
+And so the master very temporarily updated its little list of responsibilities to say OK I need four
+
+copies of multi worker but I now have three copies running. => using image to create container
+
+
+
+So the big lesson here is that you and I as developers work with this master you and I do not work directly
+
+with the notes over here.
+
+In other words you and I are never going to reach into a node with some serious commands and attempt
+
+to manually start a container inside of one of them.
+
+Instead we're always going to use the kubernetes command line tool which is going to send all of our
+
+commands off to the master.
+
+It's then up to the master and the different programs that are running inside this thing to reach out
+
+to some appropriate node and create the appropriate container or essentially update the state I mean
+
+update the appropriate or update the appropriate note.
+
+It's up to the master to reach out to some node and tell it to do some amount of work to fulfill the
+
+master's little list of responsibilities.
+
+The next big thing to take notice of is that the master is **always watching** each of these different notes
+
+and each time that some container or some object for that matter runs into some issue the master is
+
+going to automatically attempt to recreate that object inside of some given note until it's list of
+
+responsibilities is 100 percent balanced out.
+
 ### 12. Imperative vs Declarative Deployments
+
+![image-20210116194605148](docker-and-kubernetes-the-complete-guide.assets/image-20210116194605148.png)
+
+![image-20210116194855647](docker-and-kubernetes-the-complete-guide.assets/image-20210116194855647.png)
+
+![image-20210116195011143](docker-and-kubernetes-the-complete-guide.assets/image-20210116195011143.png)
+
+![image-20210116195145275](docker-and-kubernetes-the-complete-guide.assets/image-20210116195145275.png)
+
+![image-20210116195338340](docker-and-kubernetes-the-complete-guide.assets/image-20210116195338340.png)
+
+![image-20210116195512267](docker-and-kubernetes-the-complete-guide.assets/image-20210116195512267.png)
+
+![image-20210116195544780](docker-and-kubernetes-the-complete-guide.assets/image-20210116195544780.png)
+
+
 
 ## 13. Maintaining Sets of Containers with Deployments
 ### 1. Updating Existing Objects
