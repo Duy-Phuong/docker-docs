@@ -4796,7 +4796,7 @@ volumes exist outside host machine
 
 replicas là 2 => dùng chung volumes => same problems
 
-Now I want you to recall that I told you yeah we can set up postscripts to have like some amount of
+Now I want you to recall that I told you yeah we can set up postgres to have like some amount of
 replication or a clustering that's going to improve the availability and performance of our database
 just to make sure it's really clear.
 If we just like bump that up to replicas like to right there we would end up with a situation like this
@@ -4923,7 +4923,7 @@ I want you to also do a `kubectl. describe storageclass` as well and you'll see 
 about that option right there.
 So when you do so it tells you in very broad terms.
 Yes we have a provision for it that is minikube hostpath minikube hosts path means exactly what
-we saw over here minikube hostpath means that when we ask Kuber Nettie's to create this persistent volume
+we saw over here minikube hostpath means that when we ask Kubernetes to create this persistent volume
 it's going to look on the host machine to minikube hostpath And it's going to make a little slice of space on your
 personal harddrive.
 
@@ -4935,70 +4935,769 @@ And we did not designate that option because we are relying upon the default.
 And like I just said the default for us is to create a little slice on our hard drive to use for this
 persistent volume.
 But when you put your application up to kubernetes on Google Cloud or AWS the standard option is
-not going to be minikube/hostpath.
+not going to be minikube-hostpath.
 
 ### 22. Designating a PVC in a Pod Template
 
+```ini
+  template:
+    metadata:
+      labels:
+        component: postgres
+    spec:
+    # ----------  add start
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+          # name from claim
+            claimName: database-persistent-volume-claim
+    # ----------  add end
+      containers:
+        - name: postgres
+          image: postgres
+          ports:
+            - containerPort: 5432
+          # add
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+              subPath: postgres
+```
+
+OK so this right here is what sets up the request on the pod to reach out to kubernetes and say I
+need some type of long term storage that meets all the requirements that are laid out inside of this
+database persistent volume claim object.
+And that's what we had just put together over here.
+So this line alone is what's going to make companies realize that it needs to go over to either the
+local hard drive.
+
+
+
+**volumeMounts** and volumes above are identical
+
+We're then going to put in a mount path the Mount path is designating where inside the container.
+This story should be made available.
+So in other words you're going to put in a little folder reference right here and then anything that
+the container stores at that folder are inside that directory will be actually stored inside of our
+volume number.
+
+This is at the end of the day pretty darn similar to the docker volume.
+
+So if this was just a normal application where we're just trying to set up some persistent storage that's
+really all we have to do both postgres postgres in particular we're going to put in one additional
+little option here.
+So as an additional option I'm going to also put in sub path is postgres like so the path option
+means that any data inside the container that is stored inside of Mt path is going to be stored inside
+a folder called `postgres` inside of the actual persistent volume claim.
+So if we ran our application for some amount of time and then saved some data to our `postgres` state
+base and then eventually opened up our persistent volume we would see that all the data that was saved
+to this folder is nested inside of a folder called postgres inside the persistent volume.
+
 ### 23. Applying a PVC
+
+![image-20210117092539885](docker-and-kubernetes-the-complete-guide.assets/image-20210117092539885.png)
+
+
+
+![image-20210117092610857](docker-and-kubernetes-the-complete-guide.assets/image-20210117092610857.png)
+
+![image-20210117092716579](docker-and-kubernetes-the-complete-guide.assets/image-20210117092716579.png)
+
+
+
+
 
 ### 24. Defining Environment Variables
 
+15-25
+
+![image-20210117093214028](docker-and-kubernetes-the-complete-guide.assets/image-20210117093214028.png)
+
+![image-20210117093304924](docker-and-kubernetes-the-complete-guide.assets/image-20210117093304924.png)
+
+
+
+> Yellow: consistence constant value
+>
+> So the two host values these are also going to be constant values that do not need to change over time
+> or anything like that.
+> But I want to remind you about the purpose of the host environment variables.
+> These are essentially URL of sorts that are going to tell multi worker and multi server how
+> to connect to read us and postscripts in the first place.
+
+how we can tell multi worker to connect over to this rightest pod somehow through
+
+this cluster IP service and we're going to do this by providing a value to the host environment variable.
+
+![image-20210117093651347](docker-and-kubernetes-the-complete-guide.assets/image-20210117093651347.png)
+
+![image-20210117093738027](docker-and-kubernetes-the-complete-guide.assets/image-20210117093738027.png)
+
+In file redis-cluster-ip-service.yaml we had specified the name for IP service
+
+
+
+
+
+
+
 ### 25. Adding Environment Variables to Config
 
+worker-deployment.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: worker
+  template:
+    metadata:
+      labels:
+        component: worker
+    spec:
+      containers:
+        - name: worker
+          image: stephengrider/multi-worker
+          env:
+            - name: REDIS_HOST
+              value: redis-cluster-ip-service
+            - name: REDIS_PORT
+              value: '6379'
+```
+
+Add env: value of host get from cluster ip configuration file
+
+server-deployment.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      component: server
+  template:
+    metadata:
+      labels:
+        component: server
+    spec:
+      containers:
+        - name: server
+          image: stephengrider/multi-server
+          ports:
+            - containerPort: 5000
+          # add
+          env:
+            - name: REDIS_HOST
+              value: redis-cluster-ip-service
+            - name: REDIS_PORT
+              value: '6379'
+            - name: PGUSER
+              value: postgres
+            - name: PGHOST
+              value: postgres-cluster-ip-service
+            - name: PGPORT
+              value: '5432'
+            - name: PGDATABASE
+              value: postgres
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgpassword
+                  key: PGPASSWORD
+
+```
+
+
+
+
+
 ### 26. Creating an Encoded Secret
+
+15-28
+
+![image-20210117094932287](docker-and-kubernetes-the-complete-guide.assets/image-20210117094932287.png)
+
+![image-20210117095244703](docker-and-kubernetes-the-complete-guide.assets/image-20210117095244703.png)
+
+type of secret: `docker-registry` or `tls`
+
+tls is relevant to https set up
+
+![image-20210117095833925](docker-and-kubernetes-the-complete-guide.assets/image-20210117095833925.png)
+
+server and postgres file add
+
+```yaml
+# PGPASSWORD in the first line can be anything but server is looking for PGPASSWORD => we set PGPASSWORD
+           - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgpassword
+                  key: PGPASSWORD # map to command
+```
+
+![image-20210117100319934](docker-and-kubernetes-the-complete-guide.assets/image-20210117100319934.png)
+
+Now you can see some error like:
+
+![image-20210117100339918](docker-and-kubernetes-the-complete-guide.assets/image-20210117100339918.png)
+
+
+
+
 
 ### 27. Passing Secrets as Environment Variables
 
 ### 28. Environment Variables as Strings
 
+We're seeing this message right here because inside of our server deployment file and our worker as
+well.
+We provided some environment variables as integers.
+So right here our reddest port has a integer value are essentially a number as 6 3 7 9.
+And that report is 5 4 3 2.
+
+=> Thay trong server and worker env port number to string to fix:  `6379` -> `'6379'`
+
+![image-20210117100735824](docker-and-kubernetes-the-complete-guide.assets/image-20210117100735824.png)
+
 ## 15. Handling Traffic with Ingress Controllers
 ### 1. Load Balancer Services
-### 10. Testing Ingress Locally
-### 11. The Minikube Dashboard
+
+![image-20210117100939915](docker-and-kubernetes-the-complete-guide.assets/image-20210117100939915.png)
+
+Traffic
+
+![image-20210117101052433](docker-and-kubernetes-the-complete-guide.assets/image-20210117101052433.png)
+
+![image-20210117101139281](docker-and-kubernetes-the-complete-guide.assets/image-20210117101139281.png)
+
+We would make a configuration file of type service and a subtype of load balancer.
+When you set that up you're going to essentially allow access to one specific set of pods inside of
+your application.
+Remember the goal of a service is to kind of manage access or provide networking to reach a set of pots.
+And so a load balancer only is going to give you access to one set of pots.
+In our case our application has to set 2 of pods we want to exposed to the outside world which is 100
+percent common.
+Your application might need to have a very similar type of setup.
+So a **load balancer** would not be able to give us access to both the multi server set and the multi client
+as well.
+
+
+
+It's going to reach out to your cloud provider so be it.
+AWS or Google Cloud or whoever else you might be using and it's going to create a load balancer using
+their configuration or definition of what a load balancer is.
+So the AWS world you might get a **classic load balancer or an application load balancer**.
+There's one other third kind of load balancer that escapes me out of my head as well.
+kubernetes is going to tell AWS hey I need like a.
+Application load balance or a classic load balancer.
+So it's going to set up this external resource outside of your cluster and then it's going to automatically
+configure that load balancer to send traffic into your cluster and access the load balancer service
+that has been set up to govern access to this very specific set of pots.
+So that's what a load balancer does.
+
+
+
+
+
 ### 2. A Quick Note on Ingresses
+
+![image-20210117101915507](docker-and-kubernetes-the-complete-guide.assets/image-20210117101915507.png)
+
+![image-20210117102006456](docker-and-kubernetes-the-complete-guide.assets/image-20210117102006456.png)
+
+Use ngin ingress
+
+![image-20210117102035415](docker-and-kubernetes-the-complete-guide.assets/image-20210117102035415.png)
+
+totally separate
+
+
+
+
+
 ### 3. One Other Quick Note!
+
+![image-20210117102339087](docker-and-kubernetes-the-complete-guide.assets/image-20210117102339087.png)
+
+google cloud
+
+
+
 ### 4. Behind the Scenes of Ingress
+
+![image-20210117102518798](docker-and-kubernetes-the-complete-guide.assets/image-20210117102518798.png)
+
+And the reason I'm giving you this reminder about how all this stuff works is that this deployment object
+
+right here is what we refer to as a type of controller in kubernetes a controller is any type of
+
+object that constantly works to make some desired state a reality inside of our cluster.
+
+it is a controller.
+It is something that's going to look at our current state.
+It's going to look at the desired state and then create some infrastructure that's going to make our
+desired state a reality.
+So in the case of our particular ingress controller which is as you might guess using NGINX behind
+the scenes when we feed in this config file the controller is going to create a pod running NGINX.
+That's going to have a very particular set of rules to make sure that traffic comes in and gets sent
+off to the appropriate different services inside of our cluster.
+So you can kind of think that this entire setup around ingress looks a little something like this.
+
+![image-20210117103042824](docker-and-kubernetes-the-complete-guide.assets/image-20210117103042824.png)
+
+
+
+We have our ingress config over here which is our config file that describes all the routing rules that
+we want to have inside of our application that's going to be fed into kubernetes where an ingress
+controller is going to be constantly working behind the scenes to make sure that all of the routing
+rules that we define inside the ingress config are actually implemented and met.
+
+![image-20210117103256454](docker-and-kubernetes-the-complete-guide.assets/image-20210117103256454.png)
+
+
+
+
+
 ### 5. More Behind the Scenes of Ingress
+
+![image-20210117103644993](docker-and-kubernetes-the-complete-guide.assets/image-20210117103644993.png)
+
+This config is going to be fed into a deployment that is running both our controller at the ingress
+
+https://cloud.google.com/load-balancing
+
+Well behind the scenes on Google Cloud at the load balancer service is still being used and you wouldn't
+quite know it unless you actually looked at some of the source code or config files that set all this
+stuff up.
+So incoming traffic will come to the Google Cloud load balancer that load balancer is going to send
+that traffic to a load balancer service inside the cluster which is going to eventually get that traffic
+in to the `nginx pod` that gets created by our ingress controller.
+It's then up to that nginx pod to eventually send that traffic off to the appropriate service inside
+of our application other the multi client or the multi server.
+
+the default back end is used for a series of health checks to essentially make sure that your cluster
+
+is working the way that it should be working.
+
+![image-20210117104327683](docker-and-kubernetes-the-complete-guide.assets/image-20210117104327683.png)
+
+
+
+**NGINX example:**
+
+NGINX project is not actually going to send traffic over to the cluster IPs service and allow that to do some amount of load balancing.
+
+Instead the cluster IP service does still exist and it still is working to essentially keep track of
+all these different ports.
+But that's how we get a in-coming request to the next pod right here the nginx pod is going to actually
+route the request directly to one of these different parts completely **bypassing** that cluster IP service.
+The reason that this is done is to allow for features like say sticky sessions which is a reference
+to the fact that we sometimes want to make sure that if one user sent to request our application we
+want to make sure that both those requests go to the exact same server.
+And there's some cases where that feature is extremely handy and actually a 100 percent necessary to
+have.
+So that's just one example of why we were making use of this ingress nginX project as opposed to
+kind of doing our own build it yourself solution.
+
+
+
 ### 6. Optional Reading on Ingress Nginx.html
+
+Just in case you wanted to understand ingress-nginx a bit better, check out this article by Hongli Lai - https://www.joyfulbikeshedding.com/blog/2018-03-26-studying-the-kubernetes-ingress-system.html. Hongli is an absolute genius, he co-created Phusion Passenger, an extremely popular webserver that integrates with Nginx.
+
+
+
 ### 7. Setting up Ingress Locally
+
+https://github.com/kubernetes/ingress-nginx
+
+=> https://kubernetes.github.io/ingress-nginx/deploy/
+
+>  mandatory command is removed??
+
+![image-20210117112530491](docker-and-kubernetes-the-complete-guide.assets/image-20210117112530491.png)
+
+#### minikube[-](https://kubernetes.github.io/ingress-nginx/deploy/#minikube)
+
+For standard usage:
+
+```
+minikube addons enable ingress
+```
+
+#### GCE_GKE
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.43.0/deploy/static/provider/cloud/deploy.yaml
+```
+
+google cloud => go to file above to see load blancer
+
+
+
 ### 8. Creating the Ingress Configuration
+
+![image-20210117112933107](docker-and-kubernetes-the-complete-guide.assets/image-20210117112933107.png)
+
+
+
+ingress-service.yaml
+
+```yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-service
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1 # remove /api
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /?(.*)
+            backend:
+              serviceName: client-cluster-ip-service
+              servicePort: 3000
+          - path: /api/?(.*)
+            backend:
+              serviceName: server-cluster-ip-service
+              servicePort: 5000
+
+```
+
+![image-20210117113401566](docker-and-kubernetes-the-complete-guide.assets/image-20210117113401566.png)
+
 ### 9. Fix for ingress-service.yaml Configuration.html
+
+In the previous lecture we created our ingress-service.yaml configuration file. There has recently been an update to how we need to specify some of these rules.
+
+Three lines need to be changed - the annotation of rewrite-target and the two path identifiers:
+
+```yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-service
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    # UPDATE THIS LINE ABOVE
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /?(.*)
+          # UPDATE THIS LINE ABOVE
+            backend:
+              serviceName: client-cluster-ip-service
+              servicePort: 3000
+          - path: /api/?(.*)
+          # UPDATE THIS LINE ABOVE
+            backend:
+              serviceName: server-cluster-ip-service
+              servicePort: 5000
+```
+
+### 10. Testing Ingress Locally
+
+![image-20210117113535824](docker-and-kubernetes-the-complete-guide.assets/image-20210117113535824.png)
+
+=> 192.168.99.100:31515
+
+
+
+security issue on the url with https => forces use https 
+
+
+
+### 11. The Minikube Dashboard
+
+![image-20210117113855260](docker-and-kubernetes-the-complete-guide.assets/image-20210117113855260.png)
+
+![image-20210117113922029](docker-and-kubernetes-the-complete-guide.assets/image-20210117113922029.png)
+
+> if you make changes on the dashboard they do not get somehow persisted back over to the folders
+>
+> and files that we've created inside of our project directory.
+
 ## 16. Kubernetes Production Deployment
 ### 1. The Deployment Process
-### 10. Don't Forget to Cleanup!.html
-### 11. Kubernetes Dashboard on Google Cloud
-### 12. Travis Deployment Overview
-### 13. Installing the Google Cloud SDK
-### 14. Generating a Service Account
-### 15. Running Travis CLI in a Container
-### 16. Encrypting a Service Account File
-### 17. More Google Cloud CLI Config
-### 18. Running Tests with Travis
-### 19. Custom Deployment Providers
+
+16
+
+![image-20210117115015058](docker-and-kubernetes-the-complete-guide.assets/image-20210117115015058.png)
+
+gg: google cloud cost calculator
+
+[Google Cloud Platform Pricing Calculator](https://cloud.google.com/products/calculator/?utm_source=google&utm_medium=cpc&utm_campaign=japac-VN-all-en-dr-bkws-all-all-trial-e-dr-1009882&utm_content=text-ad-none-none-DEV_c-CRE_248037466737-ADGP_Hybrid | AW SEM | BKWS ~ T1 | EXA | General | M%3A1 | VN | en | calculator | pricing-KWID_43700029827987824-kwd-166601605930&userloc_1028581-network_g&utm_term=KW_google cloud cost calculator&gclid=CjwKCAiAuoqABhAsEiwAdSkVVDoBOW1LWSZZitwq4BzUBzdto0FM5edwY4mU8t5WNBi7h4E0z4ql3hoC0KgQAvD_BwE)
+
+tab kubernetes
+
+
+
+
+
 ### 2. Google Cloud vs AWS for Kubernetes
-### 20. Unique Deployment Images
-### 21. Unique Tags for Built Images
-### 22. Updating the Deployment Script
-### 23. Configuring the GCloud CLI on Cloud Console
-### 24. Creating a Secret on Google Cloud
-### 25. Helm Setup
-### 26. Kubernetes Security with RBAC
-### 27. Assigning Tiller a Service Account
-### 28. Ingress-Nginx with Helm
-### 29. The Result of Ingress-Nginx
+
+![image-20210117115845282](docker-and-kubernetes-the-complete-guide.assets/image-20210117115845282.png)
+
+
+
+
+
+
+
 ### 3. Creating a Git Repo
-### 30. Finally - Deployment!
-### 31. Did I Really Type That
-### 32. Verifying Deployment
-### 33. A Workflow for Changing in Prod
-### 34. Merging a PR for Deployment
-### 35. That's It!  What's Next
+
+Create new repo
+
+![image-20210117120358951](docker-and-kubernetes-the-complete-guide.assets/image-20210117120358951.png)
+
+![image-20210117120506135](docker-and-kubernetes-the-complete-guide.assets/image-20210117120506135.png)
+
+
+
+
+
+
+
+
 ### 4. Linking the Github Repo to Travis
+
+![image-20210117120702649](docker-and-kubernetes-the-complete-guide.assets/image-20210117120702649.png)
+
+![image-20210117120848721](docker-and-kubernetes-the-complete-guide.assets/image-20210117120848721.png)
+
+
 ### 5. Free Google Cloud Credits.html
+
+In the next section we are going to start creating our project on Google Cloud.
+
+Remember, creating Kubernetes clusters on Google Cloud costs real money! If you are sensitive to spending money, you can try getting some free Google Cloud credits using this link: https://console.cloud.google.com/freetrial/signup/0. *Note that if you already have a Google Cloud account you will have to sign out of it and create a new account in order to get those free credits.*
+
 ### 6. Creating a Google Cloud Project
+
+Go to
+
+![image-20210117121106170](docker-and-kubernetes-the-complete-guide.assets/image-20210117121106170.png)
+
+![image-20210117121202540](docker-and-kubernetes-the-complete-guide.assets/image-20210117121202540.png)
+
+Click on the dropdown
+
+
+
+
+
 ### 7. Linking a Billing Account
+
+
+
+![image-20210117121337611](docker-and-kubernetes-the-complete-guide.assets/image-20210117121337611.png)
+
+![image-20210117121409158](docker-and-kubernetes-the-complete-guide.assets/image-20210117121409158.png)
+
+![image-20210117121504207](docker-and-kubernetes-the-complete-guide.assets/image-20210117121504207.png)
+
+![image-20210117121554088](docker-and-kubernetes-the-complete-guide.assets/image-20210117121554088.png)
+
+![image-20210117121625497](docker-and-kubernetes-the-complete-guide.assets/image-20210117121625497.png)
+
+
+
 ### 8. Kubernetes Engine Init
+
+![image-20210117121848473](docker-and-kubernetes-the-complete-guide.assets/image-20210117121848473.png)
+
+![image-20210117122016144](docker-and-kubernetes-the-complete-guide.assets/image-20210117122016144.png)
+
+Have spiner => ok
+
+
+
 ### 9. Creating a Cluster with Google Cloud
+
+![image-20210117122109599](docker-and-kubernetes-the-complete-guide.assets/image-20210117122109599.png)
+
+
+
+![image-20210117122444951](docker-and-kubernetes-the-complete-guide.assets/image-20210117122444951.png)
+
+I recommend that you select a zone close to wherever you are trying to serve traffic to or alternatively
+
+just to that zone that is close to your geographic location.
+
+
+
+![image-20210117122633271](docker-and-kubernetes-the-complete-guide.assets/image-20210117122633271.png)
+
+
+
+
+
+### 10. Don't Forget to Cleanup!.html
+
+**Remember, as long as this cluster is running you will be billed real life money!**
+
+**If you need to stop the course for \*any reason\* remember to shut down this cluster.** Directions for cleaning up the Google Cloud cluster can be found in a lecture at the very end of this course. Here's a direct link to it: [**https://www.udemy.com/docker-and-kubernetes-the-complete-guide/learn/v4/t/lecture/11684242?start=0**](https://www.udemy.com/docker-and-kubernetes-the-complete-guide/learn/v4/t/lecture/11684242?start=0)
+
+
+
+### 11. Kubernetes Dashboard on Google Cloud
+
+![image-20210117130113109](docker-and-kubernetes-the-complete-guide.assets/image-20210117130113109.png)
+
+You can check out **workloads** right here.
+This is going to be a page that's going to eventually show all the different pods and deployments that
+are along to our application.
+At present we have nothing running on our cluster.
+So this window is completely empty.
+We then have the **services** tab as you might guess this is all about different services that we create
+inside of our cluster like the cluster IP service or a load balancer if we create one or the node for
+services all that kind of stuff.
+You're going to see eventually show up on the services tab.
+
+Now **applications** right here is really talking about different kinds of plug ins so we can install and
+make use of inside of our cluster.
+So this is not talking about different pods or deployments so we're running this is talking about some
+third party software that might run inside of our cluster.
+We're not going to make use of any third party stuff.
+So we are going to generally ignore the Applications tab.
+The **configuration** is going to show all the different environment variables or secrets that we set up
+inside of our cluster.
+You'll recall that we have one secret in use right now which stores our postscripts password.
+So eventually we're going to see that secret appear on the configuration tab.
+Then finally **storage** is going to list all the different persistent volumes and persistent volumes claims
+that are set up inside of our cluster.
+
+![image-20210117130434890](docker-and-kubernetes-the-complete-guide.assets/image-20210117130434890.png)
+
+![image-20210117130542424](docker-and-kubernetes-the-complete-guide.assets/image-20210117130542424.png)
+
+see storage class
+
+
+
+
+
+
+
+### 12. Travis Deployment Overview
+
+![image-20210117135417488](docker-and-kubernetes-the-complete-guide.assets/image-20210117135417488.png)
+
+
+
+### 13. Installing the Google Cloud SDK
+
+.travis.yml
+
+```yaml
+sudo: required
+services:
+  - docker
+before_install:
+  - curl https://sdk.cloud.google.com | bash > /dev/null;
+  - source $HOME/google-cloud-sdk/path.bash.inc
+  - gcloud components update kubectl
+  - gcloud auth activate-service-account --key-file service-account.json
+
+```
+
+So this right here is going to look at the default install directory of Google Cloud SDK which is again
+by default at home.
+Google Cloud SDK and it's going to source the file `path.bash.inc`.
+Essentially that just means that there is some configuration that's going to modify our shell inside
+of Travis CI inside this file and we're going to apply that additional configuration through the
+source command.
+Again these two lines configuration right here kind of something that you would look up ahead of time
+and just be told hey run these two commands.
+And it's going to set up Google Cloud locally on your machine for you.
+OK so then after we install this thing we're going to make sure that Google Cloud or the Selye is going
+to also install the kubectl command the same one that you and I have been using throughout this
+course to manipulate our communities cluster to do so.
+
+
+
+### 14. Generating a Service Account
+
+![image-20210117140620171](docker-and-kubernetes-the-complete-guide.assets/image-20210117140620171.png)
+
+![image-20210117140922769](docker-and-kubernetes-the-complete-guide.assets/image-20210117140922769.png)
+
+![image-20210117141027343](docker-and-kubernetes-the-complete-guide.assets/image-20210117141027343.png)
+
+
+
+![image-20210117141203343](docker-and-kubernetes-the-complete-guide.assets/image-20210117141203343.png)
+
+![image-20210117141248467](docker-and-kubernetes-the-complete-guide.assets/image-20210117141248467.png)
+
+
+
+=> download file va k commit key to git
+
+
+
+
+
+### 15. Running Travis CLI in a Container
+
+
+
+### 16. Encrypting a Service Account File
+
+### 17. More Google Cloud CLI Config
+
+### 18. Running Tests with Travis
+
+### 19. Custom Deployment Providers
+
+### 20. Unique Deployment Images
+
+### 21. Unique Tags for Built Images
+
+### 22. Updating the Deployment Script
+
+### 23. Configuring the GCloud CLI on Cloud Console
+
+### 24. Creating a Secret on Google Cloud
+
+### 25. Helm Setup
+
+### 26. Kubernetes Security with RBAC
+
+### 27. Assigning Tiller a Service Account
+
+### 28. Ingress-Nginx with Helm
+
+### 29. The Result of Ingress-Nginx
+
+
+
+### 30. Finally - Deployment!
+
+### 31. Did I Really Type That
+
+### 32. Verifying Deployment
+
+### 33. A Workflow for Changing in Prod
+
+### 34. Merging a PR for Deployment
+
+### 35. That's It!  What's Next
+
 ## 17. HTTPS Setup with Kubernetes
 ### 1. HTTPS Setup Overview
 ### 10. Ingress Config for HTTPS
