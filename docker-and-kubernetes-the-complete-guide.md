@@ -5654,45 +5654,473 @@ course to manipulate our communities cluster to do so.
 
 ### 15. Running Travis CLI in a Container
 
+![image-20210117154359303](docker-and-kubernetes-the-complete-guide.assets/image-20210117154359303.png)
+
+install ruby by docker
+
+![image-20210117154528256](docker-and-kubernetes-the-complete-guide.assets/image-20210117154528256.png)
+
+![image-20210117160922899](docker-and-kubernetes-the-complete-guide.assets/image-20210117160922899.png)
+
+![image-20210117161637536](docker-and-kubernetes-the-complete-guide.assets/image-20210117161637536.png)
+
+Windows thì thay dấu () => {}
+
+![image-20210117161731720](docker-and-kubernetes-the-complete-guide.assets/image-20210117161731720.png)
+
+![image-20210117161953827](docker-and-kubernetes-the-complete-guide.assets/image-20210117161953827.png)
+
+![image-20210117162130169](docker-and-kubernetes-the-complete-guide.assets/image-20210117162130169.png)
+
+Copy and rename
+
+![image-20210117162308341](docker-and-kubernetes-the-complete-guide.assets/image-20210117162308341.png)
+
+![image-20210117162408301](docker-and-kubernetes-the-complete-guide.assets/image-20210117162408301.png)
+
+![image-20210117162521834](docker-and-kubernetes-the-complete-guide.assets/image-20210117162521834.png)
+
+Change location, notice that Github name is case sensitive
+
+![image-20210117163834922](docker-and-kubernetes-the-complete-guide.assets/image-20210117163834922.png)
+
+You must add this command to yaml file
+
+![image-20210117164342630](docker-and-kubernetes-the-complete-guide.assets/image-20210117164342630.png)
+
+![image-20210117164523777](docker-and-kubernetes-the-complete-guide.assets/image-20210117164523777.png)
+
+-> use this file service-account.json.enc
+
+![image-20210117164612196](docker-and-kubernetes-the-complete-guide.assets/image-20210117164612196.png)
+
+
+
+
+
 
 
 ### 16. Encrypting a Service Account File
 
+
+
 ### 17. More Google Cloud CLI Config
+
+![image-20210117165119861](docker-and-kubernetes-the-complete-guide.assets/image-20210117165119861.png)
+
+![image-20210117165652139](docker-and-kubernetes-the-complete-guide.assets/image-20210117165652139.png)
+
+![image-20210117170004040](docker-and-kubernetes-the-complete-guide.assets/image-20210117170004040.png)
+
+Copy us-central-a và lấy get-credentials=`multi-cluster` like above
+
+travis.yml
+
+```yaml
+sudo: required
+services:
+  - docker
+env:
+  global:
+    - SHA=$(git rev-parse HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+before_install:
+  # add
+  - openssl aes-256-cbc -K $encrypted_0c35eebf403c_key -iv $encrypted_0c35eebf403c_iv -in service-account.json.enc -out service-account.json -d
+  - curl https://sdk.cloud.google.com | bash > /dev/null;
+  - source $HOME/google-cloud-sdk/path.bash.inc
+  - gcloud components update kubectl
+  - gcloud auth activate-service-account --key-file service-account.json
+  # add
+  - gcloud config set project skilful-berm-214822
+  - gcloud config set compute/zone us-central1-a
+  - gcloud container clusters get-credentials multi-cluster
+```
+
+
+
+
 
 ### 18. Running Tests with Travis
 
+![image-20210117170730784](docker-and-kubernetes-the-complete-guide.assets/image-20210117170730784.png)
+
+Docker id is identical to DOCKER_USERNAME
+
+![image-20210117170925201](docker-and-kubernetes-the-complete-guide.assets/image-20210117170925201.png)
+
+![image-20210117171135526](docker-and-kubernetes-the-complete-guide.assets/image-20210117171135526.png)
+
+
+
+```yaml
+sudo: required
+services:
+  - docker
+env:
+  global:
+    - SHA=$(git rev-parse HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+before_install:
+  - openssl aes-256-cbc -K $encrypted_0c35eebf403c_key -iv $encrypted_0c35eebf403c_iv -in service-account.json.enc -out service-account.json -d
+  - curl https://sdk.cloud.google.com | bash > /dev/null;
+  - source $HOME/google-cloud-sdk/path.bash.inc
+  - gcloud components update kubectl
+  - gcloud auth activate-service-account --key-file service-account.json
+  - gcloud config set project skilful-berm-214822
+  - gcloud config set compute/zone us-central1-a
+  - gcloud container clusters get-credentials multi-cluster
+  # add
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker build -t stephengrider/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run stephengrider/react-test npm test -- --coverage
+
+```
+
+
+
 ### 19. Custom Deployment Providers
+
+![image-20210117171341544](docker-and-kubernetes-the-complete-guide.assets/image-20210117171341544.png)
+
+
+
+```yaml
+# add to travis.yml
+deploy:
+  provider: script
+  script: bash ./deploy.sh
+  on:
+    branch: master
+
+```
+
+
 
 ### 20. Unique Deployment Images
 
+![image-20210117171952720](docker-and-kubernetes-the-complete-guide.assets/image-20210117171952720.png)
+
+deploy.sh
+
+```shell
+docker build -t stephengrider/multi-client -t -f ./client/Dockerfile ./client
+docker build -t stephengrider/multi-server -t -f ./server/Dockerfile ./server
+docker build -t stephengrider/multi-worker -t -f ./worker/Dockerfile ./worker
+
+docker push stephengrider/multi-client
+docker push stephengrider/multi-server
+docker push stephengrider/multi-worker
+
+kubectl apply -f k8s
+kubectl set image deployments/server-deployment server=stephengrider/multi-server
+kubectl set image deployments/client-deployment client=stephengrider/multi-client
+kubectl set image deployments/worker-deployment worker=stephengrider/multi-worker
+```
+
+server-deployment là tên lấy từ file config metadata
+
+
+
+
+
 ### 21. Unique Tags for Built Images
+
+![image-20210117172439830](docker-and-kubernetes-the-complete-guide.assets/image-20210117172439830.png)
+
+
+
+```shell
+docker build -t stephengrider/multi-client:latest -t stephengrider/multi-client:$SHA -f ./client/Dockerfile ./client
+docker build -t stephengrider/multi-server:latest -t stephengrider/multi-server:$SHA -f ./server/Dockerfile ./server
+docker build -t stephengrider/multi-worker:latest -t stephengrider/multi-worker:$SHA -f ./worker/Dockerfile ./worker
+
+docker push stephengrider/multi-client:latest
+docker push stephengrider/multi-server:latest
+docker push stephengrider/multi-worker:latest
+
+docker push stephengrider/multi-client:$SHA
+docker push stephengrider/multi-server:$SHA
+docker push stephengrider/multi-worker:$SHA
+
+kubectl apply -f k8s
+kubectl set image deployments/server-deployment server=stephengrider/multi-server:$SHA
+kubectl set image deployments/client-deployment client=stephengrider/multi-client:$SHA
+kubectl set image deployments/worker-deployment worker=stephengrider/multi-worker:$SHA
+```
+
+git log to see SHA
+
+![image-20210117172647949](docker-and-kubernetes-the-complete-guide.assets/image-20210117172647949.png)
+
+![image-20210117172809825](docker-and-kubernetes-the-complete-guide.assets/image-20210117172809825.png)
+
+![image-20210117173001407](docker-and-kubernetes-the-complete-guide.assets/image-20210117173001407.png)
+
+k8s will pull image:latest
+
+![image-20210117173136837](docker-and-kubernetes-the-complete-guide.assets/image-20210117173136837.png)
+
+
+
+
 
 ### 22. Updating the Deployment Script
 
+.travis.yml
+
+```yaml
+# add
+env:
+  global:
+    - SHA=$(git rev-parse HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+before_install:
+```
+
+So CLOUDSDK_CORE_DISABLE_PROMPTS this entire thing right here is just going to configure the Google cloud CLI and make sure that it does not try to display any prompts that require user input.
+
+
+
 ### 23. Configuring the GCloud CLI on Cloud Console
+
+recall create secret
+
+![image-20210117173700092](docker-and-kubernetes-the-complete-guide.assets/image-20210117173700092.png)
+
+15-29
+
+![image-20210117173748349](docker-and-kubernetes-the-complete-guide.assets/image-20210117173748349.png)
+
+![image-20210117173840291](docker-and-kubernetes-the-complete-guide.assets/image-20210117173840291.png)
+
+![image-20210117174014320](docker-and-kubernetes-the-complete-guide.assets/image-20210117174014320.png)
+
+> Create cluster or project => run these commands
+
+
+
+
 
 ### 24. Creating a Secret on Google Cloud
 
+
+
+![image-20210117174214920](docker-and-kubernetes-the-complete-guide.assets/image-20210117174214920.png)
+
+Reload this page
+
+![image-20210117174308294](docker-and-kubernetes-the-complete-guide.assets/image-20210117174308294.png)
+
+
+
+
+
 ### 25. Helm Setup
+
+
+
+If you open up your code editor right now and find your directory you'll recall that we had set up that
+ingress service and the ingress service relied upon the ingress and genetics project which we had installed
+into our local mini cluster through the use of that mini cube.
+Add ons enable ingress command specifically that command that allowed us to use this nginx ingress
+into our local cluster.
+Now we have to go through a very similar set up on our production Kuber Nettie's instance as well.
+So by default the cluster that we just created right here has absolutely no idea of what a kubernetes
+or nginx ingress is.
+And we have to install it as a separate service.
+
+![image-20210117174722701](docker-and-kubernetes-the-complete-guide.assets/image-20210117174722701.png)
+
+First off we've got the ingress config which is that ingress config file we've already created inside
+of our project but we have to go through that additional set up that is going to create the load balancer
+service map it to a Google Cloud load balancer and then also set up a deployment running the ingress
+controller and the actual end going into next pod.
+That's going to do the real routing.
+So this is all some additional setup or some additional installation process above and beyond everything
+we've already done.
+Now to get the set up directions for this we can go back to the documentation for the ingress engine
+next page.
+
+[Installation Guide - NGINX Ingress Controller (kubernetes.github.io)](https://kubernetes.github.io/ingress-nginx/deploy/#using-helm)
+
+![image-20210117174955915](docker-and-kubernetes-the-complete-guide.assets/image-20210117174955915.png)
+
+Well really straight forward helm is essentially a program that we can use to administer third party
+software inside of our kubernetes cluster.
+So just as we've been talking about yeah we want to get some outside outside software into our cluster
+like this outside deployment and the pod that it controls we want to install that as a third party system
+essentially.
+And to do so we can either manually run all those apply commands.
+With all those conflicts that are mapped up to them that we just saw inside the official documentation
+over here.
+So like all these apply commands that we've seen we can also make use of this command line tool called
+helm.
+**Helm** is very commonly used with some of these more complicated projects where some of the setup might
+be a little bit challenging in nature.
+
+The first is called helm and we refer to that as the client.
+In addition to the helm client which is essentially a CLI tool that we're going to issue commands
+to we're also going to be installing something called tiller.
+Tiller is a server running inside of our kubernetes cluster and it is what is responsible for modifying
+our cluster in some fashion and installing additional objects inside of it.
+You can really think of the relationship between helm and Tiller as the relationship between the tiller
+client and the docker server running on our machine.
+
+
+
+https://docs.helm.sh/using_helm/#quickstart-guide
+
+> So one of the preferred ways that it lists inside of your to install hell is it's going to say oh yeah
+>
+> you should install using **homebrew** which is a tool for installing software on a Mac OS machine.
+>
+> And clearly we probably do not have access to homebrew in our production community's environment.
+>
+> **So we can not use this preferred method.**
+>
+> So instead we're going to scroll down a little bit or maybe a lot are going to go down down down.
+>
+> So here's the installing Helm's section. => `FROM SCRIPT`
+
+[Helm | Installing Helm](https://helm.sh/docs/intro/install/)
+
+### From Script
+
+Helm now has an installer script that will automatically grab the latest version of Helm and [install it locally](https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3).
+
+You can fetch that script, and then execute it locally. It's well documented so that you can read through it and understand what it is doing before you run it.
+
+```fallback
+$ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+$ chmod 700 get_helm.sh
+$ ./get_helm.sh
+```
+
+Yes, you can `curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash` if you want to live on the edge.
+
+Run
+
+![image-20210117175830579](docker-and-kubernetes-the-complete-guide.assets/image-20210117175830579.png)
+
+![image-20210117180012196](docker-and-kubernetes-the-complete-guide.assets/image-20210117180012196.png)
+
+Search GKE 
 
 ### 26. Kubernetes Security with RBAC
 
+Tiller is a POD that is going to be running inside of our cluster and this POD running Tiller is going
+to attempt to make changes to the configuration of our cluster.
+In other words it's going to try to install new sets of configuration new sets of deployments new secrets
+whatever else it might be.
+
+![image-20210117181759220](docker-and-kubernetes-the-complete-guide.assets/image-20210117181759220.png)
+
+Now like I said locally with minikube RBAC is not enabled.
+Google Cloud and RBAC are back by default so in production we have to deal with this security system.
+Now the obvious thing that I want to point out here is that as I just said the purpose of Tiller is
+to attempt to modify the configuration of our cluster.
+That definitely sounds like something that might go against this rule based access control Tiller wants
+to make changes to the cluster it wants to create things delete things modify things and so we need
+to make sure that Tiller has the correct set of permissions so that it can actually make all these different
+changes.
+
+![image-20210117182236725](docker-and-kubernetes-the-complete-guide.assets/image-20210117182236725.png)
+
+See namespace
+
+![image-20210117182721520](docker-and-kubernetes-the-complete-guide.assets/image-20210117182721520.png)
+
+
+
 ### 27. Assigning Tiller a Service Account
+
+![image-20210117182807496](docker-and-kubernetes-the-complete-guide.assets/image-20210117182807496.png)
+
+![image-20210117183054900](docker-and-kubernetes-the-complete-guide.assets/image-20210117183054900.png)
+
+
+
+So we need to tell helme exactly what service account Tiller should be assigned.
+
+So we're going to say helm you're going to initialize yourself and I want you to use the service account
+
+of Tiller.
+
+`--upgrade`: make sure that we're using the latest version
+
+![image-20210117183322055](docker-and-kubernetes-the-complete-guide.assets/image-20210117183322055.png)
+
+> After we run 2 commands you can run helm init
+
+
 
 ### 28. Ingress-Nginx with Helm
 
+https://kubernetes.github.io/ingress-nginx/deploy/#using-helm
+
+![image-20210117183610094](docker-and-kubernetes-the-complete-guide.assets/image-20210117183610094.png)
+
+> May be unsupported anymore
+
+
+
 ### 29. The Result of Ingress-Nginx
 
+![image-20210117183817634](docker-and-kubernetes-the-complete-guide.assets/image-20210117183817634.png)
 
+![image-20210117183846198](docker-and-kubernetes-the-complete-guide.assets/image-20210117183846198.png)
+
+Remember the workloads tab is where we're going to eventually see a list of all of our deployments so
+we can now very easily see that we have something here called the ingress controller and our ingress
+Stiefel backend.
+Remember the ingress controller is the pod that is or in this case the deployment that manages the pod
+that runs the actual controller.
+That's going to read our ingress config file and then setup engine X appropriately the default backend
+is as it says a default back and that has a series of health checks inside of it.
+If we were doing things really really well we would set up a certain number of routes inside of our
+express API to associate the health of our cluster with our actual API as opposed to this default back
+end.
+But in this case using the default back end totally fine.
+Now the other thing I want to show you really quickly is the services tab over here.
+Now if you see something here that says load balancer and you see these two sets of numbers next to
+it that's great.
+If you do not see two sets numbers right here then paused the video right now for like a couple of minutes
+and try refreshing the page again in a couple of minutes.
+
+![image-20210117184101821](docker-and-kubernetes-the-complete-guide.assets/image-20210117184101821.png)
+
+![image-20210117184141401](docker-and-kubernetes-the-complete-guide.assets/image-20210117184141401.png)
 
 ### 30. Finally - Deployment!
 
+Push code
+
+![image-20210117184348128](docker-and-kubernetes-the-complete-guide.assets/image-20210117184348128.png)
+
+![image-20210117184508714](docker-and-kubernetes-the-complete-guide.assets/image-20210117184508714.png)
+
 ### 31. Did I Really Type That
+
+Docker_password dư s
 
 ### 32. Verifying Deployment
 
+![image-20210117184712717](docker-and-kubernetes-the-complete-guide.assets/image-20210117184712717.png)
+
+![image-20210117184741318](docker-and-kubernetes-the-complete-guide.assets/image-20210117184741318.png)
+
+![image-20210117184833893](docker-and-kubernetes-the-complete-guide.assets/image-20210117184833893.png)
+
+![image-20210117185022538](docker-and-kubernetes-the-complete-guide.assets/image-20210117185022538.png)
+
 ### 33. A Workflow for Changing in Prod
+
+![image-20210117185218408](docker-and-kubernetes-the-complete-guide.assets/image-20210117185218408.png)
+
+
 
 ### 34. Merging a PR for Deployment
 
