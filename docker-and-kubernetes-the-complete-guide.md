@@ -1,5 +1,315 @@
 
 
+
+- [Docker and Kubernetes: The Complete Guide](#docker-and-kubernetes-the-complete-guide)
+  - [1. Dive Into Docker!](#1-dive-into-docker)
+    - [1. Why Use Docker](#1-why-use-docker)
+    - [2. What is Docker](#2-what-is-docker)
+    - [3. Docker for MacWindows](#3-docker-for-macwindows)
+    - [4. Installing Docker on MacOS](#4-installing-docker-on-macos)
+    - [5. Installing Docker for Windows Home users.html](#5-installing-docker-for-windows-home-usershtml)
+    - [6. Installing Docker for Windows - Professional and Enterprise Editions](#6-installing-docker-for-windows---professional-and-enterprise-editions)
+    - [7. More Windows Setup - Professional and Enterprise Editions](#7-more-windows-setup---professional-and-enterprise-editions)
+    - [8. One Last Piece of Windows Setup - Professional and Enterprise Editions](#8-one-last-piece-of-windows-setup---professional-and-enterprise-editions)
+    - [9. Installing Docker on Linux.html](#9-installing-docker-on-linuxhtml)
+    - [10. Using the Docker Client](#10-using-the-docker-client)
+    - [11. But Really...What's a Container](#11-but-reallywhats-a-container)
+    - [12. How's Docker Running on Your Computer](#12-hows-docker-running-on-your-computer)
+  - [2. Manipulating Containers with the Docker Client](#2-manipulating-containers-with-the-docker-client)
+    - [1. Docker Run in Detail](#1-docker-run-in-detail)
+    - [2. Overriding Default Commands](#2-overriding-default-commands)
+    - [3. Listing Running Containers](#3-listing-running-containers)
+    - [5. Restarting Stopped Containers](#5-restarting-stopped-containers)
+    - [6. Removing Stopped Containers](#6-removing-stopped-containers)
+    - [7. Retrieving Log Outputs](#7-retrieving-log-outputs)
+    - [8. Stopping Containers](#8-stopping-containers)
+    - [9. Multi-Command Containers](#9-multi-command-containers)
+    - [10. Executing Commands in Running Containers](#10-executing-commands-in-running-containers)
+    - [11. The Purpose of the IT Flag](#11-the-purpose-of-the-it-flag)
+    - [12. Getting a Command Prompt in a Container](#12-getting-a-command-prompt-in-a-container)
+    - [13. Starting with a Shell](#13-starting-with-a-shell)
+    - [14. Container Isolation](#14-container-isolation)
+  - [3. Building Custom Images Through Docker Server](#3-building-custom-images-through-docker-server)
+    - [1. Creating Docker Images](#1-creating-docker-images)
+    - [2. Building a Dockerfile](#2-building-a-dockerfile)
+    - [3. Dockerfile Teardown](#3-dockerfile-teardown)
+    - [4. What's a Base Image](#4-whats-a-base-image)
+    - [5. The Build Process in Detail](#5-the-build-process-in-detail)
+    - [6. A Brief Recap](#6-a-brief-recap)
+    - [7. Rebuilds with Cache](#7-rebuilds-with-cache)
+    - [8. Tagging an Image](#8-tagging-an-image)
+    - [9. Manual Image Generation with Docker Commit](#9-manual-image-generation-with-docker-commit)
+  - [4. Making Real Projects with Docker](#4-making-real-projects-with-docker)
+    - [1. Project Outline](#1-project-outline)
+    - [2. Node Server Setup](#2-node-server-setup)
+    - [3. Server Code.html](#3-server-codehtml)
+    - [4. A Few Planned Errors](#4-a-few-planned-errors)
+    - [5. Base Image Issues](#5-base-image-issues)
+    - [6. A Few Missing Files](#6-a-few-missing-files)
+    - [7. Copying Build Files](#7-copying-build-files)
+    - [8. Container Port Mapping](#8-container-port-mapping)
+    - [9. Specifying a Working Directory](#9-specifying-a-working-directory)
+    - [10. Unnecessary Rebuilds](#10-unnecessary-rebuilds)
+    - [11. Minimizing Cache Busting and Rebuilds](#11-minimizing-cache-busting-and-rebuilds)
+  - [5. Docker Compose with Multiple Local Containers](#5-docker-compose-with-multiple-local-containers)
+    - [1. App Overview](#1-app-overview)
+    - [2. App Server Code](#2-app-server-code)
+    - [3. Completed Node Code.html](#3-completed-node-codehtml)
+    - [4. Assembling a Dockerfile](#4-assembling-a-dockerfile)
+    - [5. Introducing Docker Compose](#5-introducing-docker-compose)
+    - [6. Docker Compose Files](#6-docker-compose-files)
+    - [7. Networking with Docker Compose](#7-networking-with-docker-compose)
+    - [A Docker/docker-compose setup with Redis and Node/Express](#a-dockerdocker-compose-setup-with-redis-and-nodeexpress)
+    - [8. Docker Compose Commands](#8-docker-compose-commands)
+    - [9. Stopping Docker Compose Containers](#9-stopping-docker-compose-containers)
+    - [10. Container Maintenance with Compose](#10-container-maintenance-with-compose)
+    - [11. Automatic Container Restarts](#11-automatic-container-restarts)
+    - [12. Container Status with Docker Compose](#12-container-status-with-docker-compose)
+  - [6. Creating a Production-Grade Workflow](#6-creating-a-production-grade-workflow)
+    - [1. Development Workflow](#1-development-workflow)
+    - [2. Flow specifics](#2-flow-specifics)
+    - [3. Docker's Purpose](#3-dockers-purpose)
+    - [4. Project Generation](#4-project-generation)
+    - [5. More on Project Generation](#5-more-on-project-generation)
+    - [6. Necessary Commands](#6-necessary-commands)
+    - [7. Creating the Dev Dockerfile](#7-creating-the-dev-dockerfile)
+    - [8. Duplicating Dependencies](#8-duplicating-dependencies)
+    - [9. Starting the Container](#9-starting-the-container)
+    - [10. Quick Note for Windows Users.html](#10-quick-note-for-windows-usershtml)
+    - [11. Docker Volumes](#11-docker-volumes)
+    - [12. Bookmarking Volumes](#12-bookmarking-volumes)
+    - [13. Shorthand with Docker Compose](#13-shorthand-with-docker-compose)
+    - [14. Overriding Dockerfile Selection](#14-overriding-dockerfile-selection)
+    - [15. Do We Need Copy](#15-do-we-need-copy)
+    - [16. Executing Tests](#16-executing-tests)
+    - [17. Live Updating Tests](#17-live-updating-tests)
+    - [18. Docker Compose for Running Tests](#18-docker-compose-for-running-tests)
+    - [19. Shortcomings on Testing](#19-shortcomings-on-testing)
+    - [20. Need for Nginx](#20-need-for-nginx)
+    - [21. Multi-Step Docker Builds](#21-multi-step-docker-builds)
+    - [22. Implementing Multi-Step Builds](#22-implementing-multi-step-builds)
+    - [23. Running Nginx](#23-running-nginx)
+  - [7. Continuous Integration and Deployment with AWS](#7-continuous-integration-and-deployment-with-aws)
+    - [1. Services Overview](#1-services-overview)
+    - [2. Github Setup](#2-github-setup)
+    - [3. Travis CI Setup](#3-travis-ci-setup)
+    - [4. Travis YML File Configuration](#4-travis-yml-file-configuration)
+    - [5. A Touch More Travis Setup](#5-a-touch-more-travis-setup)
+    - [6. Automatic Build Creation](#6-automatic-build-creation)
+    - [7. AWS Elastic Beanstalk](#7-aws-elastic-beanstalk)
+    - [8. More on Elastic Beanstalk](#8-more-on-elastic-beanstalk)
+    - [9. Travis Config for Deployment](#9-travis-config-for-deployment)
+    - [10. Automated Deployments](#10-automated-deployments)
+    - [11. Exposing Ports Through the Dockerfile](#11-exposing-ports-through-the-dockerfile)
+    - [12. Build Still Failing.html](#12-build-still-failinghtml)
+    - [13. Workflow With Github](#13-workflow-with-github)
+    - [14. Redeploy on Pull Request Merge](#14-redeploy-on-pull-request-merge)
+    - [15. Deployment Wrapup](#15-deployment-wrapup)
+    - [16. Environment Cleanup.html](#16-environment-cleanuphtml)
+  - [8. Building a Multi-Container Application](#8-building-a-multi-container-application)
+    - [1. Single Container Deployment Issues](#1-single-container-deployment-issues)
+    - [2. Application Overview](#2-application-overview)
+    - [3. A Quick Note.html](#3-a-quick-notehtml)
+    - [4. Application Architecture](#4-application-architecture)
+    - [5. Worker Process Setup](#5-worker-process-setup)
+    - [6. Express API Setup](#6-express-api-setup)
+    - [7. Connecting to Postgres](#7-connecting-to-postgres)
+    - [8. More Express API Setup](#8-more-express-api-setup)
+    - [9. Generating the React App](#9-generating-the-react-app)
+    - [10. Fetching Data in the React App](#10-fetching-data-in-the-react-app)
+    - [11. Rendering Logic in the App](#11-rendering-logic-in-the-app)
+    - [12. Exporting the Fib Class](#12-exporting-the-fib-class)
+    - [13. Routing in the React App](#13-routing-in-the-react-app)
+  - [9. Dockerizing Multiple Services](#9-dockerizing-multiple-services)
+    - [1. Checkpoint Files.html](#1-checkpoint-fileshtml)
+    - [2. Checkpoint Catchup](#2-checkpoint-catchup)
+    - [3. Dockerizing a React App - Again!](#3-dockerizing-a-react-app---again)
+    - [4. Dockerizing Generic Node Apps](#4-dockerizing-generic-node-apps)
+    - [5. Adding Postgres as a Service](#5-adding-postgres-as-a-service)
+- [How to use this image](#how-to-use-this-image)
+  - [start a postgres instance](#start-a-postgres-instance)
+  - [... or via `psql`](#-or-via-psql)
+  - [... via `docker stack deploy` or [`docker-compose`](https://github.com/docker/compose)](#-via-docker-stack-deploy-or-docker-compose)
+    - [6. Docker-compose Config](#6-docker-compose-config)
+    - [7. Environment Variables with Docker Compose](#7-environment-variables-with-docker-compose)
+    - [8. The Worker and Client Services](#8-the-worker-and-client-services)
+    - [9. Nginx Path Routing](#9-nginx-path-routing)
+    - [10. Routing with Nginx](#10-routing-with-nginx)
+    - [11. Building a Custom Nginx Image](#11-building-a-custom-nginx-image)
+    - [12. Starting Up Docker Compose](#12-starting-up-docker-compose)
+    - [13. Troubleshooting.html](#13-troubleshootinghtml)
+    - [14. Troubleshooting Startup Bugs](#14-troubleshooting-startup-bugs)
+    - [15. Opening Websocket Connections](#15-opening-websocket-connections)
+  - [10. A Continuous Integration Workflow for Multiple Images](#10-a-continuous-integration-workflow-for-multiple-images)
+    - [1. Production Multi-Container Deployments](#1-production-multi-container-deployments)
+    - [2. Production Dockerfiles](#2-production-dockerfiles)
+    - [3. Multiple Nginx Instances](#3-multiple-nginx-instances)
+    - [4. Altering Nginx's Listen Port](#4-altering-nginxs-listen-port)
+    - [5. A Quick Fix.html](#5-a-quick-fixhtml)
+    - [6. Cleaning Up Tests](#6-cleaning-up-tests)
+    - [7. Github and Travis CI Setup](#7-github-and-travis-ci-setup)
+    - [8. Travis Configuration Setup](#8-travis-configuration-setup)
+    - [9. Pushing Images to Docker Hub](#9-pushing-images-to-docker-hub)
+    - [10. Successful Image Building](#10-successful-image-building)
+  - [11. Multi-Container Deployments to AWS](#11-multi-container-deployments-to-aws)
+    - [1. Multi-Container Definition Files](#1-multi-container-definition-files)
+    - [2. Finding Docs on Container Definitions](#2-finding-docs-on-container-definitions)
+    - [3. Adding Container Definitions to DockerRun](#3-adding-container-definitions-to-dockerrun)
+    - [4. More Container Definitions](#4-more-container-definitions)
+    - [5. Forming Container Links](#5-forming-container-links)
+    - [6. Creating the EB Environment](#6-creating-the-eb-environment)
+    - [7. Managed Data Service Providers](#7-managed-data-service-providers)
+    - [8. Overview of AWS VPC's and Security Groups](#8-overview-of-aws-vpcs-and-security-groups)
+    - [9. RDS Database Creation](#9-rds-database-creation)
+    - [10. ElastiCache Redis Creation](#10-elasticache-redis-creation)
+    - [11. Creating a Custom Security Group](#11-creating-a-custom-security-group)
+    - [12. Applying Security Groups to Resources](#12-applying-security-groups-to-resources)
+    - [13. Setting Environment Variables](#13-setting-environment-variables)
+    - [14. IAM Keys for Deployment](#14-iam-keys-for-deployment)
+    - [15. Travis Deploy Script](#15-travis-deploy-script)
+    - [16. Container Memory Allocations](#16-container-memory-allocations)
+    - [17. Verifying Deployment](#17-verifying-deployment)
+    - [18. A Quick App Change](#18-a-quick-app-change)
+    - [19. Making Changes](#19-making-changes)
+    - [20. Cleaning Up AWS Resources](#20-cleaning-up-aws-resources)
+  - [12. Onwards to Kubernetes!](#12-onwards-to-kubernetes)
+    - [1. The Why's and What's of Kubernetes](#1-the-whys-and-whats-of-kubernetes)
+    - [2. Kubernetes in Development and Production](#2-kubernetes-in-development-and-production)
+    - [3. Setup on MacOS](#3-setup-on-macos)
+    - [4. Setup on Linux.html](#4-setup-on-linuxhtml)
+      - [**Install VirtualBox:**](#install-virtualbox)
+      - [**Install Kubectl**](#install-kubectl)
+      - [**Install Minikube**](#install-minikube)
+    - [5. Mapping Existing Knowledge](#5-mapping-existing-knowledge)
+    - [6. Adding Configuration Files](#6-adding-configuration-files)
+    - [7. Object Types and API Versions](#7-object-types-and-api-versions)
+    - [8. Running Containers in Pods](#8-running-containers-in-pods)
+    - [9. Service Config Files in Depth](#9-service-config-files-in-depth)
+    - [10. Connecting to Running Containers](#10-connecting-to-running-containers)
+    - [11. The Entire Deployment Flow](#11-the-entire-deployment-flow)
+    - [12. Imperative vs Declarative Deployments](#12-imperative-vs-declarative-deployments)
+  - [13. Maintaining Sets of Containers with Deployments](#13-maintaining-sets-of-containers-with-deployments)
+    - [1. Updating Existing Objects](#1-updating-existing-objects)
+    - [2. Declarative Updates in Action](#2-declarative-updates-in-action)
+    - [3. Limitations in Config Updates](#3-limitations-in-config-updates)
+    - [4. Running Containers with Deployments](#4-running-containers-with-deployments)
+    - [5. Deployment Configuration Files](#5-deployment-configuration-files)
+    - [6. Walking Through the Deployment Config](#6-walking-through-the-deployment-config)
+    - [7. Applying a Deployment](#7-applying-a-deployment)
+    - [8. Why Use Services](#8-why-use-services)
+    - [9. Scaling and Changing Deployments](#9-scaling-and-changing-deployments)
+    - [10. Updating Deployment Images](#10-updating-deployment-images)
+    - [11. Rebuilding the Client Image](#11-rebuilding-the-client-image)
+    - [12. Triggering Deployment Updates](#12-triggering-deployment-updates)
+    - [13. Imperatively Updating a Deployment's Image](#13-imperatively-updating-a-deployments-image)
+    - [14. Multiple Docker Installations](#14-multiple-docker-installations)
+    - [15. Reconfiguring Docker CLI](#15-reconfiguring-docker-cli)
+    - [16. Why Mess with Docker in the Node](#16-why-mess-with-docker-in-the-node)
+  - [14. A Multi-Container App with Kubernetes](#14-a-multi-container-app-with-kubernetes)
+    - [1. The Path to Production](#1-the-path-to-production)
+    - [2. Checkpoint Files.html](#2-checkpoint-fileshtml)
+    - [3. A Quick Checkpoint](#3-a-quick-checkpoint)
+    - [4. Recreating the Deployment](#4-recreating-the-deployment)
+    - [5. NodePort vs ClusterIP Services](#5-nodeport-vs-clusterip-services)
+    - [6. The ClusterIP Config](#6-the-clusterip-config)
+    - [7. Applying Multiple Files with Kubectl](#7-applying-multiple-files-with-kubectl)
+    - [8. Express API Deployment Config](#8-express-api-deployment-config)
+    - [9. Cluster IP for the Express API](#9-cluster-ip-for-the-express-api)
+    - [10. Combining Config Into Single Files](#10-combining-config-into-single-files)
+    - [11. The Worker Deployment](#11-the-worker-deployment)
+    - [12. Reapplying a Batch of Config Files](#12-reapplying-a-batch-of-config-files)
+    - [13. Creating and Applying Redis Config](#13-creating-and-applying-redis-config)
+    - [14. Last Set of Boring Config!](#14-last-set-of-boring-config)
+    - [15. The Need for Volumes with Databases](#15-the-need-for-volumes-with-databases)
+    - [16. Kubernetes Volumes](#16-kubernetes-volumes)
+    - [17. Volumes vs Persistent Volumes](#17-volumes-vs-persistent-volumes)
+    - [18. Persistent Volumes vs Persistent Volume Claims](#18-persistent-volumes-vs-persistent-volume-claims)
+    - [19. Claim Config Files](#19-claim-config-files)
+    - [20. Persistent Volume Access Modes](#20-persistent-volume-access-modes)
+    - [21. Where Does Kubernetes Allocate Persistent Volumes](#21-where-does-kubernetes-allocate-persistent-volumes)
+    - [22. Designating a PVC in a Pod Template](#22-designating-a-pvc-in-a-pod-template)
+    - [23. Applying a PVC](#23-applying-a-pvc)
+    - [24. Defining Environment Variables](#24-defining-environment-variables)
+    - [25. Adding Environment Variables to Config](#25-adding-environment-variables-to-config)
+    - [26. Creating an Encoded Secret](#26-creating-an-encoded-secret)
+    - [27. Passing Secrets as Environment Variables](#27-passing-secrets-as-environment-variables)
+    - [28. Environment Variables as Strings](#28-environment-variables-as-strings)
+  - [15. Handling Traffic with Ingress Controllers](#15-handling-traffic-with-ingress-controllers)
+    - [1. Load Balancer Services](#1-load-balancer-services)
+    - [2. A Quick Note on Ingresses](#2-a-quick-note-on-ingresses)
+    - [3. One Other Quick Note!](#3-one-other-quick-note)
+    - [4. Behind the Scenes of Ingress](#4-behind-the-scenes-of-ingress)
+    - [5. More Behind the Scenes of Ingress](#5-more-behind-the-scenes-of-ingress)
+    - [6. Optional Reading on Ingress Nginx.html](#6-optional-reading-on-ingress-nginxhtml)
+    - [7. Setting up Ingress Locally](#7-setting-up-ingress-locally)
+      - [minikube-](#minikube-)
+      - [GCE_GKE](#gce_gke)
+    - [8. Creating the Ingress Configuration](#8-creating-the-ingress-configuration)
+    - [9. Fix for ingress-service.yaml Configuration.html](#9-fix-for-ingress-serviceyaml-configurationhtml)
+    - [10. Testing Ingress Locally](#10-testing-ingress-locally)
+    - [11. The Minikube Dashboard](#11-the-minikube-dashboard)
+  - [16. Kubernetes Production Deployment](#16-kubernetes-production-deployment)
+    - [1. The Deployment Process](#1-the-deployment-process)
+    - [2. Google Cloud vs AWS for Kubernetes](#2-google-cloud-vs-aws-for-kubernetes)
+    - [3. Creating a Git Repo](#3-creating-a-git-repo)
+    - [4. Linking the Github Repo to Travis](#4-linking-the-github-repo-to-travis)
+    - [5. Free Google Cloud Credits.html](#5-free-google-cloud-creditshtml)
+    - [6. Creating a Google Cloud Project](#6-creating-a-google-cloud-project)
+    - [7. Linking a Billing Account](#7-linking-a-billing-account)
+    - [8. Kubernetes Engine Init](#8-kubernetes-engine-init)
+    - [9. Creating a Cluster with Google Cloud](#9-creating-a-cluster-with-google-cloud)
+    - [10. Don't Forget to Cleanup!.html](#10-dont-forget-to-cleanuphtml)
+    - [11. Kubernetes Dashboard on Google Cloud](#11-kubernetes-dashboard-on-google-cloud)
+    - [12. Travis Deployment Overview](#12-travis-deployment-overview)
+    - [13. Installing the Google Cloud SDK](#13-installing-the-google-cloud-sdk)
+    - [14. Generating a Service Account](#14-generating-a-service-account)
+    - [15. Running Travis CLI in a Container](#15-running-travis-cli-in-a-container)
+    - [16. Encrypting a Service Account File](#16-encrypting-a-service-account-file)
+    - [17. More Google Cloud CLI Config](#17-more-google-cloud-cli-config)
+    - [18. Running Tests with Travis](#18-running-tests-with-travis)
+    - [19. Custom Deployment Providers](#19-custom-deployment-providers)
+    - [20. Unique Deployment Images](#20-unique-deployment-images)
+    - [21. Unique Tags for Built Images](#21-unique-tags-for-built-images)
+    - [22. Updating the Deployment Script](#22-updating-the-deployment-script)
+    - [23. Configuring the GCloud CLI on Cloud Console](#23-configuring-the-gcloud-cli-on-cloud-console)
+    - [24. Creating a Secret on Google Cloud](#24-creating-a-secret-on-google-cloud)
+    - [25. Helm Setup](#25-helm-setup)
+    - [From Script](#from-script)
+    - [26. Kubernetes Security with RBAC](#26-kubernetes-security-with-rbac)
+    - [27. Assigning Tiller a Service Account](#27-assigning-tiller-a-service-account)
+    - [28. Ingress-Nginx with Helm](#28-ingress-nginx-with-helm)
+    - [29. The Result of Ingress-Nginx](#29-the-result-of-ingress-nginx)
+    - [30. Finally - Deployment!](#30-finally---deployment)
+    - [31. Did I Really Type That](#31-did-i-really-type-that)
+    - [32. Verifying Deployment](#32-verifying-deployment)
+    - [33. A Workflow for Changing in Prod](#33-a-workflow-for-changing-in-prod)
+    - [34. Merging a PR for Deployment](#34-merging-a-pr-for-deployment)
+    - [35. That's It!  What's Next](#35-thats-it--whats-next)
+  - [17. HTTPS Setup with Kubernetes](#17-https-setup-with-kubernetes)
+    - [1. HTTPS Setup Overview](#1-https-setup-overview)
+    - [2. Domain Purchase](#2-domain-purchase)
+    - [3. Domain Name Setup](#3-domain-name-setup)
+    - [4. Cert Manager Install](#4-cert-manager-install)
+    - [5. How to Wire Up Cert Manager](#5-how-to-wire-up-cert-manager)
+    - [6. Issuer Config File](#6-issuer-config-file)
+    - [7. Certificate Config File](#7-certificate-config-file)
+    - [8. Deploying Changes](#8-deploying-changes)
+    - [9. Verifying the Certificate](#9-verifying-the-certificate)
+    - [10. Ingress Config for HTTPS](#10-ingress-config-for-https)
+    - [11. It Worked!](#11-it-worked)
+    - [12. Google Cloud Cleanup.html](#12-google-cloud-cleanuphtml)
+    - [13. Local Environment Cleanup.html](#13-local-environment-cleanuphtml)
+  - [18. Local Development with Skaffold](#18-local-development-with-skaffold)
+    - [1. Awkward Local Development](#1-awkward-local-development)
+    - [2. Installing Skaffold](#2-installing-skaffold)
+    - [3. The Skaffold Config File](#3-the-skaffold-config-file)
+    - [4. Live Sync Changes](#4-live-sync-changes)
+    - [5. Automatic Shutdown](#5-automatic-shutdown)
+    - [6. Testing Live Sync with the API Server](#6-testing-live-sync-with-the-api-server)
+
+
+----
+
 # Docker and Kubernetes: The Complete Guide
 
 ## 1. Dive Into Docker!
@@ -6128,27 +6438,454 @@ Docker_password dư s
 
 ## 17. HTTPS Setup with Kubernetes
 ### 1. HTTPS Setup Overview
-### 10. Ingress Config for HTTPS
-### 11. It Worked!
-### 12. Google Cloud Cleanup.html
-### 13. Local Environment Cleanup.html
+![image-20210117192242163](docker-and-kubernetes-the-complete-guide.assets/image-20210117192242163.png)
+
+![image-20210117192329992](docker-and-kubernetes-the-complete-guide.assets/image-20210117192329992.png)
+
+
+
 ### 2. Domain Purchase
+
+![image-20210117192823348](docker-and-kubernetes-the-complete-guide.assets/image-20210117192823348.png)
+
+![image-20210117192911032](docker-and-kubernetes-the-complete-guide.assets/image-20210117192911032.png)
+
+
+
 ### 3. Domain Name Setup
+
+![image-20210117193031760](docker-and-kubernetes-the-complete-guide.assets/image-20210117193031760.png)
+
+![image-20210117193157004](docker-and-kubernetes-the-complete-guide.assets/image-20210117193157004.png)
+
+![image-20210117193228682](docker-and-kubernetes-the-complete-guide.assets/image-20210117193228682.png)
+
+Add new
+
+![image-20210117193303465](docker-and-kubernetes-the-complete-guide.assets/image-20210117193303465.png)
+
+
+
 ### 4. Cert Manager Install
+
+![image-20210117193525061](docker-and-kubernetes-the-complete-guide.assets/image-20210117193525061.png)
+
+https://cert-manager.io/docs/installation/kubernetes/#installing-with-helm
+
+
+
+To install the cert-manager Helm chart:
+
+```bash
+$ helm install \
+  cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --version v1.1.0 \
+```
+
+![image-20210117203927421](docker-and-kubernetes-the-complete-guide.assets/image-20210117203927421.png)
+
+
+
+
+
 ### 5. How to Wire Up Cert Manager
+
+![image-20210117204040690](docker-and-kubernetes-the-complete-guide.assets/image-20210117204040690.png)
+
+The search manager is actually going to automatically see that we have created a certificate and an
+issuer once it sees that both of these have been created.
+It's then going to initiate that exchange process with let's encrypt let's encrypt is going to eventually
+issue a certificate.
+So once that cert manager gets the certificate from let's encrypt it then needs to store it somewhere
+inside of our Cuban communities cluster.
+And that's the purpose of the secret that got created over here by the certificate.
+
+
+
 ### 6. Issuer Config File
+
+issuer.yaml
+
+```yaml
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: 'ste.grider@gmail.com'
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    http01: {}
+
+```
+
+At some stage let's encrypt sends over a little secret key that is tied to essentially your record with
+let's encrypt and actually comes into play as a part of this verification process right here.
+It's actually used to essentially decide exactly how to respond when Let's encrypt tries to access this
+randomly generated you are l.
+This little key that gets sent back to us and stored inside of the secret key ref is not actually something
+we ever have to use.
+So essentially we just kind of throw it on here and forget about it.
+Nonetheless the last option we'll put on is HTP 0 1 and we're going to put a set of curly braces like
+so and this probably looks like a real weird option right here.
+
+So all this option is doing is saying we want to use this HTP process of obtaining a certificate.
+We want to reach out to let's encrypt and say hey I want a certificate.
+Let's encrypt says OK.
+Respond on this route.
+
+
+
 ### 7. Certificate Config File
+
+certificate.yaml
+
+```yaml
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: k8s-multi-com-tls
+spec:
+  secretName: k8s-multi-com
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: k8s-multi.com
+  dnsNames:
+    - k8s-multi.com
+    - www.k8s-multi.com
+  acme:
+    config:
+      - http01:
+          ingressClass: nginx
+        domains:
+          - k8s-multi.com
+          - www.k8s-multi.com
+
+```
+
+![image-20210117213724005](docker-and-kubernetes-the-complete-guide.assets/image-20210117213724005.png)
+
+common Name is domain
+
+So my domain was k8s multi com and I'll put on T.L.S on here just to indicate that this is a TLS certificate.
+We're going to provide a secret name of K8s multi dot com.
+You can replace this with whatever your domain name is for the name appear and the secret name down
+here as well.
+The secret name right here is specifying where our certificate should be stored after is obtained by
+cert manager.
+So this is this little secret that is created as a part of the certificate.
+Again we do not have to create the secret at a time.
+It will be automatically created for us by cert manager.
+Once it obtains the secret after that we'll define a issuer ref issue or ref is a reference to the issuer
+that we set up and want to use in order to obtain the certificate.
+So for us ours certificate issuer is going to be let's encrypt private.
+
+
+
 ### 8. Deploying Changes
+
+So the general flow here is that we get our issuer we get our certificate.
+We deploy that search manager is going to go through this back and forth process and get our certificate
+and then only once we have it and we have an enhanced order inside of a secret inside of our cluster
+are we going to go back to our ingress service and tell it to update itself to use this new certificate.
+So in other words we're now at the point where we need to redeploy our application so that the issuer
+and the certificate files are created as objects inside of our cluster.
+
+![image-20210117214723390](docker-and-kubernetes-the-complete-guide.assets/image-20210117214723390.png)
+
+push origin master
+
 ### 9. Verifying the Certificate
+
+![image-20210117215001282](docker-and-kubernetes-the-complete-guide.assets/image-20210117215001282.png)
+
+Now to really make sure that this thing works successfully I can then `describe certificates`
+and this will print out some information about the certificate object in particular it's going to have
+a little bit of log information that describes this back and forth project with me back and forth process
+with let's encrypt.
+All right so do you keep  `describe certificates` and I'll see a bunch of information printout here.
+Now I want you to know you might see something in here around like message and it might say like validation
+failed.
+
+![image-20210117215154100](docker-and-kubernetes-the-complete-guide.assets/image-20210117215154100.png)
+
+![image-20210117215333118](docker-and-kubernetes-the-complete-guide.assets/image-20210117215333118.png)
+
+
+
+### 10. Ingress Config for HTTPS
+
+ingress-service.yaml
+
+```yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-service
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    certmanager.k8s.io/cluster-issuer: 'letsencrypt-prod'  # add
+    nginx.ingress.kubernetes.io/ssl-redirect: 'false'  # add
+# add
+spec:
+  tls:
+    - hosts:
+        - k8s-multi.com
+        - www.k8s-multi.com
+      secretName: k8s-multi-com
+  rules:
+    - host: k8s-multi.com # add
+      http:
+        paths:
+          - path: /?(.*)
+            backend:
+              serviceName: client-cluster-ip-service
+              servicePort: 3000
+          - path: /api/?(.*)
+            backend:
+              serviceName: server-cluster-ip-service
+              servicePort: 5000
+    # add
+    - host: www.k8s-multi.com 
+      http:
+        paths:
+          - path: /?(.*)
+            backend:
+              serviceName: client-cluster-ip-service
+              servicePort: 3000
+          - path: /api/?(.*)
+            backend:
+              serviceName: server-cluster-ip-service
+              servicePort: 5000
+```
+
+W W W is recognized as a separate host from the hosting that we listed right here of multi-column.
+So essentially if someone comes in on this address.
+Great We've got a set of rules to be applied to you.
+However if someone comes in on this address the same exact rule sets do not apply.
+So the part about this that is funky is that we essentially have to take this entire block right your
+and copy paste it down.
+We have to duplicate this entire block and then on the second block we're going to change the host to
+be w w w k8s.
+
+![image-20210117220458290](docker-and-kubernetes-the-complete-guide.assets/image-20210117220458290.png)
+
+### 11. It Worked!
+
+![image-20210117220755047](docker-and-kubernetes-the-complete-guide.assets/image-20210117220755047.png)
+
+![image-20210117220820995](docker-and-kubernetes-the-complete-guide.assets/image-20210117220820995.png)
+
+
+
+### 12. Google Cloud Cleanup.html
+
+Time for some cleanup! **If you want to close down the Kubernetes cluster running on Google Cloud, do the following. Remember, you are paying for the running cluster!**
+
+**Steps to clean up:**
+
+**1) Click the project selector on the top left of the page**
+
+![img](https://udemy-images.s3.amazonaws.com:443/redactor/raw/2018-09-06_15-52-13-d86ba5ce924035b5e698e5106dbcea57.png)
+
+**2) Click the 'gear' icon on the top right**
+
+![img](https://udemy-images.s3.amazonaws.com:443/redactor/raw/2018-09-06_15-52-44-c5b20fec91b3bcf618a592624572f3f7.png)
+
+**3) Find your project in the list of projects that is presented, then click the three dots on the far right hand side**
+
+![img](https://udemy-images.s3.amazonaws.com:443/redactor/raw/2018-09-06_15-53-54-200f5dfbe9d95b90640328467fcfee6b.png)
+
+**4) Click 'Delete'**
+
+![img](https://udemy-images.s3.amazonaws.com:443/redactor/raw/2018-09-06_15-54-17-64c5dea9f707f4f664c4abf1b598c457.png)
+
+**5) Enter your project ID and click 'Shut Down'**
+
+![img](https://udemy-images.s3.amazonaws.com:443/redactor/raw/2018-09-06_15-54-32-b8d88edf6cae27542b063641b711a635.png)
+
+### 13. Local Environment Cleanup.html
+
+You might want to also clean up some of the work you did on your local machine. Remember, we have a running Kubernetes cluster, and we have also built a ton of images.
+
+
+
+**Stopping Minikube**
+
+To stop Minikube, and the VM that it runs, run `minikube stop` . You can bring your local cluster back online at any time by running `minikube start`
+
+
+
+**Stopping Running Containers**
+
+You might still have some containers running on your machine. Try a `docker ps` . You can then run `docker stop <container_id>` to clean up any running containers
+
+
+
+**Clearing the Build Cache**
+
+All the images that we built and ran during the course are cached on your local machine - they might be taking up to around 1GB of space. You can clean these up by running `docker system prune`
+
 ## 18. Local Development with Skaffold
 ### 1. Awkward Local Development
+
+![image-20210117222528977](docker-and-kubernetes-the-complete-guide.assets/image-20210117222528977.png)
+
+![image-20210117222557674](docker-and-kubernetes-the-complete-guide.assets/image-20210117222557674.png)
+
+![image-20210117222633842](docker-and-kubernetes-the-complete-guide.assets/image-20210117222633842.png)
+
+Instead we would have to completely rebuild the client image and then rerun that kubetcl apply command.
+That's definitely a pain so let me show you a better way to handle this development process.
+We're going to be making use of a tool called **scaffold**.
+This is a command line tool separate from Cuban eddies but designed to be used with Cuban eddies just
+to facilitate local development.
+Here's how scaffold works scaffold is going to watch our local react project directory for changes.
+So you and I might then open up our code editor and change some react component or whatever else.
+Once we save that file scaffold is going to see that a change occurred and then scaffold is going to
+jump into action scaffold is all about somehow taking that change in our code and getting it reflected
+inside of our Cuban eddies cluster.
+It can do that with one of two different modes and we're going to explore both these different modes.
+The first way that scaffold is going to somehow update our client pod inside of our cluster is just
+automatically rebuild the entire client image from scratch.
+When I say from scratch I don't mean like Rerun on every single step including installing dependencies.
+It will be just a normal docker build process scaffold is going to tell Docker to rebuild the client
+Docker is going to see that the only change we made was to our source code.
+And so it's essentially just going to stick that source code into a new updated image scaffold will
+then take that image and update our local kubernetes cluster and then we should see our updated application
+appear now.
+
+```ini
+skaffold.dev/docs/getting-started
+```
+
+
+
 ### 2. Installing Skaffold
+
+[Installing Skaffold | Skaffold](https://skaffold.dev/docs/install/)
+
+Mac
+
+![image-20210117223703144](docker-and-kubernetes-the-complete-guide.assets/image-20210117223703144.png)
+
+`skaffold version`
+
+
+
+
+
 ### 3. The Skaffold Config File
+
+[skaffold.yaml | Skaffold](https://skaffold.dev/docs/references/yaml/)
+
+skaffold.yaml
+
+```yaml
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  local:
+    push: false
+  artifacts:
+    - image: stephengrider/multi-client
+      context: client
+      docker:
+        dockerfile: Dockerfile.dev
+      sync:
+        '**/*.js': .
+        '**/*.css': .
+        '**/*.html': .
+    - image: stephengrider/multi-server
+      context: server
+      docker:
+        dockerfile: Dockerfile.dev
+      sync:
+        '**/*.js': .
+    - image: stephengrider/multi-worker
+      context: worker
+      docker:
+        dockerfile: Dockerfile.dev
+      sync:
+        '**/*.js': .      # use mode 2
+deploy:
+  kubectl:
+    manifests:
+      - k8s/client-deployment.yaml
+      - k8s/server-deployment.yaml
+      - k8s/worker-deployment.yaml
+      - k8s/server-cluster-ip-service.yaml
+      - k8s/client-cluster-ip-service.yaml
+
+```
+
+The first option we're going to specify is something called local and then inside there we'll do a push
+of false so by default scaffold whenever it builds an image is going to try to push the built image
+off to say Docker Hub or whatever your default Docker repository is for local development.
+It's extremely likely that you probably don't want to push these images off to some hub or repository.
+You probably just want to make a change on your local machine and test it out yourself.
+So you're almost always in my opinion.
+You might have a very different workflow.
+You're very likely going to have local push false which just means every time that scaffold builds an
+image we're not going to do that push all right.
+So next up we're going to define a new image or a new container that we want scaffold to manage scaffold
+refers to these as artifacts so we'll define artifacts like so and this is going to be an array of different
+images or essentially containers we want scaffold to manage.
+
+
+
+
+
 ### 4. Live Sync Changes
+
+Add deploy ...
+
+create client image
+
+![image-20210117224644392](docker-and-kubernetes-the-complete-guide.assets/image-20210117224644392.png)
+
+![image-20210117224715571](docker-and-kubernetes-the-complete-guide.assets/image-20210117224715571.png)
+
+Change app.js
+
+![image-20210117224834280](docker-and-kubernetes-the-complete-guide.assets/image-20210117224834280.png)
+
+go to client app test to see the change
+
+
+
 ### 5. Automatic Shutdown
+
+![image-20210117225015274](docker-and-kubernetes-the-complete-guide.assets/image-20210117225015274.png)
+
+client pod is deleted
+
+ ![image-20210117225206611](docker-and-kubernetes-the-complete-guide.assets/image-20210117225206611.png)
+
+add some config to file
+
 ### 6. Testing Live Sync with the API Server
 
+add server with worker
 
-======== list file ========
+Remember the docker file dev for each of those starts up those projects using the dev script and that
+Dev script runs node 1 which watches for changes in the local project directory. use `nodemon`
+In this case inside the container and automatically restarts the project.
+So if our sub projects hear of server and worker do not make use of newly sync files coming in from
+scaffold then it's pointless to try to use scaffold to sync those files instead.
+If we don't have that ability we would want scaffold to operate in mode one which is to say automatically
+rebuild the entire image.
+Anytime we make a change.
+All right so now we've added those in.
 
-Process finished with exit code 0
+ server
+
+```js
+return [1, 2, 3] => test
+```
+
