@@ -1,0 +1,269 @@
+<html>
+                        <head>
+                        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+                        <title>003 Procedure Document</title>
+                        </head>
+                        <body>
+                        <div class="container">
+                        <div class="row">
+                        <div class="col-md-10 col-md-offset-1">
+                            <p class="lead"><div class="asset-container">
+    <div class="asset-container__padding article-view">
+        <div class="w3c-default">
+            <h4>Kubernetes Procedure Document</h4>
+
+<h4>Github repository [Read this first]</h4>
+
+
+
+
+
+<ul><li><p>Download all the course material from: <a href="https://github.com/wardviaene/kubernetes-course" rel="nofollow">https://github.com/wardviaene/kubernetes-course</a></p></li></ul>
+
+
+
+
+
+<h4>Questions?</h4>
+
+
+
+
+
+<ul><li><p>Send me a message</p></li><li><p>Use Q&amp;A</p></li><li><p>Join our facebook group: <a href="https://www.facebook.com/groups/840062592768074/" rel="nofollow">https://www.facebook.com/groups/840062592768074/</a></p></li></ul>
+
+
+
+
+
+
+
+<h4>Download Kubectl</h4>
+
+
+
+
+
+<ul><li><p>Linux: <a href="https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl" rel="nofollow">https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kubectl</a></p></li><li><p>MacOS: <a href="https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/darwin/amd64/kubectl" rel="nofollow">https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/darwin/amd64/kubectl</a></p></li><li><p>Windows: <br><a href="https://github.com/eirslett/kubectl-windows/releases/download/v1.6.3/kubectl.exe" rel="nofollow">https://github.com/eirslett/kubectl-windows/releases/download/v1.6.3/kubectl.exe</a></p></li></ul>
+
+
+
+
+
+
+
+<h4>Minikube</h4>
+
+
+
+
+
+<ul><li><p>Project URL: https://github.com/kubernetes/minikube</p></li><li><p>Latest Release and download instructions: https://github.com/kubernetes/minikube/releases</p></li><li><p>VirtualBox: http://www.virtualbox.org</p></li></ul>
+
+
+
+
+
+<h4>Minikube on windows:</h4>
+
+
+
+
+
+<ul><li><p>Download the latest minikube-version.exe</p></li><li><p>Rename the file to minikube.exe and put it in C:\minikube</p></li><li><p>Open a cmd (search for the app cmd or powershell)</p></li><li><p>Run: cd C:\minikube and enter minikube start</p></li></ul>
+
+
+
+
+
+<h4>Test your cluster commands</h4>
+
+<p>Make sure your cluster is running, you can check with <strong>minikube status<strong>.</strong></strong></p>
+
+
+
+<p>If your cluster is not running, enter <strong>minikube start</strong> first.</p>
+
+
+
+
+
+<p>kubectl run hello-minikube --image=gcr.io/google_containers/echoserver:1.4 --port=8080<br>kubectl expose deployment hello-minikube --type=NodePort</p>
+
+
+
+
+
+<p>minikube service hello-minikube --url</p>
+
+
+
+
+
+<p>&lt;open a browser and go to that url&gt;</p>
+
+
+
+
+
+<h4>Kops</h4>
+
+
+
+
+
+<h4>Project URL</h4>
+
+
+
+
+
+<ul><li><p><a href="https://github.com/kubernetes/kops" rel="nofollow">https://github.com/kubernetes/kops</a></p></li></ul>
+
+
+
+
+
+<h4>Free DNS Service</h4>
+
+
+
+
+
+<ul><li><p>Sign up at <a href="http://freedns.afraid.org/" rel="nofollow">http://freedns.afraid.org/</a></p></li><ul><li><p>Choose for subdomain hosting</p></li><li><p>Enter the AWS nameservers given to you in route53 as nameservers for the subdomain</p></li></ul><li><p><a href="http://www.dot.tk/" rel="nofollow">http://www.dot.tk/</a> provides a free .tk domain name you can use and you can point it to the amazon AWS nameservers</p></li></ul>
+
+
+
+
+
+<p>###h2<a rel="nofollow"><br></a></p>
+
+
+
+<ul><li><p><a rel="nofollow">Namecheap.com often has promotions for tlds like .co for just a couple of bucks</a></p></li></ul>
+
+
+
+<p><a rel="nofollow"></a></p>
+
+<p><a rel="nofollow"></a></p><a rel="nofollow">
+
+<h4>Cluster Commands</h4>
+
+
+
+
+
+<ul><li><p>kops create cluster --name=kubernetes.newtech.academy --state=s3://kops-state-b429b --zones=eu-west-1a --node-count=2 --node-size=t2.micro --master-size=t2.micro --dns-zone=kubernetes.newtech.academy</p></li><li><p>kops update cluster kubernetes.newtech.academy --yes --state=s3://kops-state-b429b</p></li><li><p>kops delete cluster --name kubernetes.newtech.academy --state=s3://kops-state-b429b</p></li><li><p>kops delete cluster --name kubernetes.newtech.academy --state=s3://kops-state-b429b --yes</p></li></ul>
+
+
+
+
+
+<h4>Kubernetes from scratch</h4>
+
+
+
+
+
+</a><p><a rel="nofollow"></a><br></p><p><a rel="nofollow"></a><br></p>
+
+<p><a rel="nofollow"></a><br></p>
+
+
+
+<ul><a rel="nofollow"><li><p>You can setup your cluster manually from scratch</p></li><li><p>If youre planning to deploy on AWS / Google / Azure, use the tools that are fit for these platforms</p></li><li><p>If you have an unsupported cloud platform, and you still want Kubernetes, you can install it manually</p></li></a><li><a rel="nofollow"></a><p><a rel="nofollow">CoreOS + Kubernetes: ###a href="https://coreos.com/kubernetes/docs/latest/getting-started.html"&gt;https://coreos.com/kubernetes/docs/latest/getting-started.html</a></p></li></ul>
+
+
+
+
+
+<h4>Docker</h4>
+
+
+
+
+
+<ul><li><p>You can download Docker Engine for:</p></li><ul><li><p>Windows:<a href="https://docs.docker.com/engine/installation/windows/" rel="nofollow"> https://docs.docker.com/engine/installation/windows/</a></p></li><li><p>MacOS:<a href="https://docs.docker.com/engine/installation/mac/" rel="nofollow"> https://docs.docker.com/engine/installation/mac/</a></p></li><li><p>Linux:<a href="https://docs.docker.com/engine/installation/linux/" rel="nofollow"> https://docs.docker.com/engine/installation/linux/</a></p></li></ul></ul>
+
+
+
+
+
+
+
+<h4>DevOps box</h4>
+
+
+
+
+
+<ul><li><p>Virtualbox: <a href="http://www.virtualbox.org" rel="nofollow">http://www.virtualbox.org</a></p></li><li><p>Vagrant: <a href="http://www.vagrantup.com" rel="nofollow">http://www.vagrantup.com</a></p></li><li><p>DevOps box: <a href="https://github.com/wardviaene/devops-box" rel="nofollow">https://github.com/wardviaene/devops-box</a></p></li><li><p>Launch commands (in terminal / cmd / powershell):</p></li><ul><li><p>cd devops-box/</p></li><li><p>vagrant up</p></li></ul><li><p>Launch commands for a plain ubuntu box:</p></li><ul><li><p>mkdir ubuntu</p></li><li><p>vagrant init ubuntu/xenial64</p></li><li><p>vagrant up</p></li></ul></ul>
+
+
+
+
+
+
+
+<h4>Docker commands</h4>
+
+
+
+
+
+<table><tbody><tr><td><p><strong>Description</strong></p></td><td><p><strong>Command</strong></p></td></tr><tr><td><p>Build image</p></td><td><p>docker build .</p></td></tr><tr><td><p>Build &amp; Tag</p></td><td><p>docker build -t wardviaene/k8s-demo:latest .</p></td></tr><tr><td><p>Tag image</p></td><td><p>docker tag imageid wardviaene/k8s-demo</p></td></tr><tr><td><p>Push image</p></td><td><p>docker push wardviaene/k8s-demo</p></td></tr><tr><td><p>List images</p></td><td><p>docker images</p></td></tr><tr><td><p>List all containers</p></td><td><p>docker ps -a</p></td></tr></tbody></table>
+
+
+
+
+
+
+
+<h4>Kubernetes commands</h4>
+
+
+
+
+
+<table><tbody><tr><td><p><strong>Command</strong></p></td><td><p><strong>Description</strong></p></td></tr><tr><td><p>kubectl get pod</p></td><td><p>Get information about all running pods</p></td></tr><tr><td><p>kubectl describe pod &lt;pod&gt;</p></td><td><p>Describe one pod</p></td></tr><tr><td><p>kubectl expose pod &lt;pod&gt; --port=444</p><p>--name=frontend</p></td><td><p>Expose the port of a pod (creates a new service)</p></td></tr><tr><td><p>kubectl port-forward &lt;pod&gt; 8080</p></td><td><p>Port forward the exposed pod port to your local machine</p></td></tr><tr><td><p>kubectl attach &lt;podname&gt; -i</p></td><td><p>Attach to the pod</p></td></tr><tr><td><p>kubectl exec &lt;pod&gt; -- command</p></td><td><p>Execute a command on the pod</p></td></tr><tr><td><p>kubectl label pods &lt;pod&gt; mylabel=awesome </p></td><td><p>Add a new label to a pod</p></td></tr><tr><td><p>kubectl run -i --tty busybox --image=busybox</p><p>--restart=Never -- sh </p></td><td><p>Run a shell in a pod - very useful for debugging</p></td></tr><tr><td><p>kubectl get deployments</p></td><td><p>Get information on current deployments</p></td></tr><tr><td><p>kubectl get rs</p></td><td><p>Get information about the replica sets</p></td></tr><tr><td><p>kubectl get pods --show-labels</p></td><td><p>get pods, and also show labels attached to those pods</p></td></tr><tr><td><p>kubectl rollout status deployment/helloworld-deployment</p></td><td><p>Get deployment status</p></td></tr><tr><td><p>kubectl set image deployment/helloworld-deployment </p><p>k8s-demo=k8s-demo:2</p>
+
+</td><td><p>Run k8s-demo with the image label version 2</p></td></tr><tr><td><p>kubectl edit deployment/helloworld-deployment</p></td><td><p>Edit the deployment object</p></td></tr><tr><td><p>kubectl rollout status deployment/helloworld-deployment</p></td><td><p>Get the status of the rollout</p></td></tr><tr><td><p>kubectl rollout history deployment/helloworld-deployment</p></td><td><p>Get the rollout history</p></td></tr><tr><td><p>kubectl rollout undo deployment/helloworld-deployment</p></td><td><p>Rollback to previous version</p></td></tr><tr><td><p>kubectl rollout undo deployment/helloworld-deployment --to-revision=n</p></td><td><p>Rollback to any version version</p></td></tr></tbody></table>
+
+
+
+
+
+
+
+<h4>AWS Commands</h4>
+
+
+
+
+
+<ul><li><p>aws ec2 create-volume --size 10 --region us-east-1 --availability-zone us-east-1a --volume-type gp2</p></li></ul>
+
+
+
+
+
+
+
+<h4>Certificates</h4>
+
+
+
+
+
+<ul><li><p>Creating a new key for a new user: openssl genrsa -out myuser.pem 2048</p></li><li><p>Creating a certificate request: openssl req -new -key myuser.pem -out myuser-csr.pem -subj "/CN=myuser/O=myteam/"</p></li><li><p>Creating a certificate: openssl x509 -req -in myuser-csr.pem -CA /path/to/kubernetes/ca.crt -CAkey /path/to/kubernetes/ca.key -CAcreateserial -out myuser.crt -days 10000</p></li></ul>
+        </div>
+    </div>
+</div>
+</p>
+                        </div>
+                        </div>
+                        </div>
+                        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+                        </body>
+                        </html>
