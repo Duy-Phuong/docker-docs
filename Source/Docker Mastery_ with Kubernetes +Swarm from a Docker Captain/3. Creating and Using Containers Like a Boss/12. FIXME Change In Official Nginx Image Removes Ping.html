@@ -1,0 +1,15 @@
+<p>Hey just a quick note before doing the next few lectures. A recent June 2017 change in the official nginx image <a href="https://hub.docker.com/_/nginx" rel="nofollow" target="_blank">https://hub.docker.com/_/nginx</a> (<code>nginx</code>  or <code>nginx:latest</code> ) removes ping, but I use it in the next few videos to test connectivity, so you might get an error about "ping not found". I'm working on updates to those videos but until I can get them processed and uploaded, just do this:</p>
+
+<p>Anywhere I do a <code>docker container run &lt;stuff&gt; nginx</code> , where <code>nginx</code>  is the image you should use, replace that with <code>nginx:alpine</code> , which still has ping command in it.</p>
+
+
+
+
+
+
+
+
+
+
+
+<p>There are other ways to solve this, including adding the ping util with apt-get, making your own image, etc. More info <a href="https://www.udemy.com/docker-mastery/learn/v4/questions/2487292" rel="nofollow">in this Q&amp;A answer</a>. </p>
