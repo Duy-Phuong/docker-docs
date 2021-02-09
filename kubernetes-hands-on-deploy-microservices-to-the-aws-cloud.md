@@ -2804,15 +2804,450 @@ MySQL [fleetman]> show tables;
 
 ### 1. WARNING - possible resource problems!.html
 
-### 10. Deploying the Webapp
+In this section, we're going to be deploying a lot more resources to your cluster.
+
+I've realised since recording that on some systems, there won't be enough resources (RAM) in minikube to manage the full load. For some reason, I got away with it on the videos (although in a later section, when we use Mongo, I did have to expand the RAM).
+
+**I recommend before starting this section that you set up minikube with plenty of RAM. To do this:**
+
+1. Stop minikube with "minikube stop"
+2. Delete your existing minikube with "minikube delete"
+3. Remove any config files with "rm ~/.kube" and "rm ~/.minikube". Or, delete these folders using your file explorer. The folders are stored in your home directory, which under windows will be "c:\Users\<your username>"
+4. Now restart minikube with "minikube start --memory 4096".
+
+This will allocate 4Gb of RAM to minikube (I'm assuming you have enough host ram to support this) and should give a much more comfortable experience in the next few sections.
+
+Do ask on the QA page if you have any problems here.
 
 ### 2. An Introduction to Microservices
 
+![image-20210209215845751](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209215845751.png)
+
+
+
+Problems
+
+![image-20210209220001031](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209220001031.png)
+
+So all fairly straight forward, what's the problem here?
+Well, of course the monolith gets bloated.
+Eventually, it gets too big to manage easily.
+And it gets harder and harder to make changes
+to one business area, without you accidentally
+breaking another business area.
+It gets harder to coordinate.
+By the time the monolith gets this big,
+we're going to have multiple teams
+working on this application.
+And those teams are going to start
+cutting across each other.
+So if I wanna make a change here,
+then I've got to consult with colleagues from
+the other teams to make sure that I'm not impacting on them.
+And we'll so end up having to delay
+any new releases of the application until such time as
+we're able to coordinate a release of the entire monolith.
+
+![image-20210209220350797](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209220350797.png)
+
+And I think that fits with the concept of the microservice perfectly.
+I've probably used diagrams like this for 10 years or more, on courses and at work.
+But the big idea in microservices is that this separation is going to be extreme.
+Traditionally, I would've probably built these components
+as separate Java packages, but ultimately,
+I would've combined all of the code together
+into one great big war file.
+Packages are really weak.
+They really don't give any serious level of separation, and certainly not at run time.
+So these microservices are going to be developed in their own workspaces, and most importantly,
+their ultimately going to deploy to their own, standalone hardware.
+If we can afford it, we would have each service would be running on its own private,
+physical instance of a server.
+
+http://blog.idonethis.com/two-pizza-team/
+
+![image-20210209221818250](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209221818250.png)
+
+
+
+![image-20210209221901232](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209221901232.png)
+
+![image-20210209221952458](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209221952458.png)
+
+each microservice should be highly cohesive and loosely coupled.
+These are two of the most important principles in software development, and very relevant to microservices.
+Let's look at each of the principles.
+
+**Highly cohesive**
+Well, I've already really covered that by saying that each microservice
+should be handling one business requirement.
+**Cohesive** means that a microservice should have a single set of responsibilities.
+
+![image-20210209222435671](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209222435671.png)
+
+As a quick example, you might have a microservice who's job is to maintain mailing lists.
+And when a customer signs up, this microservice is responsible for storing their details,
+their mailing preferences and so on.
+There might be some logic in there that says no, this customer is an invalid customer,
+and they can't be signed up, because they previously opted out of the list.
+Things like that.
+And the service could also be responsible for broadcasting email newsletters.
+Well, okay, it could, but really handling emails is a totally separate requirement.
+It's a separate concern from the job of maintaining mailing lists.
+So I deliberately misled you there, really, because the broadcasting of emails
+would probably be a separate microservice.
+We'll call this the newsletter service.
+
+![image-20210209222456012](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209222456012.png)
+
+
+
+
+
 ### 3. Introduction to Microservices Part 2
+
+![image-20210209223642317](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209223642317.png)
+
+
+
+If the integration database for you or your projects
+is a precious thing that you can't change, you don't want to get rid of it, then I don't really have
+any work arounds for that.
+Microservices are simply not for you.
+And that's fine.
+Microservices are definitely not a silver bullet that solves every problem that every project in the world
+can adopt.
+Well of course we're still going to need data stores whether that's traditional SQL relational databases
+or no SQL big databases or maybe just system flat file storage, whatever.
+The key thing is that each microservice will maintain its own data store.
+
+
+
+![image-20210209224041564](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209224041564.png)
+
+
+
+![image-20210209224457239](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209224457239.png)
+
+Microservice architectures are very, as we say, emergence.
+They tend to develop over time as your understanding of the system improves.
+So you will find yourself designing, building,
+and deploying a microservice, like the shipping one I did here, which ends up being incohesive, and you realise it's doing too much.
+But it's only a few weeks later or whatever down the line that you, you have a eureka moment, and you realise that no that's too big, it's doing too much, it should be broken down.
+
+https://martinfowler.com/bliki/BoundedContext.html
+
+Domain Driven design ebook
+
+
+
+
 
 ### 4. Fleetman Microservices - setting the scene
 
+![image-20210209225301761](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209225301761.png)
+
+
+
+![image-20210209225529911](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209225529911.png)
+
+The system that we're deploying on this course is a system for some kind of transport company
+that needs to track its vehicles as they move around the country.
+So it's something like delivery trucks moving around the country.
+Each of the vehicles is equipped with a Global
+Positioning System and periodically, maybe every 10 seconds or so, a vehicle will report
+its current position back to our central server.
+And we're going to have many of these vehicles out in the field constantly reporting their positions.
+
+https://github.com/DickChesterwood/k8s-fleetman/tree/master/k8s-fleetman-position-simulator
+
+![image-20210209230144235](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209230144235.png)
+
+> Java code read file to simulate position
+
+So as that microservice generates simulated positions,
+it sends those positions off to a queue.
+And a queue is a very common aspect
+of a microservice architecture.
+It allows us to send data across the system
+without coupling the microservice together.
+For this system, I'm using a queue called **ActiveMq**.
+
+https://github.com/DickChesterwood/k8s-fleetman/blob/master/k8s-fleetman-queue/Dockerfile
+
+
+
+The next microservice in the system is the one called **position tracker**, and certainly for this system 
+this is the most important of the microservices.
+The job of this microservice is to read the positions from the queue and to do various calculations
+on those positions.
+
+![image-20210209230704117](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209230704117.png)
+
+
+
+![image-20210209230847629](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209230847629.png)
+
+https://microservices.io/patterns/apigateway.html
+
+
+
 ### 5. Deploying the Queue
+
+RUN `kubectl apply –f .` to delete all
+
+and restart minikube `minikube start --memory 4096`
+
+![image-20210209232032393](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209232032393.png)
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 11 Microservices\workloads.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-queue
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: queue
+
+  ports:
+    - name: http
+      port: 8161
+      nodePort: 30010
+
+    - name: endpoint
+      port: 61616
+
+  type: NodePort
+```
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 11 Microservices\services.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-queue
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: queue
+
+  ports:
+    - name: http
+      port: 8161
+      nodePort: 30010
+	# add
+    - name: endpoint
+      port: 61616
+
+  type: NodePort
+```
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 10 Networking
+$ cd ../Chapter\ 11\ Microservices/
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 11 Microservices
+$ kubectl get all
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   9m47s
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 11 Microservices
+$ kubectl apply -f workloads.yaml
+deployment.apps/queue created
+deployment.apps/position-simulator created
+deployment.apps/position-tracker created
+deployment.apps/api-gateway created
+deployment.apps/webapp created
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 11 Microservices
+$ kubectl get all
+NAME                                      READY   STATUS              RESTARTS   AGE
+pod/api-gateway-85944f447b-p92dl          0/1     ContainerCreating   0          2s
+pod/position-simulator-54c465565f-9546b   0/1     ContainerCreating   0          3s
+pod/position-tracker-7964b5474f-7kvtp     0/1     ContainerCreating   0          2s
+pod/queue-68799ffccd-w95fk                0/1     ContainerCreating   0          3s
+pod/webapp-6d4bd8866f-v8s92               0/1     ContainerCreating   0          2s
+
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   10m
+
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api-gateway          0/1     1            0           2s
+deployment.apps/position-simulator   0/1     1            0           3s
+deployment.apps/position-tracker     0/1     1            0           3s
+deployment.apps/queue                0/1     1            0           3s
+deployment.apps/webapp               0/1     1            0           2s
+
+NAME                                            DESIRED   CURRENT   READY   AGE
+replicaset.apps/api-gateway-85944f447b          1         1         0       2s
+replicaset.apps/position-simulator-54c465565f   1         1         0       3s
+replicaset.apps/position-tracker-7964b5474f     1         1         0       3s
+replicaset.apps/queue-68799ffccd                1         1         0       3s
+replicaset.apps/webapp-6d4bd8866f               1         1         0       2s
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 11 Microservices
+$ kubectl describe po queue-68799ffccd-w95f
+Name:           queue-68799ffccd-w95fk
+Namespace:      default
+Priority:       0
+Node:           minikube/192.168.49.2
+Start Time:     Tue, 09 Feb 2021 23:26:55 +0700
+Labels:         app=queue
+                pod-template-hash=68799ffccd
+Annotations:    <none>
+Status:         Pending
+IP:
+IPs:            <none>
+Controlled By:  ReplicaSet/queue-68799ffccd
+Containers:
+  queue:
+    Container ID:
+    Image:          richardchesterwood/k8s-fleetman-queue:release1
+    Image ID:
+    Port:           <none>
+    Host Port:      <none>
+    State:          Waiting
+      Reason:       ContainerCreating
+    Ready:          False
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-2t9c7 (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             False
+  ContainersReady   False
+  PodScheduled      True
+Volumes:
+  default-token-2t9c7:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-2t9c7
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  43s   default-scheduler  Successfully assigned default/queue-68799ffccd-w95fk to minikube
+  Normal  Pulling    40s   kubelet            Pulling image "richardchesterwood/k8s-fleetman-queue:release1"
+
+```
+
+Run
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 11 Microservices
+$ kubectl get all
+NAME                                      READY   STATUS             RESTARTS   AGE
+pod/api-gateway-85944f447b-p92dl          1/1     Running            0          3m34s
+pod/position-simulator-54c465565f-9546b   1/1     Running            0          3m35s
+pod/position-tracker-7964b5474f-7kvtp     1/1     Running            0          3m34s
+pod/queue-68799ffccd-w95fk                1/1     Running            0          3m35s
+pod/webapp-6d4bd8866f-v8s92               0/1     CrashLoopBackOff   4          3m34s
+
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   13m
+
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api-gateway          1/1     1            1           3m34s
+deployment.apps/position-simulator   1/1     1            1           3m35s
+deployment.apps/position-tracker     1/1     1            1           3m35s
+deployment.apps/queue                1/1     1            1           3m35s
+deployment.apps/webapp               0/1     1            0           3m34s
+
+NAME                                            DESIRED   CURRENT   READY   AGE
+replicaset.apps/api-gateway-85944f447b          1         1         1       3m34s
+replicaset.apps/position-simulator-54c465565f   1         1         1       3m35s
+replicaset.apps/position-tracker-7964b5474f     1         1         1       3m35s
+replicaset.apps/queue-68799ffccd                1         1         1       3m35s
+replicaset.apps/webapp-6d4bd8866f               1         1         0       3m34s
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 11 Microservices
+$ kubectl apply -f services.yaml
+service/fleetman-webapp created
+service/fleetman-queue created
+service/fleetman-position-tracker created
+service/fleetman-api-gateway created
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 11 Microservices
+$ kubectl get all
+NAME                                      READY   STATUS             RESTARTS   AGE
+pod/api-gateway-85944f447b-p92dl          1/1     Running            0          4m23s
+pod/position-simulator-54c465565f-9546b   1/1     Running            0          4m24s
+pod/position-tracker-7964b5474f-7kvtp     1/1     Running            0          4m23s
+pod/queue-68799ffccd-w95fk                1/1     Running            0          4m24s
+pod/webapp-6d4bd8866f-v8s92               0/1     CrashLoopBackOff   4          4m23s
+
+NAME                                TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                          AGE
+service/fleetman-api-gateway        NodePort    10.111.15.68    <none>        8080:30020/TCP                   4s
+service/fleetman-position-tracker   ClusterIP   10.109.134.91   <none>        8080/TCP                         4s
+service/fleetman-queue              NodePort    10.107.55.22    <none>        8161:30010/TCP,61616:31910/TCP   4s
+service/fleetman-webapp             NodePort    10.97.48.47     <none>        80:30080/TCP                     4s
+service/kubernetes                  ClusterIP   10.96.0.1       <none>        443/TCP                          14m
+
+NAME                                 READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api-gateway          1/1     1            1           4m23s
+deployment.apps/position-simulator   1/1     1            1           4m24s
+deployment.apps/position-tracker     1/1     1            1           4m24s
+deployment.apps/queue                1/1     1            1           4m24s
+deployment.apps/webapp               0/1     1            0           4m23s
+
+NAME                                            DESIRED   CURRENT   READY   AGE
+replicaset.apps/api-gateway-85944f447b          1         1         1       4m23s
+replicaset.apps/position-simulator-54c465565f   1         1         1       4m24s
+replicaset.apps/position-tracker-7964b5474f     1         1         1       4m24s
+replicaset.apps/queue-68799ffccd                1         1         1       4m24s
+replicaset.apps/webapp-6d4bd8866f               1         1         0       4m23s
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 11 Microservices
+```
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 11 Microservices
+$ minikube service fleetman-queue
+|-----------|----------------|----------------|---------------------------|
+| NAMESPACE |      NAME      |  TARGET PORT   |            URL            |
+|-----------|----------------|----------------|---------------------------|
+| default   | fleetman-queue | http/8161      | http://192.168.49.2:30010 |
+|           |                | endpoint/61616 | http://192.168.49.2:31910 |
+|-----------|----------------|----------------|---------------------------|
+* Starting tunnel for service fleetman-queue.
+|-----------|----------------|-------------|------------------------|
+| NAMESPACE |      NAME      | TARGET PORT |          URL           |
+|-----------|----------------|-------------|------------------------|
+| default   | fleetman-queue |             | http://127.0.0.1:60288 |
+|           |                |             | http://127.0.0.1:60289 |
+|-----------|----------------|-------------|------------------------|
+* Opening service default/fleetman-queue in default browser...
+* Opening service default/fleetman-queue in default browser...
+! Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+
+```
+
+User name and pass is admin - admin
+
+![image-20210209233531278](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209233531278.png)
+
+
+
+![image-20210209233409541](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209233409541.png)
+
+
+
+
 
 ### 6. Deploying the Position Simulator
 
@@ -2821,6 +3256,10 @@ MySQL [fleetman]> show tables;
 ### 8. Deploying the Position Tracker
 
 ### 9. Deploying the API Gateway
+
+
+
+### 10. Deploying the Webapp
 
 ## 12. Kubernetes Persistence and Volumes
 
