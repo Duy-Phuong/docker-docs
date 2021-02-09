@@ -1553,20 +1553,335 @@ So how do we define a replica set, then?
 
 https://kubernetes.io/docs/reference/kubernetes-api/workloads-resources/replica-set-v1/
 
-
+Notice `group` is app/v1
 
 
 
 ### 2. Writing a ReplicaSet
 
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 8 ReplicaSets\pods.yaml
+
+```ini
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: webapp
+spec:
+  selector:
+    matchLabels:
+      app: webapp
+  replicas: 2
+  template: # template for the pods
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: webapp
+        image: richardchesterwood/k8s-fleetman-webapp-angular:release0-5
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: queue
+  labels:
+    app: queue
+spec:
+  containers:
+  - name: queue
+    image: richardchesterwood/k8s-fleetman-queue:release1
+
+```
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 8 ReplicaSets\services.yaml
+
+```ini
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-webapp
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: webapp
+    # remove release: "0-5"
+
+  ports:
+    - name: http
+      port: 80
+      nodePort: 30080
+
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-queue
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: queue
+
+  ports:
+    - name: http
+      port: 8161
+      nodePort: 30010
+
+  type: NodePort
+
+```
+
+![image-20210209151933496](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209151933496.png)
+
+
+
 
 
 ### 3. Applying a ReplicaSet to Kubernetes
+
+Delete all pods
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ kubectl get all
+NAME                   READY   STATUS    RESTARTS   AGE
+pod/queue              1/1     Running   0          10h
+pod/webapp             1/1     Running   0          10h
+pod/webapp-release-0   1/1     Running   0          10h
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   10h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     10h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          10h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ kubectl delete po --all
+pod "queue" deleted
+pod "webapp" deleted
+pod "webapp-release-0" deleted
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ kubectl get all
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   15h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     15h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          15h
+
+```
+
+> If some pods are still existing, you must run this command again.
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ cd ../Chapter\ 8\ ReplicaSets/
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl apply -f pods.yaml
+replicaset.apps/webapp created
+pod/queue created
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl get all
+NAME               READY   STATUS              RESTARTS   AGE
+pod/queue          0/1     ContainerCreating   0          4s
+pod/webapp-5f2vd   0/1     ContainerCreating   0          4s
+pod/webapp-cgrz4   0/1     ContainerCreating   0          4s
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   15h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     15h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          15h
+
+NAME                     DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp   2         2         0       4s
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl describe replicaset webapp
+Name:         webapp
+Namespace:    default
+Selector:     app=webapp
+Labels:       <none>
+Annotations:  <none>
+Replicas:     2 current / 2 desired
+Pods Status:  2 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:  app=webapp
+  Containers:
+   webapp:
+    Image:        richardchesterwood/k8s-fleetman-webapp-angular:release0-5
+    Port:         <none>
+    Host Port:    <none>
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Events:
+  Type    Reason            Age   From                   Message
+  ----    ------            ----  ----                   -------
+  Normal  SuccessfulCreate  32s   replicaset-controller  Created pod: webapp-5f2vd
+  Normal  SuccessfulCreate  32s   replicaset-controller  Created pod: webapp-cgrz4
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl describe rs webapp
+Name:         webapp
+Namespace:    default
+Selector:     app=webapp
+Labels:       <none>
+Annotations:  <none>
+Replicas:     2 current / 2 desired
+Pods Status:  2 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:  app=webapp
+  Containers:
+   webapp:
+    Image:        richardchesterwood/k8s-fleetman-webapp-angular:release0-5
+    Port:         <none>
+    Host Port:    <none>
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Events:
+  Type    Reason            Age   From                   Message
+  ----    ------            ----  ----                   -------
+  Normal  SuccessfulCreate  59s   replicaset-controller  Created pod: webapp-5f2vd
+  Normal  SuccessfulCreate  59s   replicaset-controller  Created pod: webapp-cgrz4
+
+```
+
+Remove release tag in the service file
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl apply -f services.yaml
+service/fleetman-webapp configured
+service/fleetman-queue unchanged
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl get all
+NAME               READY   STATUS    RESTARTS   AGE
+pod/queue          1/1     Running   0          16m
+pod/webapp-5f2vd   1/1     Running   0          16m
+pod/webapp-cgrz4   1/1     Running   0          16m
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   15h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     16h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          16h
+
+NAME                     DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp   2         2         2       16m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ minikube ip
+192.168.49.2
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ minikube service fleetman-webapp
+|-----------|-----------------|-------------|---------------------------|
+| NAMESPACE |      NAME       | TARGET PORT |            URL            |
+|-----------|-----------------|-------------|---------------------------|
+| default   | fleetman-webapp | http/80     | http://192.168.49.2:30080 |
+|-----------|-----------------|-------------|---------------------------|
+* Starting tunnel for service fleetman-webapp.
+|-----------|-----------------|-------------|------------------------|
+| NAMESPACE |      NAME       | TARGET PORT |          URL           |
+|-----------|-----------------|-------------|------------------------|
+| default   | fleetman-webapp |             | http://127.0.0.1:54268 |
+|-----------|-----------------|-------------|------------------------|
+* Opening service default/fleetman-webapp in default browser...
+! Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+```
+
+![image-20210209154912480](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209154912480.png)
+
+Reload page to see the result
+
+Try to test
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl get all
+NAME               READY   STATUS    RESTARTS   AGE
+pod/queue          1/1     Running   0          16m
+pod/webapp-5f2vd   1/1     Running   0          16m
+pod/webapp-cgrz4   1/1     Running   0          16m
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   15h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     16h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          16h
+
+NAME                     DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp   2         2         2       16m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl delete po webapp-cgrz4
+pod "webapp-cgrz4" deleted
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl get all
+NAME               READY   STATUS    RESTARTS   AGE
+pod/queue          1/1     Running   0          23m
+pod/webapp-5f2vd   1/1     Running   0          23m
+pod/webapp-np59l   1/1     Running   0          44s
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   16h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     16h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          16h
+
+NAME                     DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp   2         2         2       23m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl describe rs webapp
+Name:         webapp
+Namespace:    default
+Selector:     app=webapp
+Labels:       <none>
+Annotations:  <none>
+Replicas:     2 current / 2 desired
+Pods Status:  2 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:  app=webapp
+  Containers:
+   webapp:
+    Image:        richardchesterwood/k8s-fleetman-webapp-angular:release0-5
+    Port:         <none>
+    Host Port:    <none>
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Events:
+  Type    Reason            Age    From                   Message
+  ----    ------            ----   ----                   -------
+  Normal  SuccessfulCreate  24m    replicaset-controller  Created pod: webapp-5f2vd
+  Normal  SuccessfulCreate  24m    replicaset-controller  Created pod: webapp-cgrz4
+  Normal  SuccessfulCreate  2m11s  replicaset-controller  Created pod: webapp-np59l
+```
+
+![image-20210209155459603](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209155459603.png)
+
+Solution for downtime => 2 replicaset
 
 
 
 ## 9. Kubernetes Deployments
 ### 1. Deployments Overview
+
+![image-20210209155938927](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209155938927.png)
+
+> With zero downtime
+
+
+
 ### 2. Managing Rollouts
 
 
