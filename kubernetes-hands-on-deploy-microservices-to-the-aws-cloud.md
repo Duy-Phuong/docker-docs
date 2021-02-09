@@ -910,17 +910,661 @@ Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 5 Pods
 ## 6. Services in Kubernetes
 ### 1. Services
 
+that's because Pods are not visible outside the cluster and it's by design because you're going to discover when we go a little further on the course that Pods are designed to be very throw away things.
+Pods have short lifetimes. Pods regularly die.
+Pods are regularly recreated and as the old saying goes,
+as I mentioned in the introduction section, we treat Pods like cattle.
+We don't treat them like pets.
+So because Pods have this, as they say, ephemeral lifecycle, and that just means **short-lived**,
+Kubernetes has a further concept called a service and the idea is that a service is a **long-running** object in Kubernetes.
+A **service** will have an IP address and a service will have a stable, fixed port.
+And what we can do is we can attach services to Pods.
+I'll show you how that works in a very short while.
+
+![image-20210208221141650](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210208221141650.png)
+
+> With a service we can connect to the Kubernetes Cluster
+> and the service will find a suitable Pod to service that request.
+
+![image-20210208221253756](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210208221253756.png)
+
+
+
+**Pod Label**
+What we can do with a Pod is we can set up a series of key value pairs.
+You can have one or more of these key value pairs so for example we might give a Pod a label
+whose name is app and the value is webapp.
+Now this can be anything you like.
+I've only used this because all of the reference documentation uses, as its first example really,
+the key value pair of app followed by some value.
+
+[Service | Kubernetes](https://kubernetes.io/docs/reference/kubernetes-api/services-resources/service-v1/)
+
+![image-20210208221726500](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210208221726500.png)
+
+
+
+
+
+
+
 
 
 ### 2. NodePort and ClusterIP
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 6 Services\first-pod.yaml
+
+```ini
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webapp
+  labels:
+    app: webapp
+    release: "0"
+spec:
+  containers:
+  - name: webapp
+    image: richardchesterwood/k8s-fleetman-webapp-angular:release0
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webapp-release-0-5
+  labels:
+    app: webapp
+    release: "0-5"
+spec:
+  containers:
+  - name: webapp
+    image: richardchesterwood/k8s-fleetman-webapp-angular:release0-5
+
+```
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 6 Services\webapp-service.yaml
+
+```ini
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-webapp
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: webapp
+    release: "0-5"
+
+  ports:
+    - name: http
+      port: 80
+      nodePort: 30080
+
+  type: NodePort
+
+```
+
+https://kubernetes.io/docs/reference/kubernetes-api/services-resources/service-v1/
+
+**type** (string) 
+
+type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer. "ClusterIP" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is "None", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. "NodePort" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. "LoadBalancer" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. "ExternalName" aliases this service to the specified externalName. Several other fields do not apply to ExternalName services. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+
+---
+
+The first option is **ClusterIP**. 
+If you make your service be of type ClusterIP then you're telling Kubernetes that this
+service will only be accessible from inside the Cluster.
+**It will not be accessible to external things such as web browsers**, so you're going to use ClusterIP
+if this service is just going to be an internal service such as our micro services that we're building.
+Many of the micro services that we're building, we will not want to expose to external traffic.
+We just want other micro services inside the Cluster to talk to it.
+In that case, ClusterIP would be the right choice,
+It makes it a kind of private service.
+That's just my terminology but that's the way I think of it.
+It will give this service an IP address and that IP address will be stable because
+services are long lived entities in Kubernetes.
+Remember, pods come and go.
+Pods will constantly die, pods are going to be restarted.
+And that's the point of having this service, to act as a fronts to the pods
+so we can have stable IP addresses.
+Actually **ClusterIP is probably going to be what we use for most of our services**
+**when we start introducing the micro services, but of course, that's not the right choice for the web app.**
+We want the web app, of course, to be exposed to the outside world.
+So for that reason, the type we're going to need is the final choice available and that type is called a **NodePort**. That this is where we are going to expose a port through the node, the node in our case is the entire Kubernetes Cluster, of course, when we go further with this we are going to have multiple nodes in a Cluster but this means we're going to expose a port through the node.
+
+![image-20210208223041218](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210208223041218.png)
+
+> Port > 30000
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl get all
+NAME         READY   STATUS    RESTARTS   AGE
+pod/webapp   1/1     Running   0          67m
+
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   2d21h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl apply -f webapp-service.yaml
+service/fleetman-webapp created
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl get all
+NAME         READY   STATUS    RESTARTS   AGE
+pod/webapp   1/1     Running   0          68m
+
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+service/fleetman-webapp   NodePort    10.109.124.196   <none>        80:30080/TCP   2s
+service/kubernetes        ClusterIP   10.96.0.1        <none>        443/TCP        2d21h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ ls
+first-pod.yaml  webapp-service.yaml
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ minikube ip
+192.168.49.2
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+
+```
+
+
+
+Go to http://192.168.49.2:30080/ => not works
+
+
+
+
+
 ### 3. Pod Selection with Labels
+
+Add label in first-pod.yaml
+
+```ini
+metadata:
+  name: webapp
+  labels:
+    app: webapp # we can use any name instead of app and it should be the same with service selector
+    release: "0"
+```
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl get all
+NAME         READY   STATUS    RESTARTS   AGE
+pod/webapp   1/1     Running   0          67m
+
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   2d21h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl apply -f webapp-service.yaml
+service/fleetman-webapp created
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl get all
+NAME         READY   STATUS    RESTARTS   AGE
+pod/webapp   1/1     Running   0          68m
+
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+service/fleetman-webapp   NodePort    10.109.124.196   <none>        80:30080/TCP   2s
+service/kubernetes        ClusterIP   10.96.0.1        <none>        443/TCP        2d21h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ ls
+first-pod.yaml  webapp-service.yaml
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ minikube ip
+192.168.49.2
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl apply -f first-pod.yaml
+pod/webapp configured
+pod/webapp-release-0-5 created
+
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl get all
+NAME                     READY   STATUS    RESTARTS   AGE
+pod/webapp               1/1     Running   0          76m
+pod/webapp-release-0-5   1/1     Running   0          66s
+
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+service/fleetman-webapp   NodePort    10.109.124.196   <none>        80:30080/TCP   7m45s
+service/kubernetes        ClusterIP   10.96.0.1        <none>        443/TCP        2d21h
+
+```
+
+![image-20210208224929821](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210208224929821.png)
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ minikube ip
+192.168.49.2
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl apply -f first-pod.yaml
+pod/webapp unchanged
+pod/webapp-release-0-5 unchanged
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl apply -f webapp-service.yaml
+service/fleetman-webapp unchanged
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl get all
+NAME                     READY   STATUS    RESTARTS   AGE
+pod/webapp               1/1     Running   0          80m
+pod/webapp-release-0-5   1/1     Running   0          5m19s
+
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+service/fleetman-webapp   NodePort    10.109.124.196   <none>        80:30080/TCP   11m
+service/kubernetes        ClusterIP   10.96.0.1        <none>        443/TCP        2d21h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ curl http://192.168.49.2:30080
+curl: (7) Failed to connect to 192.168.49.2 port 30080: Timed out
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl describe svc fleetman-webapp
+Name:                     fleetman-webapp
+Namespace:                default
+Labels:                   <none>
+Annotations:              <none>
+Selector:                 app=webapp,release=0-5
+Type:                     NodePort
+IP:                       10.109.124.196
+Port:                     http  80/TCP
+TargetPort:               80/TCP
+NodePort:                 http  30080/TCP
+Endpoints:                172.17.0.4:80
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+
+```
+
+Show pods
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl get pods
+NAME                 READY   STATUS    RESTARTS   AGE
+webapp               1/1     Running   0          88m
+webapp-release-0-5   1/1     Running   0          12m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl get po
+NAME                 READY   STATUS    RESTARTS   AGE
+webapp               1/1     Running   0          88m
+webapp-release-0-5   1/1     Running   0          13m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl get po --show-labels
+NAME                 READY   STATUS    RESTARTS   AGE   LABELS
+webapp               1/1     Running   0          88m   app=webapp,release=0
+webapp-release-0-5   1/1     Running   0          13m   app=webapp,release=0-5
+
+# Filter by release
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl get po --show-labels -l release=0
+NAME     READY   STATUS    RESTARTS   AGE   LABELS
+webapp   1/1     Running   0          90m   app=webapp,release=0
+
+```
+
+https://minikube.sigs.k8s.io/docs/handbook/accessing/
+
+I**ncreasing the NodePort range**
+By default, minikube only exposes ports 30000-32767. If this does not work for you, you can adjust the range by using:
+
+
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ kubectl get all
+NAME                     READY   STATUS    RESTARTS   AGE
+pod/webapp               1/1     Running   0          100m
+pod/webapp-release-0-5   1/1     Running   0          25m
+
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+service/fleetman-webapp   NodePort    10.109.124.196   <none>        80:30180/TCP   31m
+service/kubernetes        ClusterIP   10.96.0.1        <none>        443/TCP        2d21h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ minikube ip
+192.168.49.2
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ minikube service fleetman-webapp
+|-----------|-----------------|-------------|---------------------------|
+| NAMESPACE |      NAME       | TARGET PORT |            URL            |
+|-----------|-----------------|-------------|---------------------------|
+| default   | fleetman-webapp | http/80     | http://192.168.49.2:30180 |
+|-----------|-----------------|-------------|---------------------------|
+* Starting tunnel for service fleetman-webapp.
+|-----------|-----------------|-------------|------------------------|
+| NAMESPACE |      NAME       | TARGET PORT |          URL           |
+|-----------|-----------------|-------------|------------------------|
+| default   | fleetman-webapp |             | http://127.0.0.1:63961 |
+|-----------|-----------------|-------------|------------------------|
+* Opening service default/fleetman-webapp in default browser...
+! Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+
+```
+
+![image-20210208231048748](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210208231048748.png)
+
+
+
+Minikube doesn't support LoadBalancer services, so the service will never get an external IP.
+
+But you can access the service anyway with its external port.
+
+You can get the IP and PORT by running:
+
+```yaml
+minikube service <service_name>
+```
+
+https://stackoverflow.com/questions/39850819/kubernetes-minikube-external-ip-does-not-work
+
+
+
+https://kubernetes.io/docs/tutorials/hello-minikube/#create-a-service
+
+
+
+---
+
+
+
+https://stackoverflow.com/questions/63600378/cant-access-minikube-service-using-nodeport-from-host-on-mac
+
+You are mostly facing [this issue](https://github.com/kubernetes/minikube/issues/7344) when you use `minikube ip` which returns `127.0.0.1`. It should work if you use internal ip from `kubectl get node -o wide` instead of `127.0.0.1`.
+
+A much easier approach from the official reference [docs](https://kubernetes.io/docs/tutorials/hello-minikube/) is you can get the url using `minikube service web-test --url` and use it in browser or if you use `minikube service web-test` it will open the url in browser directly
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 6 Services
+$ minikube service fleetman-webapp --url
+* Starting tunnel for service fleetman-webapp.
+|-----------|-----------------|-------------|------------------------|
+| NAMESPACE |      NAME       | TARGET PORT |          URL           |
+|-----------|-----------------|-------------|------------------------|
+| default   | fleetman-webapp |             | http://127.0.0.1:57237 |
+|-----------|-----------------|-------------|------------------------|
+http://127.0.0.1:57237
+! Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+
+```
+
+
+
 ## 7. Exercise Deploy ActiveMQ as a Pod and Service to Kubernetes
 ### 1. Exercise Deploy ActiveMQ as a Pod and Service
+
+![image-20210208234345926](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210208234345926.png)
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 7 Exercise\pods.yaml
+
+```ini
+---
+# add
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: queue
+  labels:
+    app: queue
+spec:
+  containers:
+  - name: queue
+    image: richardchesterwood/k8s-fleetman-queue:release1
+```
+
+
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 7 Exercise\services.yaml
+
+```ini
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-queue
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: queue
+
+  ports:
+    - name: http
+      port: 8161
+      nodePort: 30010
+
+  type: NodePort
+```
+
+Run `kubectl apply -f .` to apply all
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ kubectl apply -f .
+pod/webapp-release-0-5 unchanged
+pod/webapp-release-0 created
+pod/queue created
+service/fleetman-webapp unchanged
+service/fleetman-queue created
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ kubectl get all
+NAME                     READY   STATUS              RESTARTS   AGE
+pod/queue                0/1     ContainerCreating   0          5s
+pod/webapp               1/1     Running             0          15m
+pod/webapp-release-0     1/1     Running             0          5s
+pod/webapp-release-0-5   1/1     Running             0          15m
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   5s
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     15m
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          16m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ kubectl describe pod queue
+Name:         queue
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Mon, 08 Feb 2021 23:50:10 +0700
+Labels:       app=queue
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.6
+IPs:
+  IP:  172.17.0.6
+Containers:
+  queue:
+    Container ID:   docker://d82ab5b505b036ae72bfb6dbc198048e5b710967ef991b52fa124f5d0c9080f8
+    Image:          richardchesterwood/k8s-fleetman-queue:release1
+    Image ID:       docker-pullable://richardchesterwood/k8s-fleetman-queue@sha256:bc2cb90a09aecdd8bce5d5f3a8dac17281ec7883077ddcfb8b7acfe2ab3b6afa
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Mon, 08 Feb 2021 23:51:00 +0700
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-mxg8z (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             True
+  ContainersReady   True
+  PodScheduled      True
+Volumes:
+  default-token-mxg8z:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-mxg8z
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  3m37s  default-scheduler  Successfully assigned default/queue to minikube
+  Normal  Pulling    3m36s  kubelet            Pulling image "richardchesterwood/k8s-fleetman-queue:release1"
+  Normal  Pulled     2m49s  kubelet            Successfully pulled image "richardchesterwood/k8s-fleetman-queue:release1" in 47.1026686s
+  Normal  Created    2m47s  kubelet            Created container queue
+  Normal  Started    2m47s  kubelet            Started container queue
+
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ minikube ip
+192.168.49.2
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ minikube service fleetman-queue
+|-----------|----------------|-------------|---------------------------|
+| NAMESPACE |      NAME      | TARGET PORT |            URL            |
+|-----------|----------------|-------------|---------------------------|
+| default   | fleetman-queue | http/8161   | http://192.168.49.2:30010 |
+|-----------|----------------|-------------|---------------------------|
+* Starting tunnel for service fleetman-queue.
+|-----------|----------------|-------------|------------------------|
+| NAMESPACE |      NAME      | TARGET PORT |          URL           |
+|-----------|----------------|-------------|------------------------|
+| default   | fleetman-queue |             | http://127.0.0.1:58199 |
+|-----------|----------------|-------------|------------------------|
+* Opening service default/fleetman-queue in default browser...
+! Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+
+```
+
+![image-20210208235208961](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210208235208961.png)
+
+
+
 ### 1.2 K8S-Command-Reference.pdf.pdf
 ## 8. Kubernetes ReplicaSets
 ### 1. ReplicaSets
+
+Now, pods are very basic and disposable objects in Kubernetes.
+In a full running system, it's more than possible that pods are going to die.
+Lots of reasons for that.
+If a node were to fail, then of course all of the pods running on that node are going to die.
+If a pod consumes too many resources, such as CPU, then Kubernetes will kill the pod.
+We will talk about that in a dedicated section, but for now, as long as you're aware that
+that's a possibility.
+So for whatever reason, pods can be short-lived.
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ minikube status
+minikube
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+timeToStop: Nonexistent
+
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ kubectl describe svc fleetman-webapp
+Name:                     fleetman-webapp
+Namespace:                default
+Labels:                   <none>
+Annotations:              <none>
+Selector:                 app=webapp,release=0-5
+Type:                     NodePort
+IP:                       10.96.67.149
+Port:                     http  80/TCP
+TargetPort:               80/TCP
+NodePort:                 http  30080/TCP
+Endpoints:                172.17.0.4:80
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ kubectl get all
+NAME                     READY   STATUS    RESTARTS   AGE
+pod/queue                1/1     Running   0          9h
+pod/webapp               1/1     Running   0          10h
+pod/webapp-release-0     1/1     Running   0          9h
+pod/webapp-release-0-5   1/1     Running   0          10h
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   9h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     10h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          10h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ kubectl delete po webapp-release-0-5
+pod "webapp-release-0-5" deleted
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+$ kubectl get all
+NAME                   READY   STATUS    RESTARTS   AGE
+pod/queue              1/1     Running   0          10h
+pod/webapp             1/1     Running   0          10h
+pod/webapp-release-0   1/1     Running   0          10h
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   10h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     10h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          10h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 7 Exercise
+
+```
+
+Now we will delete a pod 
+
+What we do with a ReplicaSet is we just provide, really, an additional piece of configuration to Kubernetes.
+We specify how many instances of this pod do we want Kubernetes to make sure are running
+at any one time?
+So we could start simple, and we could simply specify that we want one replica of this pod to be running at any one time.
+And all that will mean is, if this pod were to die for any reason, any reason at all, then Kubernetes will spring up another one.
+And I would suggest, therefore, you're going to be doing this in general for all of your pods.
+So if you're deploying a general microservice pod, once again, you would be wrapping it inside a ReplicaSet.
+Now, we'll keep the replicas at one for now, but you can probably guess that we can use
+any number we want in there, more on that later.
+But first we need to learn how to define a replica set.
+So how do we define a replica set, then?
+![image-20210209101446657](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209101446657.png)
+
+https://kubernetes.io/docs/reference/kubernetes-api/workloads-resources/replica-set-v1/
+
+
+
+
+
 ### 2. Writing a ReplicaSet
+
+
+
 ### 3. Applying a ReplicaSet to Kubernetes
+
+
+
 ## 9. Kubernetes Deployments
 ### 1. Deployments Overview
 ### 2. Managing Rollouts
