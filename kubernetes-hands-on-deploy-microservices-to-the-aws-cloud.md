@@ -1,7 +1,12 @@
 
 
+
+
 ## 1. Introduction
 ### 1. Introduction to Kubernetes Microservices course
+
+https://github.com/DickChesterwood/k8s-fleetman
+
 ### 1.2 K8S Command Reference.pdf.pdf
 
 Here's a run down of all (ok, most of) of the commands used in the
@@ -616,6 +621,8 @@ Pods are designed to support multiple cooperating processes (as containers) that
 https://hub.docker.com/u/richardchesterwood
 
 https://hub.docker.com/r/richardchesterwood/k8s-fleetman-webapp-angular
+
+https://github.com/DickChesterwood/k8s-fleetman
 
 Refer:
 
@@ -1882,7 +1889,507 @@ Solution for downtime => 2 replicaset
 
 
 
+
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl get all
+NAME               READY   STATUS    RESTARTS   AGE
+pod/queue          1/1     Running   0          39m
+pod/webapp-5f2vd   1/1     Running   0          39m
+pod/webapp-np59l   1/1     Running   0          17m
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   16h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     16h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          16h
+
+NAME                     DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp   2         2         2       39m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl delete rs webapp
+replicaset.apps "webapp" deleted
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl get all
+NAME               READY   STATUS        RESTARTS   AGE
+pod/queue          1/1     Running       0          39m
+pod/webapp-5f2vd   0/1     Terminating   0          39m
+pod/webapp-np59l   0/1     Terminating   0          17m
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   16h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     16h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          16h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl get all
+NAME               READY   STATUS        RESTARTS   AGE
+pod/queue          1/1     Running       0          39m
+pod/webapp-5f2vd   0/1     Terminating   0          39m
+pod/webapp-np59l   0/1     Terminating   0          17m
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   16h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     16h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          16h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 8 ReplicaSets
+$ kubectl get all
+NAME        READY   STATUS    RESTARTS   AGE
+pod/queue   1/1     Running   0          39m
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   16h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     16h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          16h
+```
+
+Change context
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 9 Deployments\pods.yaml
+
+```ini
+apiVersion: apps/v1
+kind: Deployment # change
+metadata:
+  name: webapp
+spec:
+  # minReadySeconds: 30
+  selector:
+    matchLabels:
+      app: webapp
+  replicas: 2
+  template: # template for the pods
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: webapp
+        image: richardchesterwood/k8s-fleetman-webapp-angular:release0 # change
+```
+
+RUN
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl apply -f pods.yaml
+deployment.apps/webapp created
+pod/queue unchanged
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get all
+NAME                          READY   STATUS    RESTARTS   AGE
+pod/queue                     1/1     Running   0          43m
+pod/webapp-77896f4bf8-bbzvb   1/1     Running   0          3s
+pod/webapp-77896f4bf8-tc7lw   1/1     Running   0          3s
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   16h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     16h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          16h
+
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2/2     2            2           3s
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-77896f4bf8   2         2         2       3s
+
+```
+
+Version 0
+
+![image-20210209164006429](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209164006429.png)
+
+
+
+![image-20210209162050805](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209162050805.png)
+
+![image-20210209162105699](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209162105699.png)
+
+So we need to see then **how can we do a rolling deployment**
+without needing to fiddle around with labels like we did before using this Kubernetes deployments?
+And the answer is wonderfully simple.
+As long as we're working with a different container image, when we make a change to the image
+that is being used by a deployment and we re-deploy that deployment,
+then Kubernetes will start a brand new replica set and the pods that that replica set are managing
+will contain the updated image.
+And once the pods in the new version of this replica set are responding to requests, then effectively,
+the required number of replicas in the old replica set will be switched to zero.
+And that will mean that **these old pods will be stopped**.
+
+
+
+Now what I'm trying to illustrate here is that the old replica set is still there,
+it's just that the number of replicas on it is now set to zero.
+That's significant because it means that if we decide we need to roll back,
+if something goes wrong with this deployment,
+then we can resurrect the old version of the replica set by,
+I'll show you how to do this, there's a special command for it (`kubectl rollout status deploy webapp`),
+but we can effectively reset this number of replicas
+back to two on the old replica set, that's if we want to go backwards.
+So it's quite elegant and really quite simple.
+So the important thing to recap then is this is all working on the container image,
+the container image does need to change and we typically do that
+by using different tags on the images.
+
+https://kubernetes.io/docs/reference/kubernetes-api/workloads-resources/deployment-v1/
+
+> **minReadySeconds** (int32)
+>
+> Minimum number of seconds for which a newly created pod should be ready without any of its container crashing, for it to be considered available. Defaults to 0 (pod will be considered available as soon as it is ready)
+
+Add
+
+```ini
+spec:
+  # add this one
+  minReadySeconds: 30
+
+   # ...
+
+spec:
+      containers:
+      - name: webapp
+        image: richardchesterwood/k8s-fleetman-webapp-angular:release0-5 # change
+```
+
+Run
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl rollout status deploy webapp
+deployment "webapp" successfully rolled out
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get all
+NAME                          READY   STATUS    RESTARTS   AGE
+pod/queue                     1/1     Running   0          77m
+pod/webapp-6ccdfd88cb-fnqns   1/1     Running   0          7m48s
+pod/webapp-6ccdfd88cb-s445l   1/1     Running   0          7m47s
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   16h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     17h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          17h
+
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2/2     2            2           34m
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-6ccdfd88cb   2         2         2       7m48s
+replicaset.apps/webapp-77896f4bf8   0         0         0       34m
+```
+
+Change and click CTRL f5 to see the change
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl apply -f pods.yaml
+deployment.apps/webapp configured
+pod/queue unchanged
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get all
+NAME                          READY   STATUS        RESTARTS   AGE
+pod/queue                     1/1     Running       0          79m
+pod/webapp-6ccdfd88cb-fnqns   0/1     Terminating   0          9m52s
+pod/webapp-6ccdfd88cb-s445l   0/1     Terminating   0          9m51s
+pod/webapp-77896f4bf8-8xsdw   1/1     Running       0          3s
+pod/webapp-77896f4bf8-vmhcr   1/1     Running       0          4s
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   16h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     17h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          17h
+
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2/2     2            2           36m
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-6ccdfd88cb   0         0         0       9m52s
+replicaset.apps/webapp-77896f4bf8   2         2         2       36m
+
+```
+
+https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+
+> To see the Deployment rollout status, run `kubectl rollout status deployment/nginx-deployment`.
+>
+> The output is similar to:
+>
+> ```
+> Waiting for rollout to finish: 2 out of 3 new replicas have been updated...
+> deployment "nginx-deployment" successfully rolled out
+> ```
+
+![image-20210209165203395](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209165203395.png)
+
+You can see the new version
+
+
+
 ### 2. Managing Rollouts
+
+![image-20210209165439495](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209165439495.png)
+
+You can change file pods.yaml and run again to check status for deployment
+
+In the meantime, you can visit the browser to see the old version since it go back in the history
+
+![image-20210209165735076](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209165735076.png)
+
+You can this flag because it always go back one version
+
+
+
+![image-20210209165903064](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209165903064.png)
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl rollout history deploy webapp
+deployment.apps/webapp
+REVISION  CHANGE-CAUSE
+2         <none>
+3         <none>
+
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl rollout undo deploy webapp
+deployment.apps/webapp rolled back
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl rollout history deploy webapp
+deployment.apps/webapp
+REVISION  CHANGE-CAUSE
+3         <none>
+4         <none>
+
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ minikube service fleetman-webapp
+|-----------|-----------------|-------------|---------------------------|
+| NAMESPACE |      NAME       | TARGET PORT |            URL            |
+|-----------|-----------------|-------------|---------------------------|
+| default   | fleetman-webapp | http/80     | http://192.168.49.2:30080 |
+|-----------|-----------------|-------------|---------------------------|
+* Starting tunnel for service fleetman-webapp.
+|-----------|-----------------|-------------|------------------------|
+| NAMESPACE |      NAME       | TARGET PORT |          URL           |
+|-----------|-----------------|-------------|------------------------|
+| default   | fleetman-webapp |             | http://127.0.0.1:51422 |
+|-----------|-----------------|-------------|------------------------|
+* Opening service default/fleetman-webapp in default browser...
+! Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+
+```
+
+![image-20210209170252476](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209170252476.png)
+
+> We recommend this is used only in stressful emergency situations! Your
+>
+> YAML will now be out of date with the live deployment!
+
+Use wrong image
+
+```ini
+    spec:
+      containers:
+      - name: webapp
+        image: richardchesterwood/k8s-fleetman-webapp-angular:releasekjadhskjdfs0-5
+```
+
+You can check status
+
+![image-20210209170856816](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209170856816.png)
+
+webapp-64c.. is not ready and pod is not running
+
+Run again
+
+![image-20210209171059818](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209171059818.png)
+
+Status is PullBackOff
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get all
+NAME                          READY   STATUS    RESTARTS   AGE
+pod/queue                     1/1     Running   0          103m
+pod/webapp-77896f4bf8-kk7z2   1/1     Running   0          9m42s
+pod/webapp-77896f4bf8-l5v4b   1/1     Running   0          9m43s
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   17h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     17h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          17h
+
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2/2     2            2           60m
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-6ccdfd88cb   0         0         0       33m
+replicaset.apps/webapp-77896f4bf8   2         2         2       60m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl apply -f pods.yaml
+deployment.apps/webapp configured
+pod/queue unchanged
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get all
+NAME                          READY   STATUS              RESTARTS   AGE
+pod/queue                     1/1     Running             0          104m
+pod/webapp-588c8764bc-zvbnt   0/1     ContainerCreating   0          5s
+pod/webapp-77896f4bf8-kk7z2   1/1     Running             0          9m54s
+pod/webapp-77896f4bf8-l5v4b   1/1     Running             0          9m55s
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   17h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     17h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          17h
+
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2/2     1            2           60m
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-588c8764bc   1         1         0       5s
+replicaset.apps/webapp-6ccdfd88cb   0         0         0       33m
+replicaset.apps/webapp-77896f4bf8   2         2         2       60m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get all
+NAME                          READY   STATUS         RESTARTS   AGE
+pod/queue                     1/1     Running        0          104m
+pod/webapp-588c8764bc-zvbnt   0/1     ErrImagePull   0          11s
+pod/webapp-77896f4bf8-kk7z2   1/1     Running        0          10m
+pod/webapp-77896f4bf8-l5v4b   1/1     Running        0          10m
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   17h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     17h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          17h
+
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2/2     1            2           60m
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-588c8764bc   1         1         0       11s
+replicaset.apps/webapp-6ccdfd88cb   0         0         0       34m
+replicaset.apps/webapp-77896f4bf8   2         2         2       60m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl describe po webapp-588c8764bc-zvbnt
+Name:         webapp-588c8764bc-zvbnt
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Tue, 09 Feb 2021 17:12:57 +0700
+Labels:       app=webapp
+              pod-template-hash=588c8764bc
+Annotations:  <none>
+Status:       Pending
+IP:           172.17.0.3
+IPs:
+  IP:           172.17.0.3
+Controlled By:  ReplicaSet/webapp-588c8764bc
+Containers:
+  webapp:
+    Container ID:
+    Image:          richardchesterwood/k8s-fleetman-webapp-angular:releassdfsdfsdfe0-5
+    Image ID:
+    Port:           <none>
+    Host Port:      <none>
+    State:          Waiting
+      Reason:       ImagePullBackOff
+    Ready:          False
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-mxg8z (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             False
+  ContainersReady   False
+  PodScheduled      True
+Volumes:
+  default-token-mxg8z:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-mxg8z
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                 From               Message
+  ----     ------     ----                ----               -------
+  Normal   Scheduled  101s                default-scheduler  Successfully assigned default/webapp-588c8764bc-zvbnt to minikube
+  Normal   Pulling    44s (x3 over 100s)  kubelet            Pulling image "richardchesterwood/k8s-fleetman-webapp-angular:releassdfsdfsdfe0-5"
+  Warning  Failed     36s (x3 over 94s)   kubelet            Failed to pull image "richardchesterwood/k8s-fleetman-webapp-angular:releassdfsdfsdfe0-5": rpc error: code = Unknown desc = Error
+ response from daemon: manifest for richardchesterwood/k8s-fleetman-webapp-angular:releassdfsdfsdfe0-5 not found: manifest unknown: manifest unknown
+  Warning  Failed     36s (x3 over 94s)   kubelet            Error: ErrImagePull
+  Normal   BackOff    9s (x4 over 94s)    kubelet            Back-off pulling image "richardchesterwood/k8s-fleetman-webapp-angular:releassdfsdfsdfe0-5"
+  Warning  Failed     9s (x4 over 94s)    kubelet            Error: ImagePullBackOff
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+
+```
+
+Then we will delete manually 
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get all
+NAME                          READY   STATUS    RESTARTS   AGE
+pod/queue                     1/1     Running   0          113m
+pod/webapp-77896f4bf8-kk7z2   1/1     Running   0          18m
+pod/webapp-77896f4bf8-l5v4b   1/1     Running   0          18m
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   17h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     17h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          17h
+
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2/2     2            2           69m
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-588c8764bc   0         0         0       9m5s
+replicaset.apps/webapp-6ccdfd88cb   0         0         0       42m
+replicaset.apps/webapp-77896f4bf8   2         2         2       69m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl delete rs webapp-588c8764bc
+replicaset.apps "webapp-588c8764bc" deleted
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get all
+NAME                          READY   STATUS    RESTARTS   AGE
+pod/queue                     1/1     Running   0          113m
+pod/webapp-77896f4bf8-kk7z2   1/1     Running   0          19m
+pod/webapp-77896f4bf8-l5v4b   1/1     Running   0          19m
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   17h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     17h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          17h
+
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2/2     2            2           70m
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-6ccdfd88cb   0         0         0       43m
+replicaset.apps/webapp-77896f4bf8   2         2         2       70m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+
+```
+
+
 
 
 
@@ -1890,15 +2397,408 @@ Solution for downtime => 2 replicaset
 
 ### 1. Networking Overview in Kubernetes
 
+![image-20210209182745306](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209182745306.png)
+
+if you decided to deploy these two containers into a single pod, then things are very easy.
+In fact, the two containers can see each other using localhost, so if I were writing any code
+in this Java application I could just do a lookup of the address, localhost, colon,
+and I would use the MySQL port 3306.
+
+
+
+Having the database and an application running in the same pod would make this pod
+much more complicated to manage. If this pod fails, then we're going to have to find
+out if it's failed because of the database container or if it's failed because of the application container,
+and generally, it just makes things more complicated.
+I don't recommend, until you have some very specialist requirements, I don't recommend having multiple containers in a pod.
+
+![image-20210209183423632](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209183423632.png)
+
+Now, you will have noticed earlier on in the course that each of the services
+is given it's own private IP address, an IP address that is only visible inside the Kubernetes cluster.
+All we really need if we wanted to write some code in the application that wants to communicate
+with the database is we just need to reference the IP address of the database service.
+Of course, we're not going to know the IP address
+of that service because these IP addresses are allocated dynamically by Kubernetes.
+The next time that we run the Kubernetes cluster, there will probably be different IP addresses allocated to the services, and the solution is Kubernetes maintains its own private DNS service.
+I don't know how familiar you are with DNS services, but the DNS service is basically a database
+containing a set of key value pairs.
+
+
+
+
+
 ### 2. Namespaces - kube-system
+
+![image-20210209184335093](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209184335093.png)
+
+**I need to explain how namespaces work in Kubernetes.**
+A namespace is a way of partitioning your resources in Kubernetes into separate areas.
+As an example, imagine you're working on a system which has thousands of resources.
+Let's for now just think about thousands of pods
+and thousands of services, but actually everything I'm about to say also applies
+to resources such as deployments and replica sets and so on.
+I've only put a few on this picture for illustration, and I've made all of these names up.
+We're going to be working on a real microservice architecture soon.
+But if you can imagine working on this Kubernetes system,
+remembers there's thousands of these pods.
+It's going to be very difficult to work on that system because there are just too many pods.
+So, the idea of a namespace is we can go through our pods and our services, and we can allocate them to namespaces.
+So, in this very simple example, I might notice as the architect that, well, this pod,
+and it would have an associated service, is a web container.
+
+> And what happens when you don't specify a namespace is the resource is put into the default namespace.
+> And whenever you issue a command like kubectl get all, if you don't specify a namespace,
+> you only see the resources in the default namespace.
+
+
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get all
+NAME                          READY   STATUS    RESTARTS   AGE
+pod/queue                     1/1     Running   0          3h9m
+pod/webapp-77896f4bf8-kk7z2   1/1     Running   0          95m
+pod/webapp-77896f4bf8-l5v4b   1/1     Running   0          95m
+
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue    NodePort    10.100.41.19   <none>        8161:30010/TCP   18h
+service/fleetman-webapp   NodePort    10.96.67.149   <none>        80:30080/TCP     19h
+service/kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP          19h
+
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2/2     2            2           146m
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-6ccdfd88cb   0         0         0       119m
+replicaset.apps/webapp-77896f4bf8   2         2         2       146m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get ns
+NAME              STATUS   AGE
+default           Active   19h
+kube-node-lease   Active   19h
+kube-public       Active   19h
+kube-system       Active   19h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+
+```
+
+
+
+Now, if we want to see what's in those namespaces,
+then we have to be specific. 
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get po
+NAME                      READY   STATUS    RESTARTS   AGE
+queue                     1/1     Running   0          3h18m
+webapp-77896f4bf8-kk7z2   1/1     Running   0          103m
+webapp-77896f4bf8-l5v4b   1/1     Running   0          103m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get po -n kube-system
+NAME                               READY   STATUS    RESTARTS   AGE
+coredns-74ff55c5b-9cmnq            1/1     Running   0          19h
+etcd-minikube                      1/1     Running   0          19h
+kube-apiserver-minikube            1/1     Running   0          19h
+kube-controller-manager-minikube   1/1     Running   0          19h
+kube-proxy-pf7n7                   1/1     Running   0          19h
+kube-scheduler-minikube            1/1     Running   0          19h
+storage-provisioner                1/1     Running   1          19h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get all -n kube-system
+NAME                                   READY   STATUS    RESTARTS   AGE
+pod/coredns-74ff55c5b-9cmnq            1/1     Running   0          19h
+pod/etcd-minikube                      1/1     Running   0          19h
+pod/kube-apiserver-minikube            1/1     Running   0          19h
+pod/kube-controller-manager-minikube   1/1     Running   0          19h
+pod/kube-proxy-pf7n7                   1/1     Running   0          19h
+pod/kube-scheduler-minikube            1/1     Running   0          19h
+pod/storage-provisioner                1/1     Running   1          19h
+
+NAME               TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)                  AGE
+service/kube-dns   ClusterIP   10.96.0.10   <none>        53/UDP,53/TCP,9153/TCP   19h
+
+NAME                        DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+daemonset.apps/kube-proxy   1         1         1       1            1           kubernetes.io/os=linux   19h
+
+NAME                      READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/coredns   1/1     1            1           19h
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/coredns-74ff55c5b   1         1         1       19h
+
+
+```
+
+You can see `kube-dns`
+
+
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get ns
+NAME              STATUS   AGE
+default           Active   20h
+kube-node-lease   Active   20h
+kube-public       Active   20h
+kube-system       Active   20h
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl get all -n kube-public
+No resources found in kube-public namespace.
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 9 Deployments
+$ kubectl describe svc kube-dns -n kube-system
+Name:              kube-dns
+Namespace:         kube-system
+Labels:            k8s-app=kube-dns
+                   kubernetes.io/cluster-service=true
+                   kubernetes.io/name=KubeDNS
+Annotations:       prometheus.io/port: 9153
+                   prometheus.io/scrape: true
+Selector:          k8s-app=kube-dns
+Type:              ClusterIP
+IP:                10.96.0.10
+Port:              dns  53/UDP
+TargetPort:        53/UDP
+Endpoints:         172.17.0.2:53
+Port:              dns-tcp  53/TCP
+TargetPort:        53/TCP
+Endpoints:         172.17.0.2:53
+Port:              metrics  9153/TCP
+TargetPort:        9153/TCP
+Endpoints:         172.17.0.2:9153
+Session Affinity:  None
+Events:            <none>
+
+```
+
+
+
+https://stackoverflow.com/questions/45929548/whats-the-kube-public-namespace-for
+
+ You might be thinking, as I did at first, that kube-public is possibly
+where you put your pods and resources, and kube-system is used
+for the internal infrastructure of Kubernetes.
+
+
 
 ### 3. Accessing MySQL from a Pod
 
+D:\devops-practices\k8s\Chapter 10 Networking\networking-tests.yaml
+
+```ini
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+spec:
+  containers:
+   - name: mysql
+     image: mysql:5
+     env:
+      # Use secret in real life
+      - name: MYSQL_ROOT_PASSWORD
+        value: password
+      - name: MYSQL_DATABASE
+        value: fleetman
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: database
+spec:
+  selector:
+    app: mysql
+  ports:
+  - port: 3306
+  type: ClusterIP
+
+```
+
+https://github.com/DickChesterwood/k8s-fleetman
+
+https://github.com/DickChesterwood/k8s-fleetman/blob/master/k8s-fleetman-webapp-angular/Dockerfile
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 10 Networking
+$ ls
+networking-tests.yaml  pods.yaml  services.yaml
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 10 Networking
+$ kubectl apply -f networking-tests.yaml
+pod/mysql created
+service/database created
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 10 Networking
+$ kubectl get all
+NAME                          READY   STATUS              RESTARTS   AGE
+pod/mysql                     0/1     ContainerCreating   0          8s
+pod/queue                     1/1     Running             0          5h4m
+pod/webapp-77896f4bf8-kk7z2   1/1     Running             0          3h29m
+pod/webapp-77896f4bf8-l5v4b   1/1     Running             0          3h30m
+
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/database          ClusterIP   10.102.121.122   <none>        3306/TCP         8s
+service/fleetman-queue    NodePort    10.100.41.19     <none>        8161:30010/TCP   20h
+service/fleetman-webapp   NodePort    10.96.67.149     <none>        80:30080/TCP     20h
+service/kubernetes        ClusterIP   10.96.0.1        <none>        443/TCP          20h
+
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2/2     2            2           4h20m
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-6ccdfd88cb   0         0         0       3h54m
+replicaset.apps/webapp-77896f4bf8   2         2         2       4h20m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 10 Networking
+$ kubectl exec -it webapp-77896f4bf8-kk7z2 sh
+kubectl exec [POD] [COMMAND] is DEPRECATED and will be removed in a future version. Use kubectl exec [POD] -- [COMMAND] instead.
+/ # exit
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 10 Networking
+$ kubectl exec -it webapp-77896f4bf8-kk7z2 -- sh
+/ # ls
+bin    dev    etc    home   lib    media  mnt    proc   root   run    sbin   srv    sys    tmp    usr    var
+
+```
+
+
+
+
+
 ### 4. Cygwin extra - fixing the terminal with winpty
+
+https://github.com/rprichard/winpty/releases
+
+
+
+![image-20210209210307613](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209210307613.png)
+
+![image-20210209210438748](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210209210438748.png)
+
+
+
+
 
 ### 5. Service Discovery
 
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 10 Networking
+$ kubectl exec -it webapp-77896f4bf8-kk7z2 -- sh
+/ # ls
+bin    dev    etc    home   lib    media  mnt    proc   root   run    sbin   srv    sys    tmp    usr    var
+/ # cat /etc/resolv.conf
+nameserver 10.96.0.10
+search default.svc.cluster.local svc.cluster.local cluster.local
+options ndots:5
+/ # nslookup google.com
+nslookup: can't resolve '(null)': Name does not resolve
+
+Name:      google.com
+Address 1: 74.125.24.138
+Address 2: 74.125.24.102
+Address 3: 74.125.24.101
+Address 4: 74.125.24.113
+Address 5: 74.125.24.139
+Address 6: 74.125.24.100
+Address 7: 2404:6800:4003:c04::66
+Address 8: 2404:6800:4003:c04::65
+Address 9: 2404:6800:4003:c04::8b
+Address 10: 2404:6800:4003:c04::71
+/ # nslookup database
+nslookup: can't resolve '(null)': Name does not resolve
+
+Name:      database
+Address 1: 10.102.121.122 database.default.svc.cluster.local
+/ # exit
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 10 Networking
+$ kubectl get all
+NAME                          READY   STATUS    RESTARTS   AGE
+pod/mysql                     1/1     Running   0          43m
+pod/queue                     1/1     Running   0          5h47m
+pod/webapp-77896f4bf8-kk7z2   1/1     Running   0          4h13m
+pod/webapp-77896f4bf8-l5v4b   1/1     Running   0          4h13m
+
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/database          ClusterIP   10.102.121.122   <none>        3306/TCP         43m
+service/fleetman-queue    NodePort    10.100.41.19     <none>        8161:30010/TCP   21h
+service/fleetman-webapp   NodePort    10.96.67.149     <none>        80:30080/TCP     21h
+service/kubernetes        ClusterIP   10.96.0.1        <none>        443/TCP          21h
+
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2/2     2            2           5h4m
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-6ccdfd88cb   0         0         0       4h37m
+replicaset.apps/webapp-77896f4bf8   2         2         2       5h4m
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 10 Networking
+
+```
+
+
+
+```shell
+
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 10 Networking
+$ kubectl exec -it webapp-77896f4bf8-kk7z2 -- sh
+/ # apk update
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.7/main/x86_64/APKINDEX.tar.gz
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.7/community/x86_64/APKINDEX.tar.gz
+v3.7.3-184-gffd32bfd09 [http://dl-cdn.alpinelinux.org/alpine/v3.7/main]
+v3.7.3-183-gcc9ad2b48d [http://dl-cdn.alpinelinux.org/alpine/v3.7/community]
+OK: 9070 distinct packages available
+/ # apk add mysql-client
+(1/6) Installing mariadb-common (10.1.41-r0)
+(2/6) Installing ncurses-terminfo-base (6.0_p20171125-r1)
+(3/6) Installing ncurses-terminfo (6.0_p20171125-r1)
+(4/6) Installing ncurses-libs (6.0_p20171125-r1)
+(5/6) Installing mariadb-client (10.1.41-r0)
+(6/6) Installing mysql-client (10.1.41-r0)
+Executing busybox-1.27.2-r7.trigger
+OK: 53 MiB in 34 packages
+/ # mysql
+ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/run/mysqld/mysqld.sock' (2 "No such file or directory")
+
+/ # mysql -h database -uroot -ppassword fleetman
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MySQL connection id is 2
+Server version: 5.7.33 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MySQL [fleetman]> create table testtable(test varchar(255));
+Query OK, 0 rows affected (0.02 sec)
+
+MySQL [fleetman]> show tables;
++--------------------+
+| Tables_in_fleetman |
++--------------------+
+| testtable          |
++--------------------+
+1 row in set (0.01 sec)
+
+
+```
+
+
+
 ### 6. Fully Qualified Domain Names (FQDN)
+
+
 
 ## 11. Microservice Architectures
 
