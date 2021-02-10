@@ -2994,7 +2994,16 @@ https://microservices.io/patterns/apigateway.html
 
 ### 5. Deploying the Queue
 
-RUN `kubectl apply –f .` to delete all
+RUN `kubectl delete -f .` to delete all
+
+```shell
+Admin@LAPTOP-QO8E8EAL /cygdrive/d/devops-practices/k8s/Chapter 11 Microservices
+$ kubectl delete -f .
+service "fleetman-webapp" deleted
+service "fleetman-queue" deleted
+....
+
+```
 
 and restart minikube `minikube start --memory 4096`
 
@@ -3251,59 +3260,1183 @@ User name and pass is admin - admin
 
 ### 6. Deploying the Position Simulator
 
+![image-20210210064927013](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210064927013.png)
+
+
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 11 Microservices\workloads.yaml
+
+```ini
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: position-simulator
+spec:
+  selector:
+    matchLabels:
+      app: position-simulator
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: position-simulator
+    spec:
+      containers:
+      - name: position-simulator
+        image: richardchesterwood/k8s-fleetman-position-simulator:release1
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+```
+
+https://github.com/DickChesterwood/k8s-fleetman/tree/master/k8s-fleetman-position-simulator/src/main/resources
+
+depend on the SPRING_PROFILES_ACTIVE => read resources 
+
+set wrong value for env => `apply` => get all => `describe po` to check status and see the error 
+
+
+
+
+
 ### 7. Inspecting Pod Logs
+
+![image-20210210070159408](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210070159408.png)
+
+Run `kubectl logs <pod_name>` many times to see the needed log info 
+
+Run `kubectl logs -f <pod_name>` to follow log info 
+
+![image-20210210070538686](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210070538686.png)
+
+![image-20210210070803447](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210070803447.png)
 
 ### 8. Deploying the Position Tracker
 
+![image-20210210071111506](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210071111506.png)
+
+
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: position-tracker
+spec:
+  selector:
+    matchLabels:
+      app: position-tracker
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: position-tracker
+    spec:
+      containers:
+      - name: position-tracker
+        image: richardchesterwood/k8s-fleetman-position-tracker:release1
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+```
+
+![image-20210210071315579](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210071315579.png)
+
+After we apply pod, we see it consumes the message
+
+![image-20210210071538629](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210071538629.png)
+
+Service
+
+![image-20210210072101215](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210072101215.png)
+
+Check
+
+![image-20210210072229219](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210072229219.png)
+
+Click F5 to see changes
+
+```ini
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-position-tracker
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: position-tracker
+
+  ports:
+    - name: http
+      port: 8080
+
+  type: ClusterIP
+```
+
+
+
+
+
 ### 9. Deploying the API Gateway
+
+![image-20210210072440944](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210072440944.png)
+
+
+
+```ini
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  selector:
+    matchLabels:
+      app: api-gateway
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: richardchesterwood/k8s-fleetman-api-gateway:release1
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+```
+
+service
+
+```ini
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-api-gateway
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: api-gateway
+
+  ports:
+    - name: http
+      port: 8080
+      nodePort: 30020
+
+  type: NodePort
+```
+
+![image-20210210072734997](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210072734997.png)
 
 
 
 ### 10. Deploying the Webapp
 
+![image-20210210075417808](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210075417808.png)
+
+
+
+```ini
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+spec:
+  selector:
+    matchLabels:
+      app: webapp
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: webapp
+        image: richardchesterwood/k8s-fleetman-webapp-angular:release1
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+```
+
+![image-20210210081031378](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210081031378.png)
+
+> Must use chrome or firefox to see changes here
+
+
+
 ## 12. Kubernetes Persistence and Volumes
 
 ### 1. Persistence
 
+![image-20210210083634855](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210083634855.png)
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 12 Persistence\workloads.yaml
+
+Change to version 2
+
+```ini
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: queue
+spec:
+  selector:
+    matchLabels:
+      app: queue
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: queue
+    spec:
+      containers:
+      - name: queue
+        image: richardchesterwood/k8s-fleetman-queue:release2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: position-simulator
+spec:
+  selector:
+    matchLabels:
+      app: position-simulator
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: position-simulator
+    spec:
+      containers:
+      - name: position-simulator
+        image: richardchesterwood/k8s-fleetman-position-simulator:release2
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: position-tracker
+spec:
+  selector:
+    matchLabels:
+      app: position-tracker
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: position-tracker
+    spec:
+      containers:
+      - name: position-tracker
+        image: richardchesterwood/k8s-fleetman-position-tracker:release2
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  selector:
+    matchLabels:
+      app: api-gateway
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: richardchesterwood/k8s-fleetman-api-gateway:release2
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+spec:
+  selector:
+    matchLabels:
+      app: webapp
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: webapp
+        image: richardchesterwood/k8s-fleetman-webapp-angular:release2
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+
+```
+
+Run `kubectl apply -f .`
+
+![image-20210210084039854](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210084039854.png)
+
+If you see R2, it means ok
+
+You can click onto the vehicle type to see the red line for tracking
+
+![image-20210210084845824](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210084845824.png)
+
+delete a pod
+
+![image-20210210090255378](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210090255378.png)
+
 ### 2. Upgrading to a Mongo Pod
+
+Go to tag release 3
+
+https://github.com/DickChesterwood/k8s-fleetman/tree/release3/k8s-fleetman-position-tracker/src/main/resources
+
+application-production-microservice.properties
+
+```ini
+spring.activemq.broker-url=tcp://fleetman-queue.default.svc.cluster.local:61616
+fleetman.position.queue=positionQueue
+
+# We'll use the default port 8080 for all microservices in production cluster.
+
+# TODO but this is reasonable guess! This may change when we scale it out...
+spring.data.mongodb.host=fleetman-mongodb.default.svc.cluster.local
+```
+
+![image-20210210091015145](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210091015145.png)
+
+Change 
+
+```ini
+   spec:
+      containers:
+      - name: position-tracker
+        image: richardchesterwood/k8s-fleetman-position-tracker:release3 
+```
+
+Run apply => check logs -f in the position tracker => Mongodb exception
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 12 Persistence\mongo-stack.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:3.6.5-jessie
+        # this one will be added in the next section
+        volumeMounts:
+          - name: mongo-persistent-storage
+            mountPath: /data/db
+      volumes:
+        - name: mongo-persistent-storage
+          # pointer to the configuration of HOW we want the mount to be implemented
+          persistentVolumeClaim:
+            claimName: mongo-pvc
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: fleetman-mongodb
+spec:
+  selector:
+    app: mongodb
+  ports:
+    - name: mongoport
+      port: 27017
+  type: ClusterIP
+
+```
+
+Just in case you're thinking we've missed something here, until we do a little further work, all of this data in the database is going to be stored in memory again.
+So if this pod restarts, then we're going to lose the data.
+Don't worry, we will be fixing that.
+
+=> apply
 
 ### 3. Mongo Service
 
+![image-20210210151411395](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210151411395.png)
+
+
+
+![image-20210210151759443](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210151759443.png)
+
+Current time is 15:29 in my laptop 
+
+![image-20210210152659357](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210152659357.png)
+
+=> problems: sometimes, It's not track
+
 ### 4. Expanding the Minikube VM
+
+Run
+
+```shell
+minikube stop
+# Change the RAM for VM 
+minikube start
+```
+
+![image-20210210153019567](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210153019567.png)
+
+
+
+
 
 ### 5. Volume Mounts
 
+https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+
+we're back up and running now and hopefully everything is going to run a lot smoother.
+So we're now in a position where this history data is being stored in the Mongo database.
+And what this means is, now if the position tracker crashes, or is restarted, then, that's not a problem,
+Kubernetes will restart the position tracker, it will reconnect to the database,
+and it will pick up the histories from before.
+Now that's still not enough for full persistence, as you've probably spotted, but, before I talk about that,
+I'd like to demonstrate, so, I don't have much vehicle history just yet, but if we can remember
+that this city truck, if you're following along, just trace it back to the beginning,
+and make a note of where that history starts.
+And then I'm going to go the cluster, and, as we did before, I'm going to do a kubectl delete,
+and I'm going to delete the position tracker pod.
+
+![image-20210210153612410](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210153612410.png)
+
+=> check the tracking and it works fine for backup
+
+As things stand at the moment, the default configuration of this Mongo container, is that **the data**
+**is not in memory**, but it's being stored on the file system of this container, and as always that means
+if this Docker container were to die, then the data will die with it.
+
+![image-20210210153843988](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210153843988.png)
+
+I'm sure you get the idea, but I think it's worth doing the demonstration anyway, if we do a kubectl delete, on the Mongo pod, this time...
+Of course it will be restarted, but we think that's going to the lose all of the data for the histories.
+
+![image-20210210154001777](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210154001777.png)
+
+Line is change
+
+
+
+Now that's going to be fine for when we're just testing locally, on our development machine.
+But, when we move to a cloud platform, we're going to want a more complex persistence mechanism.
+Now, as you probably know, I am aiming to move to Amazon Web Services on this course,
+and that's coming up in the next chapter.
+And, on Amazon Web Services we have the concept of a so-called EBS,
+or Elastic Block Store, which is a fancy name really for what I think of as a hard drive in the cloud.
+So when we move to AWS, we're going to want to get one of these EBSs, and we're going to want Kubernetes to make sure that the data for this Mongo containter
+is stored on one of these virtual hard drives.
+And of course, that means we can restart pods, we can restart containers, we could destroy
+the entire cluster, in fact, and yet these virtual hard drives, these EBS volumes,
+will still be persisting our data.
+So, that's very much more complicated than this local file storage that we want for this chapter,
+and the great thing about these Kubernetes configurations is it supports all of those requirements, and makes it relatively simple to move from one platform to another.
+
+https://stackoverflow.com/questions/35400740/how-to-set-docker-mongo-data-volume/43860292
+
+> Try and check [docker logs ](https://docs.docker.com/engine/reference/commandline/logs/)to see what was going on when the container stopped and go in "Existed" mode.
+>
+> See also if specifying the full path for the volume would help:
+>
+> ```js
+> docker run -p 27017:27017 -v /home/<user>/data:/data/db
+> ```
+
+`data/db`
+
 ### 6. Volumes
+
+https://kubernetes.io/docs/concepts/storage/volumes/#volume-types
+
+A `hostPath` volume mounts a file or directory from the host node's filesystem into your Pod
+
+```yaml
+  volumes:
+  - name: test-volume
+    hostPath:
+      # directory location on host
+      path: /data
+      # this field is optional
+      type: Directory
+```
+
+`path` is located in the Virtual machine, not in the windows
+
+![image-20210210161650112](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210161650112.png)
+
+Run apply
+
+Run `kubectl describe pod/mongodb-12324-2342`
+
+![image-20210210161806171](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210161806171.png)
+
+You can see the successful message
+
+![image-20210210162015320](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210162015320.png)
+
+pass: tcuser
+
+name: docker
+
+![image-20210210162106510](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210162106510.png)
+
+mongod.lock is mongo data
+
+![image-20210210162227820](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210162227820.png)
+
+Test tracking again
+
+
 
 ### 7. PersistentVolumeClaims
 
+[Persistent Volumes | Kubernetes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+
+> A *PersistentVolume* (PV) is a piece of storage in the cluster that has been provisioned by an administrator or dynamically provisioned using [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/). It is a resource in the cluster just like a node is a cluster resource. PVs are volume plugins like Volumes, but have a lifecycle independent of any individual Pod that uses the PV. This API object captures the details of the implementation of the storage, be that NFS, iSCSI, or a cloud-provider-specific storage system.
+>
+> A *PersistentVolumeClaim* (PVC) is a request for storage by a user. It is similar to a Pod. Pods consume node resources and PVCs consume PV resources. Pods can request specific levels of resources (CPU and Memory). Claims can request specific size and access modes (e.g., they can be mounted ReadWriteOnce, ReadOnlyMany or ReadWriteMany, see [AccessModes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes)).
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 12 Persistence\storage.yaml
+
+```yaml
+# What do want?
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+spec:
+  storageClassName: mylocalstorage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+# How do we want it implemented
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-storage
+spec:
+  storageClassName: mylocalstorage
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/some new/directory/structure/"
+    type: DirectoryOrCreate
+
+```
+
+https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+
+![image-20210210163724626](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210163724626.png)
+
+I'll repeat, the first document we have is saying, what do we want?
+What are we looking for to fulfil our requirements for our Mongo container?
+Whereas with the second document, we're saying, what physical storage do we want to have
+in our Kubernetes cluster?
+So actually, these two values are different, because what we could do is we could say, oh, actually,
+this persistent volume is going to be 100 gigabytes in size.
+Now, as I say, it's not really relevant to a directory structure, but it's certainly relevant.
+If we deploy this to the cloud now, we would find that we have a hard drive created,
+an EBS volume, and that will be physically 100 gigabytes.
+So this is physical storage.
+Now, up here, Mongo is just saying, oh, I need 20 gigabytes of storage.
+Kubernetes, please fulfil it.
+And I'll show you how this works in a second, but it will search around for a match.
+Oh yeah, here's a match here.
+There's enough physical storage here to fulfil this requirement.
+
+
+
+
+
 ### 8. StorageClasses and Binding
+
+Now the easiest way to link these two together is to add in a field into the PersistentVolumeClaim
+called storageClassName.
+Now storage classes are really useful when we move across to a cloud environment.
+A storage class allows a cluster administrator to set up different classes of storage.
+The most common example here is that perhaps an administrator might want to set up a hard disc,
+which is using a traditional magnetic hard disc, and it might also provision a volume,
+which is using SSD storage.
+So the SSD one is going to be typically faster than the magnetic storage.
+So they might produce a configuration for both of them.
+And this storage class name enables the administrator to give each type of storage a label.
+And when we make this PersistentVolumeClaim,
+we're effectively declaring here what type of storage we want.
+Now that's all getting a little bit advanced, and will be coming in the cloud section of the course,
+but for now, all you need to do is come up with an arbitrary label for this type
+of storage that you're working with.
+I'm going to go for mylocalstorage, and all we have to do is make sure that
+that exact key value pair is replicated in the specification of the PersistentVolume.
+
+Then run `apply -f storage.yaml`
+
+![image-20210210170643777](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210170643777.png)
+
+Run `kubectl get pv` to get all persistent  volumes
+
+Run `kubectl get pvc` to get all persistent volume claims
+
+![image-20210210171011538](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210171011538.png)
+
+
+
+![image-20210210171252986](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210171252986.png)
+
+![image-20210210171314807](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210171314807.png)
+
+![image-20210210171406862](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210171406862.png)
+
+Delete to test
+
+![image-20210210171512694](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210171512694.png)
+
+![image-20210210171542327](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210171542327.png)
 
 ## 13. Running Kubernetes on the AWS Cloud
 
 ### 1. Warning.html
+
+Warning!
+
+When working in AWS, any resource you create WILL INCUR CHARGES.
+
+These charges are billed by the hour. **IF YOU FORGET TO DELETE THE RESOURCES, YOU WILL CONTINUE TO BE CHARGED.**
+
+We won't qualify for the free tier on this course. The resources for recording the entire course came to around 6USD, and I spent well over a week re-recording, editing etc. Your charges should be much lower.
+
+However - **IF FOR ANY REASON YOU DECIDE TO STOP THE COURSE, EVEN IF FOR A DAY OR SO, YOU MUST DELETE THE CLUSTER AS DESCRIBED IN THE VIDEO "DELETING THE CLUSTER".**
+
+**Don't leave the cluster running overnight.**
+
+It's very easy to re-create a cluster and there is a video explaining this.
+
+I can't be held responsible for any oversights in your account. Please be careful!
+
+I'll keep repeating this warning through the AWS sessions.
+
+Your ever,
+
+Richard Chesterwood.
+
+### 2. Getting started with AWS
+
+![image-20210210205129601](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210205129601.png)
+
+
+
+![image-20210210205421160](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210205421160.png)
+
+![image-20210210210425692](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210210425692.png)
+
+Minikube is not for production env
+
+When we're going to production on a cloud environment, we're going to create several nodes,
+and a node is a physical server in our system.
+
+![image-20210210210851807](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210210851807.png)
+
+As we're planning to deploy onto Amazon Web Services, a node in AWS is called an **EC2** instance.
+And you can just think of that as being a server in the cloud.
+Now one node probably won't big enough to hold the entire architecture.
+We're typically going to only deploy a small proportion of our system to a single node.
+Typically in Kubernetes we're going to have multiple nodes in a so-called **cluster**.
+There are two advantages to this.
+The first advantage is that the nodes don't have to be particularly big or powerful instances,
+because we can deploy just part of the system to each of the nodes.
+
+![image-20210210211153756](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210211153756.png)
+
+So in this made up example, I have my API gateway on this node,
+the position tracker and the database on this node, the position simulator and the cue on this node.
+Now one of the great joys of working in Kubernetes
+is we don't have to make much in the way of decisions
+as to which nodes these pods are deployed to, because we're going to have a further node
+called the **master node**, and the master node is responsible for scheduling these pods.
+And scheduling here is just jargon term that means Kubernetes will decide which node
+each of the pods should run on.
+The other advantage is that with a little work, with a little thought and care,
+we can make our system tolerant to failure.
+
+![image-20210210211211063](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210211211063.png)
+
+For example, as things stand, if this node here were to crash, then we're not going to have an API gateway in our system anymore.
+
+So for that reason we might decide as architects that we're going to replicate the API gateway,
+and you actually know how to do that in your YAML files.
+If you've forgotten then don't worry, we will be doing exactly this
+when we start to do the practical work.
+But it's a really simple piece of YAML configuration that would mean that the Kubernetes master node
+will ensure that the API gateway is running on for example at least two nodes at a time.
+And with care and with thought, as architects we can design the system to be
+resilient to node failure.
+
+![image-20210210211522726](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210211522726.png)
+
+Well now that we're getting professional, we're going to be able to set up
+virtual hard drives in the cloud.
+In Amazon they're called EBS volumes for elastic block storage,
+and you're going to see it's really quite straightforward to configure these storages and to link them
+with any pods that we want.
+Now this means for example if this node here were to crash, then the master node is going to reschedule these pods onto different nodes,
+and when that rescheduling is complete, it will be able to connect back to the EBS volume
+so we won't have lost any data.
+
+
+
+### 3. Introducing Kops - Kubernetes Operations
+
+![image-20210210212347000](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210212347000.png)
+
+![image-20210210212432950](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210212432950.png)
+
+![image-20210210212458904](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210212458904.png)
+
+https://github.com/kubernetes/kops
+
+The easiest way to get a production grade Kubernetes cluster up and running.
+
+https://github.com/kubernetes/kops/blob/master/docs/getting_started/aws.md
+
+https://aws.amazon.com/cli/
+
+#### AWS
+
+In order to correctly prepare your AWS account for `kops`, we require you to install the AWS CLI tools, and have API credentials for an account that has the permissions to create a new IAM account for `kops` later in the guide.
+
+Once you've [installed the AWS CLI tools](https://aws.amazon.com/cli/) and have correctly setup your system to use the official AWS methods of registering security credentials as [defined here](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials) we'll be ready to run `kops`, as it uses the Go AWS SDK.
+
+---
+
+
+
+you can instal KOPS onto your local development machine
+and then KOPS will talk to your EC2 account to start up the nodes and the master
+and any other resources that are required.
+
+![image-20210210214645612](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210214645612.png)
+
+![image-20210210214752135](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210214752135.png)
+
+you can choose here the lowest powered instance available.
+
+
+
+![image-20210210215006228](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210215006228.png)
+
+![image-20210210215106087](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210215106087.png)
+
+![image-20210210215139636](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210215139636.png)
+
+![image-20210210215239977](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210215239977.png)
+
+Input name
+
+![image-20210210215408698](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210215408698.png)
+
+Choose my ip to allow only myself access
+
+![image-20210210215519064](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210215519064.png)
+
+![image-20210210215628172](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210215628172.png)
+
+Download key pair
+
+![image-20210210215710458](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210215710458.png)
+
+Then we click launch instance
+
+![image-20210210215823108](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210215823108.png)
+
+![image-20210210215858814](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210215858814.png)
+
+Log in to the instance
+
+![image-20210210220050781](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210220050781.png)
+
+copy and paste Ip address
+
+![image-20210210220153864](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210220153864.png)
+
+
+
+### 4. Installing the Kops Environment
+
+https://kops.sigs.k8s.io/getting_started/install/
+
+```ini
+curl -Lo kops https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
+chmod +x kops
+sudo mv kops /usr/local/bin/kops
+```
+
+Run
+
+![image-20210210221028918](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210221028918.png)
+
+If help command appear => ok
+
+![image-20210210221231392](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210221231392.png)
+
+![image-20210210221436229](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210221436229.png)
+
+Install kubectl on linux
+
+![image-20210210222150421](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210222150421.png)
+
+![image-20210210222432010](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210222432010.png)
+
+![image-20210210222457844](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210222457844.png)
+
+![image-20210210222611671](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210222611671.png)
+
+![image-20210210222946829](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210222946829.png)
+
+![image-20210210223022101](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210223022101.png)
+
+![image-20210210223057366](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210223057366.png)
+
+![image-20210210223148639](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210223148639.png)
+
+![image-20210210223231497](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210223231497.png)
+
+![image-20210210223326444](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210223326444.png)
+
+![image-20210210223513116](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210223513116.png)
+
+![image-20210210223557243](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210223557243.png)
+
+![image-20210210223623177](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210223623177.png)
+
+![image-20210210223845694](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210223845694.png)
+
+![image-20210210224126020](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210224126020.png)
+
+![image-20210210224239306](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210224239306.png)
+
+![image-20210210224324668](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210224324668.png)
+
+![image-20210210224352389](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210224352389.png)
+
+![image-20210210224414675](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210224414675.png)
+
+https://github.com/kubernetes/kops/blob/master/docs/getting_started/aws.md
+
+You should record the SecretAccessKey and AccessKeyID in the returned JSON output, and then use them below:
+
+```ini
+# configure the aws client to use your new IAM user
+aws configure           # Use your new access and secret key here
+aws iam list-users      # you should see a list of all your IAM users here
+
+# Because "aws configure" doesn't export these vars for kops to use, we export them now
+export AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id)
+export AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key)
+```
+
+![image-20210210224559877](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210224559877.png)
+
+![image-20210210224853338](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210224853338.png)
+
+
+
+
+
+### 5. Warning - EC2 Instance types across regions.html
+
+Just a quick additional note - not all instance types are supported in all regions, and kops unfortunately doesn't know about this!
+
+For example, at the time of writing, the default instance type for the master node in kops is "c4.large". This is actually a slightly old instance type, which has now been superseded by c5.large.
+
+That's ok in many regions as many of them will have both types - but for example, if you're in eu-west-3 (Paris), then c4.large is not available - and this will mean your cluster won't start.
+
+There's two solutions to this. You can either:
+
+1. Use region us-east-1. This region will probably have the instance types that kops is using by default. It's usually fast enough wherever in the world you actually are.
+
+2. Change the instance types you're using. Run the command:
+
+   
+
+   `kops get instancegroups`
+
+This will show the name of your master group (eg master-us-east-2c ). Now you can do:
+
+```
+kops edit ig <name of master group>
+```
+
+And you can change the instance type to one you can see in the pricing chart.
+
+Then,
+
+```
+kops edit ig nodes
+```
+
+And do the same here.
+
+Hopefully that will work - let me know if any problems.
+
+Note: I used m3.medium to record the video - the default type is currently t2.medium.
+
+### 6. Configuring your first cluster
+
+![image-20210210225606023](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210225606023.png)
+
+Create a bucket
+
+![image-20210210225701232](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210225701232.png)
+
+https://github.com/kubernetes/kops/blob/master/docs/getting_started/aws.md
+
+> **Using S3 default bucket encryption**
+> kops supports default bucket encryption to encrypt its state in an S3 bucket. This way, the default server side encryption set for your bucket will be used for the kOps state too. You may want to use this AWS feature, e.g., for easily encrypting every written object by default or when you need to use specific encryption keys (KMS, CMK) for compliance reasons.
+>
+> If your S3 bucket has a default encryption set up, kOps will use it:
+
+![image-20210210225826976](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210225826976.png)
+
+![image-20210210230621297](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210230621297.png)
+
+So this is telling me that London has three physically separate data centres and they're names are,
+it's a bit confusing, because the name's very similar to the region.
+
+
+
+![image-20210210231036508](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210231036508.png)
+
+So, just add in all the zones that you have.
+I think all zones have at least two zones, but even if you only get one zone back
+it will be fine just to use one.
+And then we need to specify the name of our cluster.
+Which we previously created this environment variable for.
+
+![image-20210210231116596](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210231116596.png)
+
+It doesn't create anything, it's actually just set up some configuration files.
+
+Fix error
+
+![image-20210210231530899](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210231530899.png)
+
+![image-20210210231735216](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210231735216.png)
+
+![image-20210210231905516](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210231905516.png)
+
+See default values
+
+![image-20210210231947595](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210231947595.png)
+
+You can change any editor instead of VI
+
+![image-20210210232035524](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210232035524.png)
+
+
+
+we can also do an edit of what's called the instances group.
+
+![image-20210210232302184](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210232302184.png)
+
+`ig`: instance group
+
+The IG here stands for instance group.
+And what KOPS is going to have is an instance group for our nodes and an instance group for our master, so two instance groups.
+
+![image-20210210232404703](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210232404703.png)
+
+
+
+It's not particularly powerful.
+but its more powerful than the Bootstrap instance we created previously.
+So we could decide to change that to a bigger or smaller machine depending on our needs.
+Very importantly we have a max size and a min size, which is going to configure how many nodes do we want to be running at any one time.
+Now I think even for this basic system, perhaps two nodes isn't really sufficient.
+In fact, when we go further with the course,
+when we start doing monitoring, the monitoring will take lots of resources itself.
+
+![image-20210210232750042](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210232750042.png)
+
+So, we might actually on this course need as many as five instances.
+So, I'm going to suggest that we change this here
+to a maximum of five but a minimum of three.
+We don't need to change anything else, but notice the availability zones is
+configured here as well.
+So, we would expect these three instances to be distributed across those three availability zones.
+
+You can verify by:
+
+![image-20210210232853179](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210232853179.png)
+
+You can change master node
+
+![image-20210210232930963](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210232930963.png)
+
+
+
+
+
+### 7. Running the Cluster
+
+Now we want to apply the configuration to real hardware.
+It is a bit confusing that kops create cluster
+didn't go away and start up any instances.
+In fact, we now need the command kops update cluster
+
+![image-20210210233445926](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210233445926.png)
+
+Run validate
+
+![image-20210210233533017](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210233533017.png)
+
+=> see the error
+
+![image-20210210233828014](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210233828014.png)
+
+The same errors
+
+![image-20210210233903273](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210233903273.png)
+
+4 new instances
+
+Wait a minutes
+
+![image-20210210234029241](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210234029241.png)
+
+Now, looking in detail at this I have validation errors.
+This looks worrying, but again, no panic.
+This is just because the machines, these nodes, **have not yet joined the cluster**,
+and the master node here is not ready.
+The validation failed just means it's still starting up.
+All right, so I waited about another minute.
+
+![image-20210210234222006](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210234222006.png)
+
+Let's try validate cluster again. And things are happening.
+We've got fewer validation errors.
+
+5 minutes later
+
+![image-20210210234309228](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210234309228.png)
+
+![image-20210210234352189](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210234352189.png)
+
+![image-20210210234539019](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210234539019.png)
+
+Now, I don't know if you're familiar with load balancers
+in general or in AWS, but a load balancer is a way of directing traffic to instances,
+and the important thing about a load balancer is it has a stable DNS name.
+
+![image-20210210234715566](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210234715566.png)
+
+Now, the reason for this load balancer is
+when we type in commands, such as kubectl get all, kubectl get all is actually calling
+that load balancer, and the load balancer, we can check this on the configuration here.
+If we click on **instances**, the load balancer
+is currently pointing to the master instance.
+Now, the idea is if this master crashes for any reason
+kubectl won't work for a while, but what will happen
+in the background is a new master will be created.
+Then that new master will be added to this load balancer
+and therefore that DNS name will never need to change.
+
+![image-20210210235020236](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210235020236.png)
+
+![image-20210210235129204](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210235129204.png)
+
+Now, I'm here on the pricing page for the,
+they call them Elastic Load Balancers,
+and at the time of recording it's actually using
+a Classic Load Balancer, and just to give you an idea,
+the prices do vary across regions.
+
+
+
+But the other thing I'd like to show you is that these instances are protected by something called
+a **Auto Scaling Group in AWS**.
+Again, if you're new to this, if I go down and click on the Auto Scaling link here
+we have here two entries, one of the master, and one for the nodes, and this is an Amazon configuration that is saying for example for the nodes we must have
+a minimum of three and a maximum of five instances running at any one time.
+Now, of course it's taken that from the configuration
+that we just gave it, but this means that if for any reason
+any of these nodes were to crash then Amazon will automatically start a new instance for us,
+and it will add it to any, and it will add it to any load balancers as required.
+
+![image-20210210235445232](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210235445232.png)
+
+Now, we're going to do that quite a lot when we've got the system running,
+but I'm going to just for fun take one node at random, Instance State, Terminate. So I'm simulating there maybe an entire data center crashing.
+So now an emergency situation with only two nodes running.
+Now, it will take a while.
+These Auto Scale Groups are not instantaneous, and while I'm waiting I guess I could do
+a kubectl get nodes, and yes, we're seeing here there's only two of these nodes.
+
+![image-20210210235618496](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210235618496.png)
+
+There should have been three.
+Now, when we deploy work loads to these nodes I hope it's fairly obviously that Kubernetes
+will detect that a node has gone down, and any of the pods that were lost
+are going to be restarted on the surviving nodes.
+
+![image-20210210235730518](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210235730518.png)
+
+![image-20210210235757145](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210210235757145.png)
+
+Check status after few minutes
+
+
+
+
+
+
+
+### 8. Provisioning SSD drives with a StorageClass
+
+### 9. Deploying the Fleetman Workload to Kubernetes
+
+
 
 ### 10. Setting up a real Domain Name
 
 ### 11. Surviving Node Failure
 
 ### 12. Replicating Pods in Kubernetes
-
-### 2. Getting started with AWS
-
-### 3. Introducing Kops - Kubernetes Operations
-
-### 4. Installing the Kops Environment
-
-### 5. Warning - EC2 Instance types across regions.html
-
-### 6. Configuring your first cluster
-
-### 7. Running the Cluster
-
-### 8. Provisioning SSD drives with a StorageClass
-
-### 9. Deploying the Fleetman Workload to Kubernetes
 
 ## 14. Deleting the Cluster
 
@@ -3314,6 +4447,16 @@ User name and pass is admin - admin
 ## 15. Extra - how to run Kubernetes in Google Cloud
 
 ### 1. How to deploy to Google Cloud Platform.html
+
+As you know, the course was designed around AWS, as that is by far the most in-demand cloud platform, and it also happens to be the one I use in my real work. It's the platform I know and trust.
+
+But I've been asked by a few people if I can show how to run the application on **Google Cloud Platform**. It was quite a challenge as I've hardly ever used the platform before - so I spent a day working on porting the Fleetman application to GCP.
+
+**But, it turns out to be easy!**
+
+As this isn't a core part of the course, I'm linking here to my YouTube channel a 30 minute video where we follow the same steps on Google Cloud.
+
+[Get access to the video here!](https://www.youtube.com/watch?v=w9vy3wHGKeo)
 
 ## 16. Logging a Kubernetes Cluster
 
