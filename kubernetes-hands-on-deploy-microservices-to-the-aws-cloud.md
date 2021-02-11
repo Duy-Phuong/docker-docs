@@ -3,6 +3,11 @@
 
 
 ## 1. Introduction
+
+https://chesterwood.io/
+
+https://blog.chesterwood.io/page/2
+
 ### 1. Introduction to Kubernetes Microservices course
 
 https://github.com/DickChesterwood/k8s-fleetman
@@ -4428,21 +4433,462 @@ Check status after few minutes
 
 ### 8. Provisioning SSD drives with a StorageClass
 
+![image-20210211074410368](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211074410368.png)
+
+We have 3 node and connect to the cluster
+
+![image-20210211075430274](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211075430274.png)
+
+Now there's quite a long list of them, mainly because
+there's a hard drive for each of the nodes, which is
+by default one hundred and twenty-eight gigabytes.
+I think then we have a hard drive for the master,
+which is sixty-four gigabytes.
+There's a couple hard drives for the ETCD service,
+which is key values stored that the cops cluster's using.
+The hard drive here is for the bootstrap instance
+that we have.
+The other two at the bottom here are just from a couple
+of instances that I was using while rehearsing
+for this course, which I'm currently not using.
+
+https://kubernetes.io/docs/concepts/storage/storage-classes/
+
+
+
+![image-20210211075925186](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211075925186.png)
+
+> AWS EBS
+>
+> ```yaml
+> apiVersion: storage.k8s.io/v1
+> kind: StorageClass
+> metadata:
+>   name: slow
+> provisioner: kubernetes.io/aws-ebs
+> parameters:
+>   type: io1
+>   iopsPerGB: "10"
+>   fsType: ext4
+> ```
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 13 AWS\storage-aws.yaml
+
+```yaml
+# What do want?
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+spec:
+  storageClassName: cloud-ssd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 7Gi
+---
+# How do we want it implemented
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: cloud-ssd
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2
+
+```
+
+![image-20210211080127766](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211080127766.png)
+
+![image-20210211080716832](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211080716832.png)
+
+![image-20210211080751015](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211080751015.png)
+
 ### 9. Deploying the Fleetman Workload to Kubernetes
+
+![image-20210211081146039](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211081146039.png)
+
+Create a new file and copy old file in the previous chapter 
+
+![image-20210211082910715](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211082910715.png)
+
+![image-20210211082949330](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211082949330.png)
+
+![image-20210211083020687](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211083020687.png)
+
+![image-20210211083103355](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211083103355.png)
+
+![image-20210211083146430](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211083146430.png)
+
+Change from available to in-use
+
+
+
+service
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-webapp
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: webapp
+
+  ports:
+    - name: http
+      port: 80
+
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-queue
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: queue
+
+  ports:
+    - name: http
+      port: 8161
+
+    - name: endpoint
+      port: 61616
+
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-position-tracker
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: position-tracker
+
+  ports:
+    - name: http
+      port: 8080
+
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-api-gateway
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    app: api-gateway
+
+  ports:
+    - name: http
+      port: 8080
+
+  type: ClusterIP
+
+```
+
+
+
+Now we will delete `NodePort` and change `NodePort` to `LoadBalancer` for fleetman-webapp
+
+we will delete `NodePort` and change `NodePort` to `ClusterIP` for fleetman-queue
+
+we will delete `NodePort` and change `NodePort` to `ClusterIP` for fleetman-api-gateway
+
+![image-20210211085225067](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211085225067.png)
+
+Check logs
+
+![image-20210211085509704](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211085509704.png)
+
+![image-20210211085528580](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211085528580.png)
+
+![image-20210211090322339](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211090322339.png)
+
+It might take some time for the instances that are going to be added to this load balancer to register.
+If I click on the instances link here, and yes, I have the situation where my three instances
+are currently listed as being out of service.
+This just means, if I hover over this info here, instance registration is still in progress.
+It's beyond the scope of the course to talk about how the load balancers work on AWS.
+But, very briefly, they do have a health check process which means that the load balancer will ping the instance.
+It needs to have a series of successful pings before it considers that instance in service.
+
+![image-20210211090636358](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211090636358.png)
+
+![image-20210211090755373](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211090755373.png)
+
+DNS name is standard domain name this, although it's clearly an ugly, auto generated domain name.
+Now this is exciting.
+If we go into the browser and paste that domain name into your browser's address bar.
+If you're getting an error at this point, you might get an address not found, that's simply because
+the Amazon DNS entries can take a few moments to propagate.
+It might be something like five minutes.
+So, if you're not seeing anything at this stage have a break, come back, and try again and usually all will be well.
+
+![image-20210211091013061](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211091013061.png)
+
+![image-20210211091146117](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211091146117.png)
 
 
 
 ### 10. Setting up a real Domain Name
 
+https://chesterwood.io/
+
+https://blog.chesterwood.io/page/2
+
+![image-20210211092023372](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211092023372.png)
+
+![image-20210211092123596](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211092123596.png)
+
+![image-20210211092153989](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211092153989.png)
+
+![image-20210211092229010](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211092229010.png)
+
+Create a subdomain
+
+![image-20210211092434235](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211092434235.png)
+
+Then we click create button
+
+![image-20210211092523747](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211092523747.png)
+
+
+
+
+
 ### 11. Surviving Node Failure
 
+![image-20210211093534681](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211093534681.png)
+
+
+
+![image-20210211095802761](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211095802761.png)
+
+
+
+![image-20210211095733240](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211095733240.png)
+
+
+
+![image-20210211095951340](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211095951340.png)
+
+we are running a replica set for the webapp.
+So Kubernetes detected that the webapp pod had died.
+It's restarted that webapp pod.
+And we can see from the eight seconds there, that this is a new fresh webapp pod.
+And its rescheduled that pod onto one of the surviving nodes.
+So can you see there it's on this node with 65 rather then 2-4-2.
+
+![image-20210211100354751](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211100354751.png)
+
+Now that happened not because of Kubernetes, but because of the Auto Scaling Group.
+I made a brief reference to this when we first started with AWS.
+Let's have a look at the Auto Scaling Group.
+And it's actually this Auto Scaling Group
+here called nodes.fleetman which is in charge of monitoring this cluster
+and making sure that there are always at least three instances up and running.
+
+![image-20210211100620927](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211100620927.png)
+
+the Auto Scale Group responded to that by launching a new EC2 instance
+because there was a difference between the desired and actual capacity
+and the capacity was moved from two to three.
+And we can confirm that on our console if we do a kubectl get nodes. 
+
+![image-20210211100926035](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211100926035.png)
+
+Now something to note, let me repeat the get pods with the wide output.
+You'll notice that as things stand at the moment, this new node, the one with 1-8-2, is not being used.
+Now you might have expected that since currently we have four pods now, all scheduled onto this node here.
+You might expect that the cluster gets kind of rebalanced.
+Perhaps it would be efficient if Kubernetes were to terminate some of these pods and maybe put them onto the new node.
+Well, Kubernetes will not do that.
+And that makes sense because Kubernetes has no way of knowing if it's safe to do so.
+Now, we've designed this system so that in the event of any pod being stopped and restarted the system will continue.
+That was part of our microservice design.
+But Kubernetes doesn't know that.
+It could be this position tracker here has some really vital user data and if were to just terminate that pod and move it to another node, we might lost some data.
+
+
+
+
+
 ### 12. Replicating Pods in Kubernetes
+
+Change to 2
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+spec:
+  selector:
+    matchLabels:
+      app: webapp
+  replicas: 2 # change to 2
+  template: # template for the pods
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: webapp
+        image: richardchesterwood/k8s-fleetman-webapp-angular:release2
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+```
+
+![image-20210211101755522](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211101755522.png)
+
+![image-20210211101832074](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211101832074.png)
+
+![image-20210211102126021](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211102126021.png)
+
+![image-20210211102244208](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211102244208.png)
+
+![image-20210211102335502](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211102335502.png)
+
+![image-20210211102410511](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211102410511.png)
+
+Now if you're really disappointed with that, and you want the system to run perfectly, even in the event of the node failure, then you might think it's a case of simply replicating the appropriate pods.
+So for our example, take the queue pod, give it two replicas and therefore, in the event of a node failure, one of the nodes will always survive.
+Unfortunately you can't do that because this particular pod, the queue pod is **stateful**. In other words, it contains data.
+And because it contains data, if you replicate it, you're going to end up with a kind of a split brain situation, where half the data is in one part, half the data is in the other part.
+And all kinds of chaos will follow on from that.
+Really what you're aiming for with any pod is to make it **stateless**, so it's not holding data.
+And really as soon as a pod is stateless, then you can happily replicate it.
+Now my plans for this course were that we would now go ahead and take the queue and the MongoDatabase, which are the two stateful pods in the system, and we would get rid of them.
+There's really two ways of addressing this problem.
+Lets look at the queue as a working example.
+You could either investigate your queue's implementation.
+For me it's ActiveMQ, and see if there are replication options available.
+And there certainly are.
+**And ActiveMQ does support replication.**
+So you could work quite hard to configure that so that you can then run multiple instances of this pod.
+Probably an easier way would be to look to your cloud provider and see if they have a hosted service that does the same job that your pod was doing.
+And luckily in the case of ActiveMQ, Amazon do indeed have a managed mass message broker service for Apache ActiveMQ.
+
+![image-20210211103113736](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211103113736.png)
+
+So it speed be a relatively simple job.
+It would be a day or two's work, but you would configure an Amazon MQ instance in your Amazon account, and that would give you a URL for a queue, and then you would just have to re-engineer your code so it works with this hosted queue, and then you can get rid of the queue pod entirely.
+So I'm kinda saying that you just shift the problem, really, to your cloud provider.
+
+
+
+
 
 ## 14. Deleting the Cluster
 
 ### 1. Deleting the Cluster
 
+Run delete command
+
+![image-20210211145100657](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211145100657.png)
+
+![image-20210211145230766](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211145230766.png)
+
+![image-20210211145300502](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211145300502.png)
+
+![image-20210211145320485](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211145320485.png)
+
+![image-20210211145343104](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211145343104.png)
+
+nothing appear
+
+![image-20210211145540935](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211145540935.png)
+
+If you're planning on restarting your Kubernetes cluster, maybe you haven't yet finished with the course => stop
+
+Still keep volume `bootstrap`
+
+Or
+
+![image-20210211145906410](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211145906410.png)
+
+
+
+
+
+
+
 ### 2. Restarting the Cluster
+
+![image-20210211150018995](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211150018995.png)
+
+![image-20210211150113743](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211150113743.png)
+
+![image-20210211150146782](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211150146782.png)
+
+![image-20210211150239640](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211150239640.png)
+
+Then copy the new IP address
+
+![image-20210211150318408](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211150318408.png)
+
+
+
+Run commands again
+
+![image-20210211150410368](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211150410368.png)
+
+![image-20210211150456034](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211150456034.png)
+
+Click CTRL R to search old command
+
+![image-20210211150621025](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211150621025.png)
+
+
+
+![image-20210211151744432](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211151744432.png)
+![image-20210211152117975](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211152117975.png)
+
+![image-20210211152146839](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211152146839.png)
+
+Wait about 5m
+
+![image-20210211152345541](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211152345541.png)
+
+![image-20210211153843463](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211153843463.png)
+
+![image-20210211153917696](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211153917696.png)
+
+Another way 
+
+![image-20210211153951570](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211153951570.png)
+
+![image-20210211154031786](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211154031786.png)
+
+You can see full name
+
+
+
+![image-20210211154058177](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211154058177.png)
+
+wait a few minutes
 
 ## 15. Extra - how to run Kubernetes in Google Cloud
 
@@ -4462,27 +4908,1041 @@ As this isn't a core part of the course, I'm linking here to my YouTube channel 
 
 ### 1. Introducing the ELK  ElasticStack
 
+![image-20210211155818832](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211155818832.png)
+
+If we restart app => we can lost some critical information
+
+![image-20210211160455203](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211160455203.png)
+
+![image-20210211161123335](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211161123335.png)
+
+
+
 ### 2. Installing the Stack to Kubernetes
+
+https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/fluentd-elasticsearch
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 15 ELK\elastic-stack.yaml
+
+```yaml
+#
+# Fluentd configuration - this installs onto all nodes and gathers all logs
+# A separate yaml configures Fluentd
+#
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fluentd-es
+  namespace: kube-system
+  labels:
+    k8s-app: fluentd-es
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: fluentd-es
+  labels:
+    k8s-app: fluentd-es
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - "namespaces"
+  - "pods"
+  verbs:
+  - "get"
+  - "watch"
+  - "list"
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: fluentd-es
+  labels:
+    k8s-app: fluentd-es
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+subjects:
+- kind: ServiceAccount
+  name: fluentd-es
+  namespace: kube-system
+  apiGroup: ""
+roleRef:
+  kind: ClusterRole
+  name: fluentd-es
+  apiGroup: ""
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd-es-v2.2.0
+  namespace: kube-system
+  labels:
+    k8s-app: fluentd-es
+    version: v2.2.0
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+spec:
+  selector:
+    matchLabels:
+      k8s-app: fluentd-es
+      version: v2.2.0
+  template:
+    metadata:
+      labels:
+        k8s-app: fluentd-es
+        kubernetes.io/cluster-service: "true"
+        version: v2.2.0
+      # This annotation ensures that fluentd does not get evicted if the node
+      # supports critical pod annotation based priority scheme.
+      # Note that this does not guarantee admission on the nodes (#40573).
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+        seccomp.security.alpha.kubernetes.io/pod: 'docker/default'
+    spec:
+      priorityClassName: system-node-critical
+      serviceAccountName: fluentd-es
+      containers:
+      - name: fluentd-es
+        image: k8s.gcr.io/fluentd-elasticsearch:v2.2.0
+        env:
+        - name: FLUENTD_ARGS
+          value: --no-supervisor -q
+        resources:
+          limits:
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: config-volume
+          mountPath: /etc/fluent/config.d
+      # nodeSelector:
+      #  beta.kubernetes.io/fluentd-ds-ready: "true"
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: config-volume
+        configMap:
+          name: fluentd-es-config-v0.1.4
+
+
+---
+
+#
+# Elastic Search configuration
+#
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-logging
+  namespace: kube-system
+  labels:
+    k8s-app: elasticsearch-logging
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+    kubernetes.io/name: "Elasticsearch"
+spec:
+  ports:
+  - port: 9200
+    protocol: TCP
+    targetPort: db
+  selector:
+    k8s-app: elasticsearch-logging
+---
+# RBAC authn and authz
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: elasticsearch-logging
+  namespace: kube-system
+  labels:
+    k8s-app: elasticsearch-logging
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: elasticsearch-logging
+  labels:
+    k8s-app: elasticsearch-logging
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - "services"
+  - "namespaces"
+  - "endpoints"
+  verbs:
+  - "get"
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kube-system
+  name: elasticsearch-logging
+  labels:
+    k8s-app: elasticsearch-logging
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+subjects:
+- kind: ServiceAccount
+  name: elasticsearch-logging
+  namespace: kube-system
+  apiGroup: ""
+roleRef:
+  kind: ClusterRole
+  name: elasticsearch-logging
+  apiGroup: ""
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch-logging
+  namespace: kube-system
+  labels:
+    k8s-app: elasticsearch-logging
+    version: v6.2.5
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+spec:
+  serviceName: elasticsearch-logging
+  replicas: 2
+  selector:
+    matchLabels:
+      k8s-app: elasticsearch-logging
+      version: v6.2.5
+  template:
+    metadata:
+      labels:
+        k8s-app: elasticsearch-logging
+        version: v6.2.5
+        kubernetes.io/cluster-service: "true"
+    spec:
+      serviceAccountName: elasticsearch-logging
+      containers:
+      - image: k8s.gcr.io/elasticsearch:v6.2.5
+        name: elasticsearch-logging
+        resources:
+          # need more cpu upon initialization, therefore burstable class
+          limits:
+            cpu: 1000m
+          requests:
+            cpu: 100m
+        ports:
+        - containerPort: 9200
+          name: db
+          protocol: TCP
+        - containerPort: 9300
+          name: transport
+          protocol: TCP
+        volumeMounts:
+        - name: elasticsearch-logging
+          mountPath: /data
+        env:
+        - name: "NAMESPACE"
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+      # Elasticsearch requires vm.max_map_count to be at least 262144.
+      # If your OS already sets up this number to a higher value, feel free
+      # to remove this init container.
+      initContainers:
+      - image: alpine:3.6
+        command: ["/sbin/sysctl", "-w", "vm.max_map_count=262144"]
+        name: elasticsearch-logging-init
+        securityContext:
+          privileged: true
+  volumeClaimTemplates:
+  - metadata:
+      name: elasticsearch-logging
+    spec:
+      storageClassName: cloud-ssd
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 31Gi
+---
+
+#
+# Finally, Kibana - for visualising the results
+#
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-logging
+  namespace: kube-system
+  labels:
+    k8s-app: kibana-logging
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: kibana-logging
+  template:
+    metadata:
+      labels:
+        k8s-app: kibana-logging
+      annotations:
+        seccomp.security.alpha.kubernetes.io/pod: 'docker/default'
+    spec:
+      containers:
+      - name: kibana-logging
+        image: docker.elastic.co/kibana/kibana-oss:6.2.4
+        resources:
+          # need more cpu upon initialization, therefore burstable class
+          limits:
+            cpu: 1000m
+          requests:
+            cpu: 100m
+        env:
+          - name: ELASTICSEARCH_URL
+            value: http://elasticsearch-logging:9200
+        ports:
+        - containerPort: 5601
+          name: ui
+          protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-logging
+  namespace: kube-system
+  labels:
+    k8s-app: kibana-logging
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+    kubernetes.io/name: "Kibana"
+spec:
+  ports:
+  - port: 5601
+    protocol: TCP
+    targetPort: ui
+  selector:
+    k8s-app: kibana-logging
+  type: LoadBalancer
+
+```
+
+D:\git-docs\docker\Source\Udemy - Kubernetes Hands-On - Deploy Microservices to the AWS Cloud\1. Introduction\Chapter 15 ELK\fluentd-config.yaml
+
+```yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: fluentd-es-config-v0.1.4
+  namespace: kube-system
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
+data:
+  system.conf: |-
+    <system>
+      root_dir /tmp/fluentd-buffers/
+    </system>
+
+  containers.input.conf: |-
+    # This configuration file for Fluentd / td-agent is used
+    # to watch changes to Docker log files. The kubelet creates symlinks that
+    # capture the pod name, namespace, container name & Docker container ID
+    # to the docker logs for pods in the /var/log/containers directory on the host.
+    # If running this fluentd configuration in a Docker container, the /var/log
+    # directory should be mounted in the container.
+    #
+    # These logs are then submitted to Elasticsearch which assumes the
+    # installation of the fluent-plugin-elasticsearch & the
+    # fluent-plugin-kubernetes_metadata_filter plugins.
+    # See https://github.com/uken/fluent-plugin-elasticsearch &
+    # https://github.com/fabric8io/fluent-plugin-kubernetes_metadata_filter for
+    # more information about the plugins.
+    #
+    # Example
+    # =======
+    # A line in the Docker log file might look like this JSON:
+    #
+    # {"log":"2014/09/25 21:15:03 Got request with path wombat\n",
+    #  "stream":"stderr",
+    #   "time":"2014-09-25T21:15:03.499185026Z"}
+    #
+    # The time_format specification below makes sure we properly
+    # parse the time format produced by Docker. This will be
+    # submitted to Elasticsearch and should appear like:
+    # $ curl 'http://elasticsearch-logging:9200/_search?pretty'
+    # ...
+    # {
+    #      "_index" : "logstash-2014.09.25",
+    #      "_type" : "fluentd",
+    #      "_id" : "VBrbor2QTuGpsQyTCdfzqA",
+    #      "_score" : 1.0,
+    #      "_source":{"log":"2014/09/25 22:45:50 Got request with path wombat\n",
+    #                 "stream":"stderr","tag":"docker.container.all",
+    #                 "@timestamp":"2014-09-25T22:45:50+00:00"}
+    #    },
+    # ...
+    #
+    # The Kubernetes fluentd plugin is used to write the Kubernetes metadata to the log
+    # record & add labels to the log record if properly configured. This enables users
+    # to filter & search logs on any metadata.
+    # For example a Docker container's logs might be in the directory:
+    #
+    #  /var/lib/docker/containers/997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b
+    #
+    # and in the file:
+    #
+    #  997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b-json.log
+    #
+    # where 997599971ee6... is the Docker ID of the running container.
+    # The Kubernetes kubelet makes a symbolic link to this file on the host machine
+    # in the /var/log/containers directory which includes the pod name and the Kubernetes
+    # container name:
+    #
+    #    synthetic-logger-0.25lps-pod_default_synth-lgr-997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b.log
+    #    ->
+    #    /var/lib/docker/containers/997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b/997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b-json.log
+    #
+    # The /var/log directory on the host is mapped to the /var/log directory in the container
+    # running this instance of Fluentd and we end up collecting the file:
+    #
+    #   /var/log/containers/synthetic-logger-0.25lps-pod_default_synth-lgr-997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b.log
+    #
+    # This results in the tag:
+    #
+    #  var.log.containers.synthetic-logger-0.25lps-pod_default_synth-lgr-997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b.log
+    #
+    # The Kubernetes fluentd plugin is used to extract the namespace, pod name & container name
+    # which are added to the log message as a kubernetes field object & the Docker container ID
+    # is also added under the docker field object.
+    # The final tag is:
+    #
+    #   kubernetes.var.log.containers.synthetic-logger-0.25lps-pod_default_synth-lgr-997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b.log
+    #
+    # And the final log record look like:
+    #
+    # {
+    #   "log":"2014/09/25 21:15:03 Got request with path wombat\n",
+    #   "stream":"stderr",
+    #   "time":"2014-09-25T21:15:03.499185026Z",
+    #   "kubernetes": {
+    #     "namespace": "default",
+    #     "pod_name": "synthetic-logger-0.25lps-pod",
+    #     "container_name": "synth-lgr"
+    #   },
+    #   "docker": {
+    #     "container_id": "997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b"
+    #   }
+    # }
+    #
+    # This makes it easier for users to search for logs by pod name or by
+    # the name of the Kubernetes container regardless of how many times the
+    # Kubernetes pod has been restarted (resulting in a several Docker container IDs).
+
+    # Json Log Example:
+    # {"log":"[info:2016-02-16T16:04:05.930-08:00] Some log text here\n","stream":"stdout","time":"2016-02-17T00:04:05.931087621Z"}
+    # CRI Log Example:
+    # 2016-02-17T00:04:05.931087621Z stdout F [info:2016-02-16T16:04:05.930-08:00] Some log text here
+    <source>
+      @id fluentd-containers.log
+      @type tail
+      path /var/log/containers/*.log
+      pos_file /var/log/es-containers.log.pos
+      time_format %Y-%m-%dT%H:%M:%S.%NZ
+      tag raw.kubernetes.*
+      read_from_head true
+      <parse>
+        @type multi_format
+        <pattern>
+          format json
+          time_key time
+          time_format %Y-%m-%dT%H:%M:%S.%NZ
+        </pattern>
+        <pattern>
+          format /^(?<time>.+) (?<stream>stdout|stderr) [^ ]* (?<log>.*)$/
+          time_format %Y-%m-%dT%H:%M:%S.%N%:z
+        </pattern>
+      </parse>
+    </source>
+
+    # Detect exceptions in the log output and forward them as one log entry.
+    <match raw.kubernetes.**>
+      @id raw.kubernetes
+      @type detect_exceptions
+      remove_tag_prefix raw
+      message log
+      stream stream
+      multiline_flush_interval 5
+      max_bytes 500000
+      max_lines 1000
+    </match>
+
+  system.input.conf: |-
+    # Example:
+    # 2015-12-21 23:17:22,066 [salt.state       ][INFO    ] Completed state [net.ipv4.ip_forward] at time 23:17:22.066081
+    <source>
+      @id minion
+      @type tail
+      format /^(?<time>[^ ]* [^ ,]*)[^\[]*\[[^\]]*\]\[(?<severity>[^ \]]*) *\] (?<message>.*)$/
+      time_format %Y-%m-%d %H:%M:%S
+      path /var/log/salt/minion
+      pos_file /var/log/salt.pos
+      tag salt
+    </source>
+
+    # Example:
+    # Dec 21 23:17:22 gke-foo-1-1-4b5cbd14-node-4eoj startupscript: Finished running startup script /var/run/google.startup.script
+    <source>
+      @id startupscript.log
+      @type tail
+      format syslog
+      path /var/log/startupscript.log
+      pos_file /var/log/es-startupscript.log.pos
+      tag startupscript
+    </source>
+
+    # Examples:
+    # time="2016-02-04T06:51:03.053580605Z" level=info msg="GET /containers/json"
+    # time="2016-02-04T07:53:57.505612354Z" level=error msg="HTTP Error" err="No such image: -f" statusCode=404
+    # TODO(random-liu): Remove this after cri container runtime rolls out.
+    <source>
+      @id docker.log
+      @type tail
+      format /^time="(?<time>[^)]*)" level=(?<severity>[^ ]*) msg="(?<message>[^"]*)"( err="(?<error>[^"]*)")?( statusCode=($<status_code>\d+))?/
+      path /var/log/docker.log
+      pos_file /var/log/es-docker.log.pos
+      tag docker
+    </source>
+
+    # Example:
+    # 2016/02/04 06:52:38 filePurge: successfully removed file /var/etcd/data/member/wal/00000000000006d0-00000000010a23d1.wal
+    <source>
+      @id etcd.log
+      @type tail
+      # Not parsing this, because it doesn't have anything particularly useful to
+      # parse out of it (like severities).
+      format none
+      path /var/log/etcd.log
+      pos_file /var/log/es-etcd.log.pos
+      tag etcd
+    </source>
+
+    # Multi-line parsing is required for all the kube logs because very large log
+    # statements, such as those that include entire object bodies, get split into
+    # multiple lines by glog.
+
+    # Example:
+    # I0204 07:32:30.020537    3368 server.go:1048] POST /stats/container/: (13.972191ms) 200 [[Go-http-client/1.1] 10.244.1.3:40537]
+    <source>
+      @id kubelet.log
+      @type tail
+      format multiline
+      multiline_flush_interval 5s
+      format_firstline /^\w\d{4}/
+      format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+      time_format %m%d %H:%M:%S.%N
+      path /var/log/kubelet.log
+      pos_file /var/log/es-kubelet.log.pos
+      tag kubelet
+    </source>
+
+    # Example:
+    # I1118 21:26:53.975789       6 proxier.go:1096] Port "nodePort for kube-system/default-http-backend:http" (:31429/tcp) was open before and is still needed
+    <source>
+      @id kube-proxy.log
+      @type tail
+      format multiline
+      multiline_flush_interval 5s
+      format_firstline /^\w\d{4}/
+      format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+      time_format %m%d %H:%M:%S.%N
+      path /var/log/kube-proxy.log
+      pos_file /var/log/es-kube-proxy.log.pos
+      tag kube-proxy
+    </source>
+
+    # Example:
+    # I0204 07:00:19.604280       5 handlers.go:131] GET /api/v1/nodes: (1.624207ms) 200 [[kube-controller-manager/v1.1.3 (linux/amd64) kubernetes/6a81b50] 127.0.0.1:38266]
+    <source>
+      @id kube-apiserver.log
+      @type tail
+      format multiline
+      multiline_flush_interval 5s
+      format_firstline /^\w\d{4}/
+      format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+      time_format %m%d %H:%M:%S.%N
+      path /var/log/kube-apiserver.log
+      pos_file /var/log/es-kube-apiserver.log.pos
+      tag kube-apiserver
+    </source>
+
+    # Example:
+    # I0204 06:55:31.872680       5 servicecontroller.go:277] LB already exists and doesn't need update for service kube-system/kube-ui
+    <source>
+      @id kube-controller-manager.log
+      @type tail
+      format multiline
+      multiline_flush_interval 5s
+      format_firstline /^\w\d{4}/
+      format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+      time_format %m%d %H:%M:%S.%N
+      path /var/log/kube-controller-manager.log
+      pos_file /var/log/es-kube-controller-manager.log.pos
+      tag kube-controller-manager
+    </source>
+
+    # Example:
+    # W0204 06:49:18.239674       7 reflector.go:245] pkg/scheduler/factory/factory.go:193: watch of *api.Service ended with: 401: The event in requested index is outdated and cleared (the requested history has been cleared [2578313/2577886]) [2579312]
+    <source>
+      @id kube-scheduler.log
+      @type tail
+      format multiline
+      multiline_flush_interval 5s
+      format_firstline /^\w\d{4}/
+      format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+      time_format %m%d %H:%M:%S.%N
+      path /var/log/kube-scheduler.log
+      pos_file /var/log/es-kube-scheduler.log.pos
+      tag kube-scheduler
+    </source>
+
+    # Example:
+    # I1104 10:36:20.242766       5 rescheduler.go:73] Running Rescheduler
+    <source>
+      @id rescheduler.log
+      @type tail
+      format multiline
+      multiline_flush_interval 5s
+      format_firstline /^\w\d{4}/
+      format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+      time_format %m%d %H:%M:%S.%N
+      path /var/log/rescheduler.log
+      pos_file /var/log/es-rescheduler.log.pos
+      tag rescheduler
+    </source>
+
+    # Example:
+    # I0603 15:31:05.793605       6 cluster_manager.go:230] Reading config from path /etc/gce.conf
+    <source>
+      @id glbc.log
+      @type tail
+      format multiline
+      multiline_flush_interval 5s
+      format_firstline /^\w\d{4}/
+      format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+      time_format %m%d %H:%M:%S.%N
+      path /var/log/glbc.log
+      pos_file /var/log/es-glbc.log.pos
+      tag glbc
+    </source>
+
+    # Example:
+    # I0603 15:31:05.793605       6 cluster_manager.go:230] Reading config from path /etc/gce.conf
+    <source>
+      @id cluster-autoscaler.log
+      @type tail
+      format multiline
+      multiline_flush_interval 5s
+      format_firstline /^\w\d{4}/
+      format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+      time_format %m%d %H:%M:%S.%N
+      path /var/log/cluster-autoscaler.log
+      pos_file /var/log/es-cluster-autoscaler.log.pos
+      tag cluster-autoscaler
+    </source>
+
+    # Logs from systemd-journal for interesting services.
+    # TODO(random-liu): Remove this after cri container runtime rolls out.
+    <source>
+      @id journald-docker
+      @type systemd
+      filters [{ "_SYSTEMD_UNIT": "docker.service" }]
+      <storage>
+        @type local
+        persistent true
+      </storage>
+      read_from_head true
+      tag docker
+    </source>
+
+    <source>
+      @id journald-container-runtime
+      @type systemd
+      filters [{ "_SYSTEMD_UNIT": "{{ container_runtime }}.service" }]
+      <storage>
+        @type local
+        persistent true
+      </storage>
+      read_from_head true
+      tag container-runtime
+    </source>
+
+    <source>
+      @id journald-kubelet
+      @type systemd
+      filters [{ "_SYSTEMD_UNIT": "kubelet.service" }]
+      <storage>
+        @type local
+        persistent true
+      </storage>
+      read_from_head true
+      tag kubelet
+    </source>
+
+    <source>
+      @id journald-node-problem-detector
+      @type systemd
+      filters [{ "_SYSTEMD_UNIT": "node-problem-detector.service" }]
+      <storage>
+        @type local
+        persistent true
+      </storage>
+      read_from_head true
+      tag node-problem-detector
+    </source>
+
+    <source>
+      @id kernel
+      @type systemd
+      filters [{ "_TRANSPORT": "kernel" }]
+      <storage>
+        @type local
+        persistent true
+      </storage>
+      <entry>
+        fields_strip_underscores true
+        fields_lowercase true
+      </entry>
+      read_from_head true
+      tag kernel
+    </source>
+
+  forward.input.conf: |-
+    # Takes the messages sent over TCP
+    <source>
+      @type forward
+    </source>
+
+  monitoring.conf: |-
+    # Prometheus Exporter Plugin
+    # input plugin that exports metrics
+    <source>
+      @type prometheus
+    </source>
+
+    <source>
+      @type monitor_agent
+    </source>
+
+    # input plugin that collects metrics from MonitorAgent
+    <source>
+      @type prometheus_monitor
+      <labels>
+        host ${hostname}
+      </labels>
+    </source>
+
+    # input plugin that collects metrics for output plugin
+    <source>
+      @type prometheus_output_monitor
+      <labels>
+        host ${hostname}
+      </labels>
+    </source>
+
+    # input plugin that collects metrics for in_tail plugin
+    <source>
+      @type prometheus_tail_monitor
+      <labels>
+        host ${hostname}
+      </labels>
+    </source>
+
+  output.conf: |-
+    # Enriches records with Kubernetes metadata
+    <filter kubernetes.**>
+      @type kubernetes_metadata
+    </filter>
+
+    <match **>
+      @id elasticsearch
+      @type elasticsearch
+      @log_level info
+      include_tag_key true
+      host elasticsearch-logging
+      port 9200
+      logstash_format true
+      <buffer>
+        @type file
+        path /var/log/fluentd-buffers/kubernetes.system.buffer
+        flush_mode interval
+        retry_type exponential_backoff
+        flush_thread_count 2
+        flush_interval 5s
+        retry_forever
+        retry_max_interval 30
+        chunk_limit_size 2M
+        queue_limit_length 8
+        overflow_action block
+      </buffer>
+    </match>
+
+```
+
+DaemonSet, StatefulSet like ReplicaSet
+
+These stateful sets are used in specialist circumstances, where you absolutely need to make sure that the pods always have a stable name.
+This is often used In situations where you're doing things like clustering.
+We don't need any more detail about Stateful sets, it's enough just to know that they're used in very exceptional circumstances.
+Just going a little further down, once again, We're using here a standard docket image called Elasticsearch.
+Keep going further down, and now here is one important piece of information, there is a VolumeClaimTemplate here, now, I've added this to the standard configuration that we got from Github.
+The standard configuration here for the storage for Elasticsearch just stores the data in a temporary folder that's going to get lost if this container restarts.
+And as they say, they've just done that for testing purposes; just to get you started.
+I think it will be well worth using some real hard drives in the cloud to store this data.
+So, for that reason, I did a `VolumeClaimTemplate`.
+
+
+
+Then we copy 2 file to aws
+
+![image-20210211174720526](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211174720526.png)
+
+![image-20210211174905134](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211174905134.png)
+
+So we'll need to wait until we get to the point where all of those pods are running.
+
+![image-20210211175114441](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211175114441.png)
+
+![image-20210211175143750](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211175143750.png)
+
+
+
+![image-20210211175310955](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211175310955.png)
+
+![image-20210211175431248](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211175431248.png)
+
+![image-20210211175459081](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211175459081.png)
+
+![image-20210211175551852](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211175551852.png)
+
+
 
 ### 3. Kibana - first look
 
+![image-20210211175753181](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211175753181.png)
+
+
+
+Remember from our architecture diagram, that's going to allow us to aggregate lots of log files together and do really intelligent searches against them. So, for that reason, we've followed this link here, in the top right.
+Or at least, it is on this version of Kibana.
+Every version of Kibana changes, and they're always fiddling around with use of interface.
+But if you've used the same config file as me, then you'll have exactly the same as me.
+Click on set up index patterns, on this step one, we need to tell Kibana what the name of the index is, in elastic search. Well, that's confusing, because we haven't created any indexes.
+But I can tell you, that what will have happened as a result of us using Fluentd in our case.
+Is automatically, there will have been an index created in Elastic search. Beginning, this is a bit confusing, in fact, beginning logstash. And it will roll over every day, so tomorrow there will be another index created.
+Beginning logstash, but then followed by the dates.
+I think fluentd is just kind of doing that for compatibility reasons, so that people who switch to fluentd don't need to change the name of the index in Elastic search. It's just a guess really, but actually this front end is telling us that, yeah, we have a single index, and its called logstash dash and that's the current date. Now, if I were to come back tomorrow, I would find we've got two indexes. And then, and so I thought, what we do here on the index pattern, is we use a wild card.
+
+![image-20210211180124417](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211180124417.png)
+
+Click next
+
+We need to tell Kibana what the time field is in our logs. That configuration of fluentd that we are using will automatically add a time field to every single one of the logs regardless of where it's come from. And actually, Kibana will detect that. If we drop down this list here, you'll see that there is a field at `@timestamp`, which fluentd is adding on to every single log message that we get. Now, we need to select that, and have that here so that Kibana knows what to use when it's doing things like time based graphs.
+
+![image-20210211192413356](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211192413356.png)
+
+![image-20210211192512933](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211192512933.png)
+
+![image-20210211193220815](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211193220815.png)
+
+![image-20210211193625260](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211193625260.png)
+
+
+
+
+
 ### 4. Setting Filters and Refreshes
+
+![image-20210211194520599](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211194520599.png)
+
+![image-20210211194756167](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211194756167.png)
+
+
+
+
 
 ### 5. Demo analysing a system failure
 
+![image-20210211195258928](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211195258928.png)
+
+![image-20210211195336815](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211195336815.png)
+
+![image-20210211195424999](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211195424999.png)
+
+![image-20210211195455860](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211195455860.png)
+
+![image-20210211195950316](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211195950316.png)
+
+![image-20210211200040373](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211200040373.png)
+
+
+
 ### 6. Kibana Dashboards
+
+Save the filter
+
+![image-20210211200301051](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211200301051.png)
+
+![image-20210211200408268](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211200408268.png)
+
+![image-20210211200509618](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211200509618.png)
+
+![image-20210211201149301](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211201149301.png)
+
+![image-20210211201223658](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211201223658.png)
+
+![image-20210211201342234](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211201342234.png)
+
+![image-20210211201439749](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211201439749.png)
+
+![image-20210211201752483](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211201752483.png)
+
+![image-20210211201836841](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211201836841.png)
+
+![image-20210211201911465](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211201911465.png)
+
+![image-20210211202331973](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211202331973.png)
+
+![image-20210211202409227](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211202409227.png)
+
+Then we click apply button
+
+
+
+![image-20210211203205935](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211203205935.png)
+
+![image-20210211203250441](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211203250441.png)
+
+
 
 ## 17. Monitoring a Kubernetes Cluster with Prometheus and Grafana
 
 ### 1. Monitoring a Cluster
 
+![image-20210211203820087](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211203820087.png)
+
+![image-20210211205521060](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211205521060.png)
+
+You can choose multiple entries
+
+![image-20210211205911473](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211205911473.png)
+
+
+
+
+
 ### 2. Helm Package Manager
 
+![image-20210211210817414](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211210817414.png)
+
+Helm allows you to instal an entire Kubernetes application using a single command line.
+Now by Kubernetes application, they really mean a workload and services, a collection of pods and a collection of services.
+So, as a quick example off the top of my head, you might've been given the requirement to introduce a mysql database into your Kubernetes cluster.
+
+
+
+Download helm
+
+https://github.com/helm/helm/releases
+
+![image-20210211212443875](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211212443875.png)
+
+Copy link
+
+![image-20210211212621858](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211212621858.png)
+
+![image-20210211212721645](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211212721645.png)
+
+the pod that it's installed is called Tiller.
+
+![image-20210211212836752](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211212836752.png)
+
+If you get client and server, it means helms is installed
+
+Go back a level in github
+
+> Deprecation and Archive Notice
+> Similar to the Helm 2 Support Plan, this GitHub project has begun transition to a 1 year "maintenance mode" (see Deprecation Timeline below). Given the deprecation plan, this project is intended for apiVersion: v1 Charts (installable by both Helm 2 and 3), and not for apiVersion: v2 charts (installable by Helm 3 only).
+
+https://github.com/helm/charts/tree/master/stable/mysql
+
+![image-20210211213653886](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211213653886.png)
+
+![image-20210211213910780](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211213910780.png)
+
+![image-20210211214024025](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211214024025.png)
+
+
+
+
+
 ### 3. Errata - steps needed to get a full set of data from Prometheus.html
+
+After I recorded these videos, a problem has been reported that after installing prometheus (coming in the next video), some of the screens of data are blank.
+
+This isn't a major problem if you're just wanting to try out prometheus, but it is frustrating that you don't see a complete set of data.
+
+Here is the workaround - it's a simple config change to your kops cluster...
+
+
+
+1: Edit your cluster definition with "kops edit cluster --name ${NAME}"
+
+2: Find the key called "kubelet:", it will have one entry below it called anonymousAuth: false. You're going to add two further entries so that this section looks like the following:
+
+```
+kubelet:
+  anonymousAuth: false    
+  authenticationTokenWebhook: true    
+  authorizationMode: Webhook
+```
+
+
+
+3: Save your changes. Then "kops update cluster --yes".
+
+4: You will now need to do a "rolling update", which is where kops will kill each node in turn, and bring up a new node with the new configuration.
+
+```
+kops rolling-update cluster --yes
+```
+
+Sometimes this process hangs - not a problem. Just wait five minutes, and if no progress, "control-C", re-run the command again. Keep doing this until the rolling update reports there is nothing to do.
+
+Now you can proceed with the next videos!
 
 ### 4. Installing Prometheus Operator
 
 ### 5. Working with Grafana
+
+update...
 
 ## 18. The Alert Manager
 
@@ -4506,9 +5966,15 @@ As this isn't a core part of the course, I'm linking here to my YouTube channel 
 
 ### 1. Course Update 2019 Introduction to the Advanced Section
 
+![image-20210211220333772](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211220333772.png)
+
+
+
 ### 2. Code  files for this section.html
 
+Attached to this text lecture is a zip of some of the code (mainly yaml) used in this section. There's not much here, but it might be helpful if you want to avoid typing problems (and YAML indenting errors!).
 
+You'll also be using some github repos, especially in the CI/CD section of the course.
 
 ## 20. Kubernetes Requests and Limits
 
