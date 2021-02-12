@@ -6317,9 +6317,126 @@ We're actually using 65% of memory but remember there is memory being consumed b
 
 ### 1. Introducing Replication and Autoscaling
 
+Now, what I'm really getting at is, you have to ensure that the software you're running inside a pod, for all is it might well be a microservice, you need to make sure that that software is designed so that if it's replicated, the system is going to continue to behave properly.
+
+And again, people get confused by the concept of statelessness.
+It just means that it's not holding any data that it needs to share with anything else.
+When a request comes in, such as that get all vehicles request, the Position Tracker just receives that as a rest request.
+It may well do some calculations in memory, but also it's implemented to go off to, in our case, it's a Mongo database.
+
+![image-20210212204137726](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212204137726.png)
+
+Databases are very, very difficult to replicate.
+If you want to replicate a Mongo database, then you have to use Mongo's own replication system.
+And to replicate this Mongo database, But the course got too long so I decided to remove that from the course.
+But in this update to the course, as a special treat, we will be replicating the Mongo database when we come to the chapter on stateful sets.
+
+
+
+What do we mean by horizontal pod autoscaling? The general term horizontal scaling you may have met from other areas of software development.
+And it always means where you're improving the capacity of a system by creating more instances of something.
+So for example, in a cluster if you want that cluster to be more powerful, then horizontally scaling the cluster means adding more nodes to that cluster.
+The related concept of vertical scaling would be where you make the nodes more powerful.
+So, in a Kubernetes cluster, when we take a pod and we create multiple instances of that pod, we are horizontally scaling.
+In this chapter, we're looking at how to automatically horizontally scale, based on the runtime of the system, and this is how it works.
+
+
+
+we're going to start with the number of replicas being one.
+And we've done this a million times on the course.
+So when we apply this deployment, the deployment will automatically create an instance of that pod, which I'm representing here.
+Now we know now that we can specify requests and limits for a pod.
+It's actually for the containers inside the pod, but usually we only have one container in a pod anyway.
+
+![image-20210212214343795](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212214343795.png)
+
+
+
+
+
+And what we do is we deploy a new object into our cluster, which is called a hpa object, or horizontal pod autoscaler.
+Now this object in Kubernetes allows us to capture a rule, and it's very simple.
+The rule is something along the lines of if the actual CPU usage of a particular pod, for us the API gateway, exceeds more than on average by using the metrics-server.
+Remember heaps? That has now been deprecated, but we did use to use heaps for this purpose as well.
+Well, we can tell the horizontal pod autoscaler that it can go ahead and modify the deployment up to a particular maximum.
+So we might say something like a maximum of five pods.
+So imagine this pod is running, and for whatever reason it's pretty busy.
+And on average, it's using more than 50% of the CPU requests.
+Well, this hpa object will automatically go in, modify the deployment object, and switch up the number of replicas.
+And from here on in, everything works exactly as it would have worked if we'd done this thing manually.
+When we change the replicas and deployments as you know, the deployments is responsible for automatically creating a new instance of that pod.
+
+![image-20210212214549123](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212214549123.png)
+
+![image-20210212215324515](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212215324515.png)
+
+![image-20210212215448653](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212215448653.png)
+
+Then apply
+
+![image-20210212215545472](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212215545472.png)
+
+We've added `/api` to this URL
+
+![image-20210212215644826](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212215644826.png)
+
+![image-20210212220101432](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212220101432.png)
+
+wait
+
+![image-20210212220544398](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212220544398.png)
+
+Reload the links
+
+![image-20210212220806328](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212220806328.png)
+
+Reload the links many times, you can see the CPU which is increased
+
+https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+
+![image-20210212222736187](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212222736187.png)
+
+9/50m per req = 0.18
+
+![image-20210212223227991](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212223227991.png)
+
+![image-20210212223256900](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212223256900.png)
+
+yaml syntax to recreate object
+
+Then we copy and remove some redundant lines
+
+![image-20210212223445660](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212223445660.png)
+
+Save to new file
+
+![image-20210212223621692](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212223621692.png)
+
+wait
+
 
 
 ### 2. Testing Autoscaling
+
+![image-20210212224605084](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212224605084.png)
+
+ ![image-20210212224732093](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212224732093.png)
+
+![image-20210212224801615](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212224801615.png)
+
+=> error
+
+![image-20210212225402132](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212225402132.png)
+
+the api-gateway has now started to settle down.
+And in fact now, all three CPU usages are, well they're not below the request, these two are below the request.
+This one is still above the other requests, but it's certainly not at 400% of the request.
+You might be wondering, well, why haven't we seen a scale down, and the answer is, we will see a scale down, if we do a describe again on that hpa object.
+In fact it doesn't immediately trigger a scale down.
+We can see, though, that the metrics are reporting that the CPU is currently at 98% of the request, but we only want to autoscale when we're at 400%.
+Now, all that's happening here is that when CPU usage drops below the percentage that we've specified, it keeps an eye on that, and if it stays below that value for, I think it's several minutes, it's something like five minutes, only then does it trigger a scale down.
+
+![image-20210212225726715](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212225726715.png)
 
 
 
@@ -6327,9 +6444,72 @@ We're actually using 65% of memory but remember there is memory being consumed b
 
 ### 1. Demo why readiness probes are needed
 
+![image-20210212231342946](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212231342946.png)
+
+But now here's the problem.
+The software inside this container although its running, it might not yet be ready to service requests.
+This depends entirely on the language that that container is implemented in depends on the framework that it's using.
+I guess some programmes inside a container might be ready to receive requests instantaneously, or at least very quickly.
+But I know as the developer of these containers that I'm using Spring Boots.
+And I know that any Spring Boots application, even if it's a pretty simple one, will typically take something in the region of 20, 30 seconds, something like that, to be at a point where it's ready to receive requests.
+
+![image-20210212231630364](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212231630364.png)
+
+Open a new terminal and run 
+
+![image-20210212231855962](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212231855962.png)
+
+![image-20210212231935441](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212231935441.png)
+
+![image-20210212232118395](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212232118395.png)
+
+![image-20210212232159889](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212232159889.png)
+
+In the downtime
+
+![image-20210212232250406](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212232250406.png)
+
+
+
 
 
 ### 2. Applying Liveness and Readiness Probes
+
+[Configure Liveness, Readiness and Startup Probes | Kubernetes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+
+These are two separate concepts in fact, although they're configured in a very similar way.
+The syntax is pretty well identical.
+What we need for the situation we have here is a readiness probe.
+And the idea of this is simply, we'll give some configuration to Kubernetes to tell it how to test if a particular pod is ready to receive requests.
+And the deal is, when we have a readiness probe, Kubernetes will not send traffic to that pod until the readiness probe is showing that the pod is ready to receive requests.
+
+![image-20210212233623144](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212233623144.png)
+
+Add `readinessProbe` and decrease replicas to 1
+
+=> Apply
+
+![image-20210212233737118](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212233737118.png)
+
+Then we will increase replicas to 3 again to test
+
+![image-20210212233907879](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212233907879.png)
+
+![image-20210212234204272](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212234204272.png)
+
+![image-20210212234236810](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212234236810.png)
+
+A liveness probe would be a http request, exactly the same as a readiness probe.
+But a liveness probe will continually run for the duration of your pod's lifetime.
+And if for any reason that probe fails, then Kubernetes can mark the whole pod as failed, and kill the pod and effectively restart the pod.
+So this could be useful if you have a container that might freeze for some reason.
+And as I've said earlier in the course, it's not an excuse to push out Boogie Software, but it could prove useful in some situations.
+Going back down to the bottom, the parameters here apply to readiness and liveness probes, so you can say, for example, that you want to set a failure threshold, and this would mean, the default, by the way, is three, so it would have to fail three of those probes before the pod is restarted.
+I don't think we need to do a demo of liveness probes.
+
+![image-20210212234413623](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212234413623.png)
+
+
 
 
 
@@ -6337,11 +6517,53 @@ We're actually using 65% of memory but remember there is memory being consumed b
 
 ### 1. Understanding the scheduler
 
+The job of the scheduler is to decide on which node a particular pod should be placed.
+When you first start a pod, the scheduler is responsible for choosing a node on which that pod should run.
+And the scheduler is a critical component of Kubernetes.
+The scheduler's main responsibility is to ensure that any one node isn't overloaded.
+
+![image-20210212235243581](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212235243581.png)
+
+Now we do a kubectl apply, and that results in a pod being deployed to our cluster.
+Now I'd like you to assume that this pod, the developer, or the deployer, has decided that the resources for this pod should be...
+We're going to request 500 megabytes, and we're going to place a limit on that pod of 500 megabytes.
+Now if you're not familiar with the concepts of requests and limits, then do go back to the earlier videos where we've already looked at this at this on the course.
+
+![image-20210213000013013](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213000013013.png)
+
+If for whatever reason Pod 1 were to try to use, say, 600 megabytes, then we know from earlier that that pod will be automatically evicted.
+It will be automatically terminated.
+I think we've come across that before when we were talking about how limit works.
+Now don't panic, in a well-designed system that shouldn't be a problem, it would just mean that that pod would get rescheduled, assuming that this is part of a replica set or a deployment, and it almost certainly will be.
+The scheduler will try to restart that pod.
+Potentially that could be restarted on another node.
+The key thing about a limit is the scheduler knows where it stands with that pod.
+It knows it's never going to be greedy.
+But unfortunately, it can't say the same for the other two pods.
+It's perfectly possible that for Pod 2, although it's requested 300, there's no limit.
+That's just a hint from the developer to say, this is what the pod will probably need.
+If it were to actually go ahead and now use 500 megabytes, well the limiting mechanism won't help here.
+And things are even worse really with Pod 3, because we have no clue what Pod 3 is going to do.
+It could well need 900 megabytes as time goes on.
+And these different combinations of requests and limits, whether you have them or not, actually has a big impact on the way that the scheduler works.
+
+![image-20210213000529804](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213000529804.png)
+
+![image-20210213000813333](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213000813333.png)
+
+
+
 ### 2. QoS labels
+
+
 
 ### 3. Evictions
 
+
+
 ### 4. Pod Priorities
+
+
 
 ## 25. RBAC (Role Based Access Control) on a Kubernetes cluster
 
