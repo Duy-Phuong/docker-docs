@@ -5980,31 +5980,358 @@ You'll also be using some github repos, especially in the CI/CD section of the c
 
 ### 1. Memory requests
 
+![image-20210211221402686](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211221402686.png)
+
+The real purpose of specifying requests is when we're deploying this pod to a real cluster it will allow the cluster manager to ensure that there is enough memory on the server, on the node, to allow that pod to run comfortably.
+And we're going to see as we progress through the whole of this section that setting resource requests really does give us a lot of very rich functionality.
+But at first in this video I'm just going to concentrate on the first thing we get from specifying a request.
+And that enables the cluster manager to make intelligent decisions about whether or not a node is able to run a pod or not.
+
+
+
+![image-20210211221811637](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211221811637.png)
+
+![image-20210211221833005](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211221833005.png)
+
+![image-20210211222101198](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211222101198.png)
+
+kubectl delete -f .: Delete all pods
+
+![image-20210211222300888](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211222300888.png)
+
+
+
+![image-20210211223645131](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211223645131.png)
+
+![image-20210211223801994](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211223801994.png)
+
+![image-20210211224203231](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211224203231.png)
+
+apply this file to test
+
+![image-20210211224303452](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211224303452.png)
+
+![image-20210211224342891](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211224342891.png)
+
+Run `kubectl describe node minikube`
+
+![image-20210211224509181](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211224509181.png)
+
+Change to 3 replicas
+
+![image-20210211224753666](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211224753666.png)
+
+
+
+
+
 ### 2. CPU Requests
 
+https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+
+![image-20210211225223049](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211225223049.png)
+
+![image-20210211225305251](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211225305251.png)
+
+![image-20210211225532093](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211225532093.png)
+
+>  change replicas to 2, cpu to 1
+
+![image-20210211225800878](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211225800878.png)
+
+![image-20210211225827875](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211225827875.png)
+
+
+
+
+
+
+
 ### 3. Memory and CPU Limits
+
+
+
+![image-20210211231212362](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211231212362.png)
+
+![image-20210211231236342](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211231236342.png)
+
+![image-20210211231355923](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211231355923.png)
+
+
+
+Apply it
+
+
+
+![image-20210211231930202](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211231930202.png)
+
+![image-20210211232004250](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211232004250.png)
+
+Change memory limit and request to 4M then apply
+
+![image-20210211232216040](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211232216040.png)
+
+![image-20210211232255061](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211232255061.png)
+
+describe
+
+![image-20210211232404357](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210211232404357.png)
+
+
+
+
 
 ## 21. Metrics Profiling in Kubernetes
 
 ### 1. Enabling the Metrics Server
 
+![image-20210212084709064](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212084709064.png)
+
+On Minikube if we issue the command minikube addons and list, it gives us a list of about 10 or 15 different plug-ins or add-ons as they call them to Minikube.
+
+![image-20210212085119984](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212085119984.png)
+
+I've highlighted here, the metrics-server, and the idea is once we've enabled this add-on our top pod and top node commands should work.
+And all we need to do to enable that add-on is the command minikube addons enable and then the name of the add-on is metrics-server, and it's as simple as that.
+If I now repeat that list command, let's just check that, yeah, metrics-server is now enabled.
+Now, if you rush now and go straight back to the `kubectl top pod` you'll probably find that you're still getting an error, and the reason for this is just simply that the metrics server gathers metrics over a time period and the default time period is a minute, and it's going to take at least a minute before there's enough data for this command to give us a reasonable answer.
+
+![image-20210212090432841](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212090432841.png)
+
+![image-20210212090720678](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212090720678.png)
+
+wait a minutes
+
+![image-20210212090820078](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212090820078.png)
+
+![image-20210212091049590](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212091049590.png)
+
+![image-20210212091127045](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212091127045.png)
+
+Now, I waited about half a minute in fact, and just off camera did a top pod, and you can see now that the queue has actually disappeared from the list.
+So, the metrics server now knows that that old pod is gone, and I assume in the next update we'll see the new incoming pod appear.
+So, looks like I might have to wait another minute perhaps.
+
+![image-20210212091251034](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212091251034.png)
+
+
+
+Now, before we move on I showed you earlier that there is also a kubectl top node command and as you can see from this, this gives us a summary and when we're on a full cluster this will give us a list of all of the nodes, the masters, and the workers, and will show you the aggregated CPU and memory usage of each of those nodes.
+We can see now the reason why earlier on in the course we had to expand the size of the Minikube virtual machine.
+With these five pods running and of course there's also the kube-system pods running in the background as well, we are using well over three gigabytes of RAM.
+That is in fact getting uncomfortably close to the limit.
+We're at 88% memory utilisation, which is slightly alarming.
+The CPU usage looks absolutely fine.
+We're using about a quarter of the available two CPU cores.
+
+![image-20210212091546329](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212091546329.png)
+
+
+
 ### 2. Viewing Metrics on the Dashboard
+
+![image-20210212091832835](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212091832835.png)
+
+wait a minutes
+
+![image-20210212092338861](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212092338861.png)
+
+
+
+Run `minikube dashboard`
+
+![image-20210212092507049](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212092507049.png)
+
+![image-20210212092629414](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212092629414.png)
+
+![image-20210212092837886](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212092837886.png)
+
+![image-20210212093900520](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212093900520.png)
+
+![image-20210212093946739](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212093946739.png)
+
+![image-20210212151339974](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212151339974.png)
+
+You can change number of pod to 2
+
+So, you can think of this as being a replacement for kubectl if you prefer working with graphical interfaces.
+When you're running a production cluster, everything works through files that you've checked into source control. They are often then automatically applied by some kind of continuous developments applications, such as Jenkins. So, that's the reason why I don't use this dashboard very often at all.
+If you've got any questions on it, I probably won't be able to answer them very well at all.
+
+![image-20210212152054667](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212152054667.png)
+
+![image-20210212152125367](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212152125367.png)
+
+![image-20210212152209933](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212152209933.png)
+
+You can see `metrics-server` is enable
+
+Now, the metrics-server is a replacement for an older service called heapster.
+Now heapster did exactly the same job that metrics-server is doing today. But, heapster has been deprecated and we are expected to use metrics-server.
+
+![image-20210212152837505](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212152837505.png)
+
+But for some reason, and I don't know the internal poetics that's gone on here, for some reason, although they've pushed out metrics-server, and they're making us use it, they just haven't gotten around to supporting that graphical support yet.
+But heapster did have graphical support and it worked just fine. So, if you're in the unfortunate position that metrics-server isn't giving you graphics and you desperately want them.
+Then what we can do is simply, disable metrics-server and then enable heapster.
+And everything will work the same, but we should see graphs appearing on the console Now that should be an easy job to do, if we do minikube add-ons disable, we should be able to disable metrics-server.
+Now unfortunately for me, and I promise this is the last problem on this video, For some reason, I think this just affects windows, it will not allow me to disable add-ons.
+
+![image-20210212152934928](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212152934928.png)
+
+> I'm only doing this, to get the graphing support, and there's a very good chance that by the time you watch this metrics-server will have graphing support and you do not need to enable heapster.
+> I expect this video will become redundant very, very soon.
+
+![image-20210212153148118](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212153148118.png)
+
+wait a minutes
+
+![image-20210212153309853](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212153309853.png)
+
+wait and re-run again
+
+![image-20210212153442238](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212153442238.png)
+
+so it will take a few moments to start up and the big difference now, is that we are seeing a graph here.
+
+![image-20210212153654367](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212153654367.png)
+
+![image-20210212153836794](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212153836794.png)
+
+This influx db, and most significantly, there is a `monitoring Grafana`.
+Now, you're probably familiar with Grafana from earlier on in the course where we were using it on top of a pretty complex Prometheus set up.
+Back in the days of heapster, when you run heapster for free, you also get a Grafana console on this as well, and it's already set up for us with a node port, running on port 30,002.
+So that means, if we visit the minikube IP address, kind of what that is for me, its this one ending in 105, so if I visit the IP call on 30,002, you'll be somewhat familiar with this now, this dashboard, this Grafana dashboard is configured slightly differently to the Prometheus Grafana dashboard that we had.
+
+Run `minikube ip`
+
+![image-20210212154148919](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212154148919.png)
+
+![image-20210212154128761](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212154128761.png)
+
+![image-20210212154250527](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212154250527.png)
+
+> **Note**: 
+>
+> So, I have no insight or knowledge here, I don't know if they are going to include Grafana with the metrics-server eventually or it's something they're going to drop.
+> I wasn't sure whether to even mention it on the course because we don't need this but, perhaps you might find it a useful addition.
+
+
 
 ### 3. Tuning Java Spring Boot Applications, Heap restriction
 
+I'm going to try to illustrate the problem with a very basic diagram here.
+Now please understand that this diagram is not going to be accurate.
+I'm doing this purely for the purposes of illustration, and for getting the idea across.
+There are many technical inaccuracies here, but I promise you those technical inaccuracies are not important for the understanding of the core problem here.
+
+![image-20210212162937203](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212162937203.png)
+
+Now we can set a value on any Java programmer, and we can specify what the maximum size of the heap that the Java programmer is going to use.
+Remember the heap is the internal memory structure that Java uses.
+Now by setting this maximum size, it will give the Java programmer a chance.
+If it recognizes that it doesn't have a lot of memory and it's doing quite frequent garbage collection and therefore potentially running slowly, the Java programmer can go ahead and resize itself.
+It can grab some more of the available system RAM, which it will use to expand its heap.
+And that will mean potentially that Java programmer won't need to do as many garbage collections.
+
+![image-20210212162224787](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212162224787.png)
+
+it's a command line argument called `-Xmx`.
+And this tells Java what the maximum allowable size of the heap is going to be for this programmer.
+
+> It will start with a small heap and it will resize and resize and resize and resize as it sees fit until it reaches this hard limit of one gigabyte, and then it won't resize its heap anymore.
+
+> **Mistake**: I didn't specify a maximum heap size for the Java process.
+
+![image-20210212162658618](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212162658618.png)
+
+But, of course, if you're working with multiple Java applications, as we are, then it's going to be the case that regardless of how big your Node is, you might only have space to run on, I'm saying containers here, but I mean this for any Java programme, you might only have space to run four Java programmes.
+So if we have eight gigabytes of available RAM on our Node, then when we've put four Java programmes on there, each of them will use up to two gigabytes of their maximum heap and, in a way then, there's no room for any other Java programmes to run on that Node.
+I say in a way because remember this is going to be the maximum heap for those Java programmes.
+It doesn't necessarily mean it's actually going to use all of that maximum heap.
+But it's certainly going to take a big chunk out of it.
+
+![image-20210212163158563](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212163158563.png)
+
+> Java 10 solve problems
+
+![image-20210212163251738](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212163251738.png)
+
+![image-20210212163430934](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212163430934.png)
+
+We push to this image
+
+![image-20210212163526167](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212163526167.png)
+
+=> Change tag of the image in the workloads.yaml file to `resources`
+
+![image-20210212163827334](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212163827334.png)
+
+![image-20210212164024747](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212164024747.png)
+
+![image-20210212164123595](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212164123595.png)
+
+
+
 ### 4. Setting reasonable Requests
+
+position simulator: 200, cpu: 50m
+
+queue: 300
+
+position tracker: 200, cpu: 50m
+
+gateway: 200, cpu: 50m
+
+webapp: 100, cpu: 50m
+
+Then we apply this
+
+![image-20210212164957635](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212164957635.png)
+
+![image-20210212165056903](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212165056903.png)
+
+![image-20210212165146891](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212165146891.png)
+
+![image-20210212165206642](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212165206642.png)
+
+![image-20210212165247750](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212165247750.png)
+
+![image-20210212165442469](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212165442469.png)
+
+If we do kubectl describe on the node, but now when we describe that node, we should see that we have now set sensible requests for CPU and memory.
+We now get a much better feel for how committed this cluster is.
+We can see at a glance that, in terms of CPU requests, we're requesting about 77% of the resource but only 43% of the memory resources.
+We have seen from kubectl top node that we're using quite a lot more memory than that.
+
+![image-20210212165534421](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210212165534421.png)
+
+We're actually using 65% of memory but remember there is memory being consumed by pods that haven't set a request, so that's the reason for the discrepancy, and it doesn't always feel like a big deal when you set sensible requests on your pod but I think it is because now this means when we move this across to a production cluster, the schedule is going to be able to make much more intelligent decisions about where these pods are best placed and will run the best, and we're also going to find these requests useful 
+
+
+
+
+
 
 ## 22. Horizontal Pod Autoscaling
 
 ### 1. Introducing Replication and Autoscaling
 
+
+
 ### 2. Testing Autoscaling
+
+
 
 ## 23. Readiness and Liveness Probes
 
 ### 1. Demo why readiness probes are needed
 
+
+
 ### 2. Applying Liveness and Readiness Probes
+
+
 
 ## 24. Quality of Service and Eviction
 
@@ -6020,17 +6347,31 @@ You'll also be using some github repos, especially in the CI/CD section of the c
 
 ### 1. Defining Roles
 
+
+
 ### 2. Defining RoleBindings
+
+
 
 ### 3. Setting up a context for the user
 
+
+
 ### 4. Issuing a Kubernetes signed X.509 certificate
+
+
 
 ### 5. Installing the user's certificate
 
+
+
 ### 6. Allocating Access to Users
 
+
+
 ### 7. ClusterRoles and ClusterRoleBindings
+
+
 
 ## 26. Kubernetes ConfigMaps and Secrets
 
