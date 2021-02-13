@@ -6555,19 +6555,129 @@ And these different combinations of requests and limits, whether you have them o
 
 ### 2. QoS labels
 
+![image-20210213073528252](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213073528252.png)
+
+![image-20210213073552340](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213073552340.png)
+
+Add limit
+
+![image-20210213073650294](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213073650294.png)
+
+![image-20210213073754755](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213073754755.png)
+
+
+
+
+
 
 
 ### 3. Evictions
 
+A kind of a label, really, applied to that pod called the QoS Class, which stands for the Quality of Service.
+And based on some fairly simple rules, based on the combination of requests and limits that we've set, you'll be given the label of Guaranteed, Burstable, or Best Effort.
+You'll get Guaranteed if you specified a request and a limit for both memory and CPU, and the request matches the limits.
+You'll get Burstable if you fail to meet those rules, but you have at least supplied a request.
+And you will get the label of Best Effort if you've not bothered with a request and a limit.
+What we need to do now, is understand what's the purpose of these labels.
+This all revolves around the scheduler.
+These labels will help the scheduler decide which pods to evict if the node is under pressure.
+Without deploying any more pods, I'm just going to assume that these pods have now been running for quite a long time.
+And of course, over time, their usage might alter.
+
+![image-20210213074333256](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213074333256.png)
+
+POD 1: If for any reason, the usage of this Pod were to go over that 500 megabytes, then it would be immediately evicted.
+And therefore, the node won't suffer.
+Now you'll remember from earlier that it actually uses Linux Operating System Fundamentals to achieve that, it uses cgroups.
+The scheduler doesn't even need to intervene there, the pod would just be automatically terminated.
+
+POD 2: Well the scheduler is going to have to evict one or more pods to ensure that the node has enough resources to continue smoothly.
+Now this does get a little bit more complicated than I'm describing here, but for now, I'll explain the algorithm that the scheduler uses as a simple case of, it will evict any Best Effort pods first.
+
+If we look at this Pod 3 here, I used that label earlier, that Pod 3 is quite a rude pod.
+The scheduler doesn't know what it's going to do, over time.
+It has no way of predicting it's usage.
+Therefore the scheduler considers that quite a dangerous pod to schedule.
+Therefore that pod will be first in the list to be evicted, if needed.
+And that's why it uses the label of Best Effort.
+
+![image-20210213075422187](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213075422187.png)
+
+Now remember, that doesn't mean the pod is terminated forever, the pod will actually become rescheduled.
+Assuming the pod is part of deployment, it will be automatically restarted, which means it will have to be put on a node somewhere.
+Now we can't see the rest of the nodes in this cluster but let's assume there is another node somewhere that that pod can be scheduled to.
+
+![image-20210213075550588](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213075550588.png)
+
+Iff pod 2 is exceed, pod 2 is evicted
+
+![image-20210213080054929](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213080054929.png)
+
+![image-20210213080145122](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213080145122.png)
+
+https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/
+
+> **Create a Pod that gets assigned a QoS class of Guaranteed**
+> For a Pod to be given a QoS class of Guaranteed:
+>
+> Every Container, including init containers, in the Pod must have a memory limit and a memory request, and they must be the same.
+
+
+
 
 
 ### 4. Pod Priorities
+
+[Pod Priority and Preemption | Kubernetes](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/)
+
+![image-20210213084415028](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213084415028.png)
+
+
+
+![image-20210213084437778](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213084437778.png)
+
+https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#interactions-of-pod-priority-and-qos
+
+![image-20210213085529720](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213085529720.png)
+
+
+
+
 
 
 
 ## 25. RBAC (Role Based Access Control) on a Kubernetes cluster
 
 ### 1. Defining Roles
+
+![image-20210213090024075](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213090024075.png)
+
+In this section, we're going to be looking at role-based access control, which I often shorten as RBAC.
+RBAC is critical if you want to have multiple people working on the same project and you perhaps want to restrict the privileges for individuals.
+I could, right now, for example, do a kubectl delete on all of the deployments by doing kubectl delete deployment --all.
+And of course that command will be actioned.
+That assumption is a perfectly good assumption if you have a small project where you might only have two or three people working on that project.
+It might be perfectly viable that all three people can have complete, if you like, system administration privileges over the entire cluster.
+But of course, in many projects, possibly most projects using Kubernetes, that's not going to be the case, you're going to have much bigger teams of people, and we need to have much tighter control over what each individual person can do.
+
+[Using RBAC Authorization | Kubernetes](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
+
+I am always going to be looking this up in the manual every time I have to do this job.
+But I don't want you to be sort of put off by the quite tricky syntax.
+It's much simpler than it looks, really.
+So for any role, we can call the role absolutely anything that we like, we can define that that role is able to perform a set of tasks against a particular set of resources.
+Resources just means whether we're talking about pods, or deployments, or services, or any of the Kubernetes objects that we've been creating through the course.
+
+![image-20210213091213085](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213091213085.png)
+
+you can get the feel that what they're defining here is that for anybody in the role of `pod-reader`, they're going to be allowed to be able to `get, watch, or list` any `secrets`.
+As I say, I'll need to explain what get, watch, and list are in a moment.
+
+![image-20210213091421638](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213091421638.png)
+
+
+
+
 
 
 
