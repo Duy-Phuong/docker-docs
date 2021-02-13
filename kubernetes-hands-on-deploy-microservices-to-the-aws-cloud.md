@@ -6675,7 +6675,33 @@ As I say, I'll need to explain what get, watch, and list are in a moment.
 
 ![image-20210213091421638](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213091421638.png)
 
+rules-for-new-joiners.yaml
 
+```yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+   name: new-joiner
+   namespace: default
+rules:
+- apiGroups: ["","apps",""] # Core API AND apps
+  resources: ["*"]  # pods, services, deployments...
+  verbs: ["get", "list", "watch"]
+
+
+```
+
+>version: apps/v1
+>
+>
+
+![image-20210213092110439](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213092110439.png)
+
+![image-20210213092201228](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213092201228.png)
+
+![image-20210213092326377](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213092326377.png)
+
+![image-20210213092426349](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213092426349.png)
 
 
 
@@ -6683,13 +6709,149 @@ As I say, I'll need to explain what get, watch, and list are in a moment.
 
 ### 2. Defining RoleBindings
 
+![image-20210213093743448](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213093743448.png)
+
+
+
+```yaml
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: put-specific-user-or-users-into-new-joiner-role
+  namespace: default
+subjects:
+- kind: User
+  name: francis-linux-login-name
+roleRef:
+  kind: Role
+  name: new-joiner
+  apiGroup: rbac.authorization.k8s.io
+```
+
+![image-20210213094118450](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213094118450.png)
+
+![image-20210213094159179](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213094159179.png)
+
+https://kubernetes.io/docs/reference/access-authn-authz/authentication/
+
+
+
+
+
 
 
 ### 3. Setting up a context for the user
 
+![image-20210213094849838](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213094849838.png)
 
+![image-20210213094959506](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213094959506.png)
+
+If I do a Who Am I? Then EC2-User, as you probably know, is the default username for logging onto an EC2 Instance.
+It's equivalent to the root user on other systems.
+So I probably shouldn't say System Administrator.
+In fact, from now on, I'm going to call myself the Super User.
+
+Create user acc
+
+![image-20210213095241342](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213095241342.png)
+
+Run last command `sudo !!`
+
+Create namespace `playground`
+
+![image-20210213095633638](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213095633638.png)
+
+switch to francis user
+
+![image-20210213095809475](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213095809475.png)
+
+![image-20210213100004715](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213100004715.png)
+
+then we copy server link
+
+![image-20210213100049016](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213100049016.png)
+
+Run clear
+
+![image-20210213100218361](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213100218361.png)
+
+
+
+Now, context allows us to specify which cluster we're talking to, and which user we want to use for that cluster. It's a bit of an over-complication really for this situation where we only have one cluster.
+But when you scale up to multiple clusters it could be really useful, so what we need to do is create a context which is pointing at this server.
+If you're interested in that there is a page in the reference manual here called Configure Access to Multiple Clusters.
+
+https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
+
+![image-20210213100643334](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213100643334.png)
+
+![image-20210213100848482](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213100848482.png)
+
+
+
+Now, wonderfully, this is a really good point we've reached, is it's saying it can't connect to the server because the certificate is signed by an unknown authority, which is just jargon really for saying can't connect to the server because you haven't authenticated yourself. In other words, the server doesn't know who we are, and it doesn't know what rights and responsibilities we have on this cluster, so we've been bounced. Many of you have been worried that somehow the cluster we've set up is not secure by default.
+Now that was certainly true in earlier versions of Kops.
+Clusters were compromised due to this, but be assured that by default the end point here is absolutely secured, and cannot be accessed unless you either have the admin username and password for the cluster, which we saw earlier in Kube config view. Or you have a valid certificate to access the cluster. So what our new joiner needs is one of these certificates to prove they are who they say they are. How do they get one of these certificates? Well, the answer is our Super User has to give them a certificate, but in the next video I'm going to show you how the Super User can give a certificate to the user to prove they are who they say they are.
 
 ### 4. Issuing a Kubernetes signed X.509 certificate
+
+But just to remind you the scenario that we're in, we have a new joiner who has joined our project and they're on day one.
+And we want to give them access to our cluster, but we want to do it in a secure way.
+So in the previous video, we have configured things so that they can issue kubectl commands.
+But unfortunately, this is, as far as we've got is that the server is saying, I'm sorry, you can't access this cluster because you don't have any credentials.
+The server just doesn't know who this new joiner is.
+As we've identified in Kubernetes, there is no built in system, of, I'm here on the authenticating Reference Guide.
+There's no built in system for authenticating users.
+And there shouldn't be, because there are lots of existing authentication techniques.
+
+![image-20210213103338711](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213103338711.png)
+
+https://en.wikipedia.org/wiki/X.509
+
+So kubectl is always making calls to that API Load Balancer.
+Remember, this is that load balancer which only the developers call, it's not customer-facing.
+You'll have noticed, we've never logged in, we've never had to do anything special in order to call this API.
+And a lot of people think, oh no, this is insecure, but actually it isn't.
+I think earlier versions of kops did have this unsecured, but it is secured because the Kubernetes cluster will only accept, this is the important bit, will only accept requests that have been signed by a certificate.
+And, this is the other crucial piece of information, that certificate must have been issued by a Kubernetes cluster.
+So to put that another way, there is a certificate authority inside Kubernetes.
+So this isn't a commercial, third-party company.
+It's a certificate authority that belongs to Kubernetes.
+Now I'm picturing this as some kind of a service or something running inside the Kubernetes cluster, actually it doesn't work like that.
+This is actually just a pair of secret files that we store in the cluster.
+
+But the point is, we can only make kubectl commands if we have a valid certificate.
+Now we didn't know about this earlier in the course because this was set up automatically, by kops when the cluster was created.
+But the idea of that automatic certificate is that will only be used by this superuser.
+When we now create a new user, now of course we want to give this new user limited privileges.
+
+![image-20210213104329601](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213104329601.png)
+
+Create private key => create signing request
+
+User: root
+
+![image-20210213105332642](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213105332642.png)
+
+![image-20210213105358725](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213105358725.png)
+
+Copy
+
+![image-20210213105447674](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213105447674.png)
+
+Set read access
+
+![image-20210213105613434](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213105613434.png)
+
+![image-20210213105728313](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213105728313.png)
+
+.crt file is a certificate for ca
+
+![image-20210213105829818](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213105829818.png)
+
+![image-20210213110138182](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213110138182.png)
+
+
 
 
 
