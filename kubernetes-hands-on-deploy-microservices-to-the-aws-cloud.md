@@ -7281,11 +7281,64 @@ We'll do that next.
 
 https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
 
+ingress.yaml
+
+```yaml
+# from v1.14 of k8s
+# apiVersion: networking.k8s.io/v1beta1
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: basic-routing
+spec:
+  rules:
+    - host: fleetman.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: fleetman-webapp
+              servicePort: 80
+
+```
+
+![image-20210215074720759](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215074720759.png)
+
+For the devil, I think I'm going to leave it on this older version.
+The old version is still available, it's going to be deprecated at some point.
+Well that was boring, but the kind of object that we're building here is a special kind of object in kubernetes called an ingress object.
+
+![image-20210215075133994](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215075133994.png)
+
+![image-20210215075212629](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215075212629.png)
+
+![image-20210215075522609](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215075522609.png)
 
 
 
+> Linux:
+>
+> run `su nano /ect/hosts`
+
+![image-20210215075737518](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215075737518.png)
+
+
+
+![image-20210215083229935](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215083229935.png)
 
 ### 3. Adding Routes
+
+![image-20210215083756169](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215083756169.png)
+
+![image-20210215083520704](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215083520704.png)
+
+![image-20210215083652412](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215083652412.png)
+
+![image-20210215083737311](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215083737311.png)
+
+https://kubernetes.github.io/ingress-nginx/
+
+https://kubernetes.github.io/ingress-nginx/examples/customization/custom-headers/
 
 
 
@@ -7293,7 +7346,45 @@ https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
 
 ### 4. Authentication
 
+https://kubernetes.github.io/ingress-nginx/examples/auth/basic/
 
+![image-20210215084719711](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215084719711.png)
+
+![image-20210215084845598](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215084845598.png)
+
+![image-20210215085026980](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215085026980.png)
+
+base 64
+
+```yaml
+# from v1.14 of k8s
+# apiVersion: networking.k8s.io/v1beta1
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: secure-routing
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: mycredentials
+    nginx.ingress.kubernetes.io/auth-realm: "Get lost unless you have a password"
+spec:
+  rules:
+    - host: queue.fleetman.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: fleetman-queue
+              servicePort: 8161
+```
+
+![image-20210215085517348](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215085517348.png)
+
+![image-20210215085729991](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215085729991.png)
+
+![image-20210215085758025](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215085758025.png)
+
+![image-20210215085902206](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215085902206.png)
 
 
 
@@ -7301,11 +7392,88 @@ https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
 
 
 
+[Installation Guide - NGINX Ingress Controller (kubernetes.github.io)](https://kubernetes.github.io/ingress-nginx/deploy/#aws)
+
+![image-20210215091056967](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215091056967.png)
+
+![image-20210215091143405](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215091143405.png)
+
+![image-20210215091232489](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215091232489.png)
+
+Layer 4
+
+![image-20210215092155340](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215092155340.png)
 
 
-### 6. Tesing the Ingress Rules
+
+![image-20210215091856185](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215091856185.png)
+
+![image-20210215092002500](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215092002500.png)
+
+![image-20210215092024071](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215092024071.png)
+
+![image-20210215092331796](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215092331796.png)
+
+![image-20210215092441140](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215092441140.png)
+
+Copy content
+
+![image-20210215092729996](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215092729996.png)
+
+![image-20210215092940188](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215092940188.png)
+
+![image-20210215093041555](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215093041555.png)
+
+![image-20210215093219454](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215093219454.png)
+
+base 64
+
+![image-20210215093300466](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215093300466.png)
+
+![image-20210215093325173](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215093325173.png)
+
+![image-20210215093433303](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215093433303.png)
+
+![image-20210215093504136](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215093504136.png)
+
+Change all to ClusterIp
+
+![image-20210215093637517](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215093637517.png)
+
+![image-20210215093710735](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215093710735.png)
 
 
+
+### 6. Testing the Ingress Rules
+
+![image-20210215093940018](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215093940018.png)
+
+You can see full domain name in the Load balancer
+
+![image-20210215094200956](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215094200956.png)
+
+![image-20210215094242015](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215094242015.png)
+
+![image-20210215094320291](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215094320291.png)
+
+Just one last thing to mention then is you'll probably want to go ahead now and add in a sub-domain for all of your services, such as Prometheus and Grafana and Kibana.
+
+![image-20210215094920194](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215094920194.png)
+
+The problem there is that these services are in different namespaces.
+Unfortunately, if I just look at our existing routing, if I were try to put a routing in here for Kibana, for example, you might remember that Kibana is running on the kube-system namespace.
+Unfortunately, this will not work because it's assumed that any of the service names you put in here are in the same namespace as the actual ingress object.
+I haven't given a namespace here, so it's obviously in the default namespace.
+I thought this was a huge problem not so long ago.
+It's only relatively recently that I've realised that it's not a problem because you would just create a separate ingress file.
+Maybe call this routing for kube-system namespace.
+
+Something for you to be aware of there.
+The screenshot I was just showing a minute ago is just an example here of, this is one of my live clusters that I'm currently running for a company called All Things Java.
+This is the private alerting system exactly as I want to see.
+I'm managing this, so I'm glad to see there are no active alerts apart from the watchdog, which is the new name for the dead man switch that I mentioned earlier in the course.
+Not relevant to this section, but I just want to mention that when I recorded the Prometheus chapter which was a year ago now, I, at the time, very rarely, if ever, used the Prometheus front end because as I mentioned on the video is it's all very basic and bare, and I do everything through Grafana.
+But since then, I have actually discovered that the Alerts tab on here is so useful because it's so easy to work with.
 
 
 
@@ -7321,36 +7489,692 @@ I felt this video was going a bit beyond the scope of the course but I know many
 
 ### 1. Batch Jobs
 
+https://kubernetes.io/docs/concepts/workloads/controllers/job/
+
+job.yaml
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-job
+spec: # Pod
+  containers:
+  - name: long-job
+    image: python:rc-slim
+    command: ["python"]
+    args: ["-c", "import time; print('starting'); time.sleep(30); print('done')"]
+  restartPolicy: Never
+
+```
+
+![image-20210215103308302](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215103308302.png)
+
+![image-20210215103537228](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215103537228.png)
+
+Now, I always think of that as being something a Deployment offers you, but really, a Deployment is more about having multiple replicas and being able to roll out changes.
+So actually, we get the restart functionality as part of Pods.
+So, that functionality is very good and very useful for something like a microservice or a Web service.
+Where you want it to be the case that if something's gone wrong, like a temporary fault or something, you want Kubernetes to automatically restart it, so you don't have any downtime.
+But, for this requirement, for where you have a batch job, that's not what we want.
+But there's actually a simple fix to this.
+Before I finally get to the point of showing you what a Job is.
+I just want to show you that in a Pod, you can change that default behaviour.
+If we follow the link here to Restart policy, a Pod has this field, restartPolicy and the values available here are Always, OnFailure and Never.
+
+https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy
+
+![image-20210215104401911](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215104401911.png)
+
+![image-20210215104414404](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215104414404.png)
+
+https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/
+
+![image-20210215104649912](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215104649912.png)
+
+![image-20210215104915591](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215104915591.png)
+
+Run `docker container ls`
+
+![image-20210215105052589](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215105052589.png)
+
+![image-20210215105134903](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215105134903.png)
+
+![image-20210215105211212](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215105211212.png)
+
+> A Job is designed to run to completion.
+> And Kubernetes's job is to try to ensure that it does indeed successfully complete.
+> There's an example of how to write a Job here.
+
+job.yaml
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-job
+spec:
+  template:
+    spec: # Pod
+      containers:
+      - name: long-job
+        image: python:rc-slim
+        command: ["python"]
+        args: ["-c", "import time; print('starting'); time.sleep(30); print('done')"]
+      restartPolicy: Never
+  backoffLimit: 2
+
+```
+
+![image-20210215110143792](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215110143792.png)
+
+![image-20210215110256845](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215110256845.png)
+
+![image-20210215110402985](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215110402985.png)
+
+![image-20210215110447171](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215110447171.png)
+
+![image-20210215110500957](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215110500957.png)
+
+![image-20210215110529278](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215110529278.png)
+
+![image-20210215110608592](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215110608592.png)
+
+![image-20210215110630731](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215110630731.png)
+
+
+
 ### 2. Cron Jobs
+
+https://kubernetes.io/docs/reference/kubernetes-api/
+
+https://kubernetes.io/docs/reference/kubernetes-api/workloads-resources/cron-job-v1beta1/
+
+cron.yaml
+
+```yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cron-job
+spec: # CronJob
+  schedule: "* * * * *"
+  jobTemplate:
+    spec: # JOB
+      template:
+        spec: # Pod
+          containers:
+          - name: long-job
+            image: python:rc-slim
+            command: ["python"]
+            args: ["-c", "import time; print('starting'); time.sleep(30); print('done')"]
+          restartPolicy: Never
+      backoffLimit: 2
+
+```
+
+![image-20210215111542128](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215111542128.png)
+
+![image-20210215111629455](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215111629455.png)
+
+![image-20210215111736486](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215111736486.png)
+
+![image-20210215111800677](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215111800677.png)
+
+![image-20210215111822341](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215111822341.png)
+
+
+
+
 
 ### 3. DaemonSets
 
+https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/
+
+workloads.yaml
+
+```yaml
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: webapp
+spec:
+  selector:
+    matchLabels:
+      app: webapp
+  # replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: webapp
+        image: richardchesterwood/k8s-fleetman-webapp-angular:release2
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+```
+
+![image-20210215112529966](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215112529966.png)
+
+![image-20210215112633825](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215112633825.png)
+
+I am seeing a crash loop backoff on this webapp.
+So, you might think oh no, we've done something wrong with the Daemon Set.
+But, this is purely because it started from an empty minikube cluster, and I've just gone and applied the workloads file.
+Up until now, we've been keeping the workloads and the services separate, and all it is is that when the webapp starts up, the first thing it does is it tries to call other microservices.
+It'll actually go to the API gateway.
+Now, if I haven't got any services set up, then, of course, it can't find any of the other pods.
+We need services to be applied.
+So, that's all that's happened here.
+
+![image-20210215112904888](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215112904888.png)
+
+![image-20210215112941298](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215112941298.png)
+
+![image-20210215113321817](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215113321817.png)
+
+
+
+![image-20210215113221856](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215113221856.png)
+
+> Fluentd was defined as a Daemon Set.
+> So, that's why we were having three fluentd's running on your AWS cluster.
+
 ### 4. StatefulSets Overview
+
+https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/
+
+![image-20210215124141555](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215124141555.png)
+
+> StatefulSet is the workload API object used to manage stateful applications.
+
+![image-20210215114804910](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215114804910.png)
+
+![image-20210215114839425](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215114839425.png)
+
+![image-20210215114913097](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215114913097.png)
+
+https://devops.stackexchange.com/questions/653/what-is-the-definition-of-cattle-not-pets
+
+![image-20210215123945880](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215123945880.png)
+
+![image-20210215124244545](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215124244545.png)
+
+![image-20210215124602242](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215124602242.png)
+
+![image-20210215124935369](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215124935369.png)
+
+![image-20210215124820976](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215124820976.png)
+
+
 
 ### 5. StatefulSets for Database Replication
 
+![image-20210215150510651](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215150510651.png)
+
+
+
+![image-20210215150631685](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215150631685.png)
+
+>Now, everything I say here in the next few minutes is going to apply equally to many, many different types of database.
+>Definitely if you're doing something like MySQL, you can't replicate a database just by having multiple copies of the database.
+>It just doesn't work like that, because the database needs to have some way of sharing its data and keeping everything consistent.
+
+![image-20210215150936116](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215150936116.png)
+
+I won't go into any detail on how that election works, but just think of it for now as a random choice.
+But the servers themselves will make this decision.
+So let's say for some reason, Mongo Server 2 has become primary.
+The other 2's will become secondary.
+And what will happen automatically is whenever I make a right to the primary...
+So I insert some data into the primary.
+Behind the scenes, that data will be copied to the secondaries.
+But the requirement says in Mongo that any clients, especially if they're writing...
+It's slightly different if they're just reading.
+
+![image-20210215151319908](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215151319908.png)
+
+We've got three instances in this cluster, and it's going to be random as to which one is the primary.
+Well what we usually have on Mongo clients, you can get Mongo clients for many programming languages, is you feed the client with a comma-separated list of the servers in the cluster.
+
+So for here, this would be mongo-server-1, mongo-server-2, mongo-server-3.
+And essentially, the client code will iterate through the servers until it finds the primary.
+Now, I really am oversimplifying here, but it'll do for this discussion that the client will try, first of all, Mongo Server 1.
+
+
+
+![image-20210215151422618](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215151422618.png)
+
+Oops, no, that's a secondary, can't write to that.
+Then it tries Mongo Server 2.
+Good, I've found a primary.
+So you can almost think of it as the clients doing load balancing, here.
+Now I don't have it on the picture, but what would happen if Mongo Server 2 now crashed would be the remaining servers would have an election and would choose a primary amongst themselves, so the new primary might be Mongo Server 3, for example.
+And then in future calls from the client, the client will try at Server 2, it will discover that's not working anymore, and it will do a search through the remaining notes in the cluster.
+
+![image-20210215151746310](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215151746310.png)
+
+So what will we have with a StatefulSet? Well, we'd have multiple pods, let's say three, for example.
+And we know now that a StatefulSet will name them mongo-0, mongo-1, mongo-2.
+We'll have one of those headless services.
+And the one thing I've not told you about headless services is when you make a call to a headless service, you'll use a URL as before, but the URL's slightly different.
+The URL for a headless service is, first of all, the name of the pod that you want to address, followed by the name of the service.
+So our client, for example, a position tracker, wants to write to the Mongo cluster, so it will make a call to the URL of the primary pod.
+I hope you're starting to feel, now, that the terminology I'm using here is different with a StatefulSet.
+The client knows which pod it's trying to send data to; in this case, mongo-0.mongodb.
+
+![image-20210215152015241](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215152015241.png)
+
+
+
 ### 6. Demo Scaling out a Mongo Database
+
+mongo-replicated.yaml
+
+```yaml
+# Demo of a STATEFUL set, Mongo clients need to be able to address the pods
+# by name, so a statefulset and headless service are used.
+# Clients will connect using eg mongodb://mongo-0.mongo,mongo-1.mongo,mongo-2.mongo/fleetman
+
+apiVersion: v1
+kind: Service
+metadata:
+ name: mongo
+ labels:
+   name: mongo
+spec:
+ ports:
+ - port: 27017
+   targetPort: 27017
+ clusterIP: None
+ selector:
+   role: mongo
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+ name: mongo
+spec:
+ replicas: 3
+ serviceName: "mongo"
+ template:
+   metadata:
+     labels:
+        role: mongo
+   spec:
+     terminationGracePeriodSeconds: 10
+     containers:
+       - name: mongo
+         image: mongo
+         command:
+           - mongod
+           - "--replSet"
+           - rs0
+           - "--smallfiles"
+           - "--noprealloc"
+           - "--bind_ip"
+           - "0.0.0.0"
+         ports:
+           - containerPort: 27017
+         volumeMounts:
+           - name: mongo-persistent-storage
+             mountPath: /data/db
+       - name: mongo-sidecar
+         image: cvallance/mongo-k8s-sidecar
+         env:
+           - name: MONGO_SIDECAR_POD_LABELS
+             value: "role=mongo"
+           - name: KUBERNETES_MONGO_SERVICE_NAME
+             value: mongo
+ volumeClaimTemplates:
+  - metadata:
+      name: mongo-persistent-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "standard"
+      resources:
+        requests:
+          storage: 7Gi
+---
+# See https://github.com/cvallance/mongo-k8s-sidecar/issues/75
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: default-view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: default
+
+```
+
+I've just grabbed this really from the helm repository.
+Now I must admit, this is a little bit old, this file.
+I don't know if there's a newer version out there.
+I don't really care.
+I know this works.
+I'm going to go with it.
+So what I want to show you is two things.
+First of all we have a service, for mongo and it's one of these headless services.
+Now a real problem I have with Kubernetes is, there's no syntax for a headless service.
+If you were to look at that you'd say, 'Oh hang on Rich, it's just a service.
+I can't see any difference there.' I really wish we could do this.
+Then at least we'd know what we were talking about.
+In fact, there's no special syntax for headless service.
+It is just, it is just a regular service.
+
+![image-20210215153433111](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215153433111.png)
+
+![image-20210215153521058](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215153521058.png)
+
+![image-20210215153718416](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215153718416.png)
+
+![image-20210215153841492](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215153841492.png)
+
+https://github.com/DickChesterwood/k8s-fleetman/blob/master/k8s-fleetman-position-tracker/src/main/resources/application-production-microservice.properties
+
+```ini
+spring.activemq.broker-url=tcp://fleetman-queue.default.svc.cluster.local:61616
+fleetman.position.queue=positionQueue
+
+# We'll use the default port 8080 for all microservices in production cluster.
+
+# This is for the replicated mongo cluster
+spring.data.mongodb.uri=mongodb://mongo-0.mongo.default.svc.cluster.local,mongo-1.mongo.default.svc.cluster.local,mongo-2.mongo.default.svc.cluster.local/fleetman
+```
+
+workloads.yaml
+
+```yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: position-tracker
+spec:
+  selector:
+    matchLabels:
+      app: position-tracker
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: position-tracker
+    spec:
+      containers:
+      - name: position-tracker
+        image: richardchesterwood/k8s-fleetman-position-tracker:release4
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+---
+```
+
+![image-20210215154333057](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215154333057.png)
+
+![image-20210215154430579](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215154430579.png)
+
+![image-20210215154529102](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215154529102.png)
+
+![image-20210215154551976](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215154551976.png)
+
+![image-20210215154821481](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215154821481.png)
+
+![image-20210215154925778](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215154925778.png)
+
+
 
 ## 29. Continuous Deployment on a Kubernetes Cluster
 
 ### 1. Introducing CICD
 
+![image-20210215155601937](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215155601937.png)
+
+![image-20210215155649709](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215155649709.png)
+
+![image-20210215155718185](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215155718185.png)
+
+
+
+![image-20210215155821725](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215155821725.png)
+
+![image-20210215155849574](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215155849574.png)
+
+![image-20210215155918928](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215155918928.png)
+
+![image-20210215155945051](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215155945051.png)
+
+
+
 ### 2. Establishing a GitHub organization
+
+![image-20210215160409092](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215160409092.png)
+
+https://github.com/fleetman-ci-cd-demo
+
+![image-20210215160807387](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215160807387.png)
+
+![image-20210215160857883](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215160857883.png)
+
+![image-20210215161057980](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215161057980.png)
+
+
+
+
 
 ### 3. Setting up a Basic Jenkins System
 
+https://github.com/fleetman-ci-cd-demo/jenkins/blob/master/jenkins.yaml
+
+![image-20210215161822101](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215161822101.png)
+
+![image-20210215161900193](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215161900193.png)
+
+docker deamon is running inside minikube
+
+![image-20210215161954033](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215161954033.png)
+
+![image-20210215162102110](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215162102110.png)
+
+![image-20210215162223236](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215162223236.png)
+
+![image-20210215162310131](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215162310131.png)
+
+![image-20210215162353266](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215162353266.png)
+
+![image-20210215162450414](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215162450414.png)
+
+![image-20210215162522191](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215162522191.png)
+
+![image-20210215162754505](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215162754505.png)
+
+
+
+
+
 ### 4. Defining a Pipeline
+
+https://github.com/fleetman-ci-cd-demo/fleetman-api-gateway/blob/master/Jenkinsfile
+
+```ini
+pipeline {
+   agent any
+
+   environment {
+     // You must set the following environment variables
+     // ORGANIZATION_NAME
+     // YOUR_DOCKERHUB_USERNAME (it doesn't matter if you don't have one)
+
+     SERVICE_NAME = "fleetman-api-gateway"
+     REPOSITORY_TAG="${YOUR_DOCKERHUB_USERNAME}/${ORGANIZATION_NAME}-${SERVICE_NAME}:${BUILD_ID}"
+   }
+
+   stages {
+      stage('Preparation') {
+         steps {
+            cleanWs()
+            git credentialsId: 'GitHub', url: "https://github.com/${ORGANIZATION_NAME}/${SERVICE_NAME}"
+         }
+      }
+      stage('Build') {
+         steps {
+            sh '''mvn clean package'''
+         }
+      }
+
+      stage('Build and Push Image') {
+         steps {
+           sh 'docker image build -t ${REPOSITORY_TAG} .'
+         }
+      }
+
+      stage('Deploy to Cluster') {
+          steps {
+                    sh 'envsubst < ${WORKSPACE}/deploy.yaml | kubectl apply -f -'
+          }
+      }
+   }
+}
+```
+
+So that will grab the project from gethub and it will store it inside, its just storing it basically on the file system of this Jenkins container.
+In order to do that it will need to log into gethub.
+So another thing we can do is we can tell Jenkins where are the credentials being stored for gethub, for in this case gethub.
+This credentials parameter in the get command just allows us to specify our username and password for gethub without having to code it into this file itself.
+Of course it would be a disaster if we were putting usernames and passwords into our source code.
+
+![image-20210215163845041](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215163845041.png)
+
+![image-20210215164114083](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215164114083.png)
+
+![image-20210215164145599](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215164145599.png)
+
+Then click save
+
+![image-20210215164648017](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215164648017.png)
+
+If you do want to use Dockerhub, no problem you could remove this line.
+Now this line is necessary because by default kubernetes whenever it starts a pod will always try to pull the image for that pod and that's just in case the image is changed.
+So by telling it to not do that it won't try to do a remote pull.
+
+This `envsubst` script will take that file that we've just seen, the deploy.yaml file, and it will do a search and replace on it, and it will automatically substitute any environment variables that it finds.
+So in other words this here that I've highlighted is going to go to the deploy.yaml file, and it searches for any dollar-curly brackets, it will take the resulting file, and then it will pipe it into our old friend cube-CTL apply.
+
+
+
+
 
 ### 5. Running a Multibranch Pipeline
 
+![image-20210215171222906](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215171222906.png)
+
+![image-20210215171358426](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215171358426.png)
+
+![image-20210215171435058](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215171435058.png)
+
+![image-20210215171525340](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215171525340.png)
+
+![image-20210215171546556](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215171546556.png)
+
+![image-20210215171649309](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215171649309.png)
+
+=> Save
+
+
+
+
+
 ### 6. Reviewing Builds
+
+![image-20210215194000323](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215194000323.png)
+
+![image-20210215194021884](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215194021884.png)
+
+![image-20210215194117682](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215194117682.png)
+
+![image-20210215194309395](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215194309395.png)
+
+
 
 ### 7. Organization Pipelines
 
+Delete and create new repo
+
+![image-20210215194603693](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215194603693.png)
+
+![image-20210215194641989](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215194641989.png)
+
+![image-20210215194908286](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215194908286.png)
+
+=> Save
+
+![image-20210215195058183](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215195058183.png)
+
+![image-20210215195148356](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215195148356.png)
+
+Check app works
+
+https://github.com/fleetman-ci-cd-demo/fleetman-position-simulator
+
+https://github.com/fleetman-ci-cd-demo/fleetman-queue
+
 ### 8. Continuous Deployment into a Cluster
+
+![image-20210215195926556](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215195926556.png)
+
+![image-20210215200141731](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215200141731.png)
+
+![image-20210215200248101](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215200248101.png)
+
+![image-20210215200426043](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215200426043.png)
+
+![image-20210215200455326](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215200455326.png)
+
+![image-20210215200518805](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215200518805.png)
+
+commit
+
+![image-20210215200617306](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215200617306.png)
+
+![image-20210215200704746](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215200704746.png)
+
+
 
 ## 30. Goodbye!
 
 ### 1. Goodbye!
 
 ### 2. Bonus Lecture links to other courses.html
+
+Well done completing the course!
+
+You can find my blog at [blog.chesterwood.io/](http://blog.chesterwood.io/)
+
+[My YouTube channel is here.](https://www.youtube.com/channel/UCR5fgyj9JaFvTMBUrKRdqYg)
+
+I'm building up my courses on Udemy over time. Currently I have:
+
+- **Docker for Java Developers** [www.udemy.com/docker-hands-on](https://www.udemy.com/docker-hands-on/?couponCode=K8SCOMPLETE)
+
+  It covers Docker but be aware it was specifically designed for Java developers. If that's you and you're new to Docker then you might want to check it out:
+
+  It also covers Docker Swarm (preview: it's not as good as K8S!)
+
+  
+
+- **Spark for Java Developers** [udemy.com/apache-spark-for-java-developers](https://www.udemy.com/apache-spark-for-java-developers/?couponCode=K8SCOMPLETE)
+
+  Most Spark developers are using Scala or Python, but Java is a great language to use with it too. It's also a great way to get some practice with modern Java functional coding style (lambdas)
+
+I'll be producing more courses for Udemy so keep an eye out!
+
+Good luck with K8S!
+
+Richard Chesterwood.
