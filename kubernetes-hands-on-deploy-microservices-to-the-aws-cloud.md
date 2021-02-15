@@ -6857,13 +6857,145 @@ Set read access
 
 ### 5. Installing the user's certificate
 
+![image-20210213164009752](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213164009752.png)
+
+![image-20210213164108821](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213164108821.png)
+
+![image-20210213164312794](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213164312794.png)
+
+user name: francis
+
+group: francis
+
 
 
 ### 6. Allocating Access to Users
 
+![image-20210213164539052](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213164539052.png)
+
+![image-20210213164620369](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213164620369.png)
+
+![image-20210213164817752](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213164817752.png)
+
+![image-20210213164921543](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213164921543.png)
+
+![image-20210213165202333](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213165202333.png)
+
+![image-20210213165344558](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213165344558.png)
+
+Run `exit`
+
+![image-20210213165508555](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213165508555.png)
+
+![image-20210213165552063](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213165552063.png)
+
+![image-20210213165622930](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213165622930.png)
+
+Now I notice, for example, we don't have any daemonsets in our cluster.
+We haven't mentioned daemonsets before, but that's coming up, so it will be explained.
+But the important thing about daemonsets is they are part of the extensions API group.
+So that's the reason why we can't currently see daemonsets.
+We can't see replica sets, which are just basic versions of deployments.
+Also there's an API group for auto scaling.
+So what's happening here is even though we don't have any daemonsets, kubectl has tried to list all of the daemonsets and that's why we're seeing a rather ugly error here.
+Now, I think it would make sense to allow Francis to have read-only access to the extensions API group, probably auto scaling as well.
+
+![image-20210213165915330](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213165915330.png)
+
+
+
+![image-20210213170014991](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213170014991.png)
+
+![image-20210213170116024](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213170116024.png)
+
+![image-20210213170156512](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210213170156512.png)
+
+Run `kubectl get all`
+
+
+
 
 
 ### 7. ClusterRoles and ClusterRoleBindings
+
+![image-20210214082048701](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214082048701.png)
+
+![image-20210214082245577](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214082245577.png)
+
+https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+
+![image-20210214082753501](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214082753501.png)
+
+> A **Role** always sets permissions within a particular namespace; when you create a Role, you have to specify the namespace it belongs in.
+>
+> **ClusterRole**, by contrast, is a non-namespaced resource. The resources have different names (Role and ClusterRole) because a Kubernetes object always has to be either namespaced or not namespaced; it can't be both.
+
+```yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+   name: new-joiner
+   # remove namespace: default
+rules:
+- apiGroups: ["","apps","autoscaling", "extensions"] # Core API AND apps
+  resources: ["*"]  # pods, services, deployments...
+  verbs: ["get", "list", "watch"]
+
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: put-specific-user-or-users-into-new-joiner-role
+  # remove namespace: default
+subjects:
+- kind: User
+  name: francis-linux-login-name
+roleRef:
+  kind: ClusterRole
+  name: new-joiner
+  apiGroup: rbac.authorization.k8s.io
+```
+
+![image-20210214083352575](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214083352575.png)
+
+![image-20210214083448282](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214083448282.png)
+
+![image-20210214083542279](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214083542279.png)
+
+Now you can see all items
+
+![image-20210214083710378](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214083710378.png)
+
+![image-20210214083748330](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214083748330.png)
+
+![image-20210214083957086](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214083957086.png)
+
+nano file add this content
+
+![image-20210214084330158](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214084330158.png)
+
+![image-20210214084423784](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214084423784.png)
+
+![image-20210214084536522](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214084536522.png)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webapp
+  namespace: playground
+spec:
+  containers:
+  - name: webapp
+    image: richardchesterwood/k8s-fleetman-webapp-angular:release0
+
+
+```
+
+![image-20210214084659312](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214084659312.png)
+
+
 
 
 
@@ -6871,37 +7003,319 @@ Set read access
 
 ### 1. Creating a ConfigMap
 
+database-config.yaml
+
+![image-20210214104010091](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214104010091.png)
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: global-database-config-v4
+  namespace: default
+data:
+    database.url: "https://mydatabaseserver.somewhere.com:3306"
+    database.password: "P@SSW0rd1"
+
+```
+
+![image-20210214090218602](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214090218602.png)
+
+![image-20210214090247616](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214090247616.png)
+
+A ConfigMap is a really simple object in Kubernetes.
+It's going to be another Kubernetes object that we that we define using YAML.
+The API version for ConfigMaps is simple, it's in the core v1 API group.
+
+
+
 ### 2. Consuming a ConfigMap as Environment Variables
+
+![image-20210214094452197](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214094452197.png)
+
+So yeah, I'm not too happy with this approach because it is four lines of YAML that I have to write.
+And perhaps the worst thing about this is I have to do it individually for each environment variable.
+Let's say I want to pass in the DATABASE_PASSWORD as well.
+
+![image-20210214095347355](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214095347355.png)
+
+
+
+
 
 ### 3. Do changes to a ConfigMap get propagated
 
+![image-20210214095951690](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214095951690.png)
+
+![image-20210214100201924](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214100201924.png)
+
+ ![image-20210214100934398](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214100934398.png)
+
+![image-20210214101022011](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214101022011.png)
+
+Change to `global-database-config-v2`
+
+![image-20210214101909663](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214101909663.png)
+
+So it's certainly a perfect approach, but it is an approach that I've seen used by many projects.
+So we make the ConfigMaps be immutable.
+In other words, we don't change them.
+When we need new values, we create a new version of the config file and update references.
+
 ### 4. How to consume multiple envioronments variables with envFrom
+
+![image-20210214102551791](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214102551791.png)
+
+![image-20210214102614972](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214102614972.png)
+
+![image-20210214102817135](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214102817135.png)
+
+![image-20210214102919936](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214102919936.png)
+
+![image-20210214102957903](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214102957903.png)
+
+![image-20210214103031129](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214103031129.png)
+
+
 
 ### 5. Mounting ConfigMaps as Volumes
 
+![image-20210214103919770](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214103919770.png)
+
+![image-20210214103751958](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214103751958.png)
+
+
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: global-database-config-v4
+  namespace: default
+data:
+  database.properties: |
+    database.url=https://mydatabaseserver.somewhere.com:3306
+    database.password=P@SSW0rd1
+
+```
+
+![image-20210214103721152](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214103721152.png)
+
+
+
 ### 6. Creating Secrets
+
+https://kubernetes.io/docs/concepts/configuration/secret/
+
+aws-credentials.yaml
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aws-credentials
+stringData:
+  accessKey: "12345678790"
+  secretKey: "SECRET1234"
+
+```
+
+![image-20210214112024407](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214112024407.png)
+
+![image-20210214112207558](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214112207558.png)
+
+![image-20210214112357683](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214112357683.png)
+
+![image-20210214112417197](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214112417197.png)
+
+![image-20210214112449781](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214112449781.png)
+
+https://www.base64decode.org/
+
+![image-20210214112607758](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214112607758.png)
+
+![image-20210214112754295](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214112754295.png)
+
+Then we apply
+
+
 
 ### 7. Using Secrets
 
+![image-20210214230606391](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214230606391.png)
+
+output mode
+
+![image-20210214230930019](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214230930019.png)
+
+![image-20210214232052462](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214232052462.png)
+
+![image-20210214232137895](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214232137895.png)
+
+I'll describe them all.
+I'll do kubectl and describe CM.
+And flashing past is all of the config maps from my system.
+Oh right, the problem isn't there.
+It might be a secret.
+The problem might be in one of the secrets.
+
+![image-20210214232247723](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214232247723.png)
+
+
+
+Just going back to our example where we're setting up some rules for a new joiner.
+We could absolutely give the new joiner access to config maps but not give them access to secrets.
+And for me that's the big point of secrets because they're separate from config maps we can apply different access rules to them.
+That's a big deal and very, very useful.
+
+
+
+
+
 ### 8. Where have we already used ConfigMaps and Secrets
 
+![image-20210214232640433](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214232640433.png)
+
+![image-20210214232705520](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214232705520.png)
+
+They're creating a file on the file system called system.conf:, and it's got these contents.
+They're using a slightly different multi line here, to the one we used.
+It's also creating the file called containers.input.conf
+
+![image-20210214234035977](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214234035977.png)
+
+
+
+The point of a ConfigMap is that we can share common data across multiple pods in our system.
+Now, if you're here for micro services, then, of course, you're going to have maybe hundreds of thousands of pods.
+And the obvious use case for a ConfigMap is when you're building a Microservice architecture, there are always some pieces of data that are shared across the entire architecture.
+So, many many pods will depend on these pieces of data.
+Now, don't get me wrong.
+You should absolutely be minimising the amount of global shared data.
+It's always a bad smell when you've got globally shared data in your application.
+But, being realistic, there are always some pieces of information that lots of pods need to know about.
+A ConfigMap, then, is an obvious solution to that.
+Rather than hard coding those values into all of the pods, we'd have a ConfigMap to store those values in.
+You've seen now, it's an easy job of either making them environment variables, or files that are mounted into the pods.
+
+![image-20210214233734410](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214233734410.png)
+
+
+
+And the joy of Spring Cloud Kubernetes is it gives you ways to automatically hook your Spring Boot applications to ConfigMaps and secrets.
+And a wonderful feature of that is that it will allow you to change a ConfigMap and automatically pick those changes up by your application.
+A wonderful feature.
+Now, I've decided that I'm not going to cover it on the videos on this course, because this course is too long already, and many of you will not be interested in Spring or Spring Boot.
+
+Now Spring Cloud Config does expose a rest interface, so I don't know, you could write a Ruby microservice, or a Go microservice, and they could call the rest end points of Spring Cloud Config to get the common global data.
+But that sounds a bit awkward to me.
+The joy of Spring Cloud Config is if the clients are written in Spring Boot, then they will just automatically get the values.
+So the disadvantage of Spring Cloud Config is I think it works best if all of your micro services are written in Spring Boot.
+So for that kind of environment, I recommend ConfigMaps would win out.
+ConfigMaps of course can be used by any port, regardless of the language they're programmed in.
+So I won't say any more about Spring Cloud Config, but I thought I'd better mention it just in case you are interested in using Spring Cloud Config.
+
+
+
 ### 9. (extra) Using Spring Cloud Kubernetes to Hot Reload ConfigMaps.html
+
+If you're into Spring Boot and want to hook up with your ConfigMaps, the new Spring Cloud Kubernetes project (originally from fabric8) makes this easy. And, you can hot reload any changes to the ConfigMap!
+
+I've a full demo here on my YouTube channel: https://www.youtube.com/watch?v=DiJ0Na8rWvc&t=563s
+
+
 
 ## 27. Ingress Controllers
 
 ### 1. Introducing Ingress
 
+![image-20210214234548656](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214234548656.png)
+
+![image-20210214234656931](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214234656931.png)
+
+We've seen that we can define a service as being of type NodePort and that allows up to specify manually, a port for that service.
+And then we can access that service through a browser, through a rest client, or whatever, through that port that we've nominated.
+I don't know what state your YAML files will be in at this part of the course, I happen to have the queue and the webapp defined as NodePort.
+So in fact the scenario that I'm going to go through on this section of the course is that, of course we want users - members of the public to be able to be access the web app through our web interface, but we also want the administrators of the system to be able to access the queue, the admin consult for the queue, so we'd want some kind of username/password combination on that particular service.
+Really, the purpose of a NodePort is just for when we're working locally, we're debugging YAML files and we're just getting a test system together.
+Of course, there's no way that a professional website could be hosted on Port 30,080.
+So using the NodePort isn't generally a professional standard approach.
+When you're running your Minikube though, your only other option for a service is to use cluster IP which I hope you're familiar by now, just means that that service is not accessible from outside the cluster.
+It can be used internally of course, MongoDB for example is currently being accessed by the position tracker and all of that is going on, inside the cluster.
+As you've seen earlier in the course, so I hope this is really just a recap, the real way that you access services on a professional cluster in the The Cloud, is using load balancers.
+Now, the load balancer is provided by your cloud provider, so for example, Amazon Web Services or Google Cloud Platform or Azure or whoever.
+Basically any good cloud provider will have a load balancing solution.
+Now these are essentially hardware resources that are highly available, highly resilient and have been absolutely battle tested by thousands or even millions of projects over the last few years.
+
+![image-20210214235123080](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214235123080.png)
+
+This is absolutely fine if you have one service that you want to publish to your end users.
+But if you have more than one service, going back to our example, we want to publish the web application to our end users but we also want to publish the ActiveMQ admin console, maybe just to our administrators, but we still want to publish it.
+Well the problem with this model is that would mean creating another load balancer and you're going to end up with separate load balancers for every service that you want to publish to your end users.
+And there is an advantage to this, the advantage is because the load balancers are completely separate hardware entities, and therefore will have different IP addresses, actually these will have different domain names, you can have them both listening to port 80, which is quite useful so I could go ahead and configure my DNS settings so that fleetman.com goes through this load balancer to the web app, but admin.fleetman.com is pointing at this load balancer which goes to a different service, so that's a bit of an advantage but you can probably see the massive disadvantage here is that load balancers are expensive items.
+
+![image-20210214235414595](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214235414595.png)
+
+![image-20210214235609713](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210214235609713.png)
+
+> We'll rework the architecture so that we have just one load balancer.
+> I can listen on any port you like, but it will typically be port 80 and instead of talking to the services, we're going to configure things so it talks to what is basically, a special service in Kubernetes called the Ingress Controller.
+
+
+
 ### 2. Defining Routing Rules
+
+![image-20210215073852988](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215073852988.png)
+
+wait
+
+![image-20210215074045465](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215074045465.png)
+
+![image-20210215074156852](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215074156852.png)
+
+![image-20210215074238961](kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.assets/image-20210215074238961.png)
+
+I think of it as just being outside the cluster even though it actually is a part and because we haven't configured anything yet, the default configuration is that all requests go through the ingress controller and are all diverted to this new service that's been created, this default HTTP backend, which does nothing more than output this message.
+So, the next step is we need to get rid of this routing, and we need to set up a proper routing to our two services.
+We'll do that next.
+
+https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
+
+
+
+
 
 ### 3. Adding Routes
 
+
+
+
+
 ### 4. Authentication
+
+
+
+
 
 ### 5. Running Ingress on AWS
 
+
+
+
+
 ### 6. Tesing the Ingress Rules
 
+
+
+
+
 ### 7. (Extra) setting up HTTPS with TLS termination at the load balancer.html
+
+[As promised, you can find a video on that at my youtube channel here.](https://youtu.be/gEzCKNA-nCg)
+
+I felt this video was going a bit beyond the scope of the course but I know many of you will be interested in this.
+
+
 
 ## 28. Other Workload Types
 
