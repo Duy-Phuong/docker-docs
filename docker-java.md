@@ -1080,6 +1080,16 @@ Chọn github và đăng nhập
 
 ![image-20200620164551518](docker-java.assets/image-20200620164551518.png)  
 
+![image-20210227080854140](docker-java.assets/image-20210227080854140.png)
+
+![image-20210227081036557](docker-java.assets/image-20210227081036557.png)
+
+Log in to git hub account
+
+![image-20210227081154581](docker-java.assets/image-20210227081154581.png)
+
+
+
  Chọn dropdown value thứ 2: Create automated builds
 
 ![image-20200620164643110](docker-java.assets/image-20200620164643110.png)  
@@ -1516,7 +1526,7 @@ choose F folder
 
 Chỉnh norton smart firewall thành 1h
 
-![image-20200621083135381](docker-java.assets/image-20200621083135381.png)  
+![image-20210227085815102](docker-java.assets/image-20210227085815102.png)
 
 Tạo folder log và webapp
 
@@ -1530,6 +1540,8 @@ Afterwards, we copy file .war into webapp folder
 
 ## 12. Use Case 8 Microservices using Docker Machine and Docker Compose
 ### 1. Introduction to Docker-Machine
+
+![image-20210227134050822](docker-java.assets/image-20210227134050822.png)
 
 ![image-20200621085105449](docker-java.assets/image-20200621085105449.png)  
 
@@ -1712,27 +1724,39 @@ Vào ô search nhập turn windows feature on off
 
 https://techcommunity.microsoft.com/t5/itops-talk-blog/step-by-step-enabling-hyper-v-for-use-on-windows-10/ba-p/267945
 
-![image-20200621095106418](docker-java.assets/image-20200621095106418.png)  
+![image-20210227135830508](docker-java.assets/image-20210227135830508.png)
+
+check in Hyper-v  
 
 Check container và hyper-v => restart
+
+Windows/ Search Hyper-V manager
 
 ![image-20200621100022497](docker-java.assets/image-20200621100022497.png)  
 
 Create new virtual switch manager by click on it
 
-![image-20200621100119921](docker-java.assets/image-20200621100119921.png)  
+![image-20210227140110936](docker-java.assets/image-20210227140110936.png)
+
+![image-20210227140348283](docker-java.assets/image-20210227140348283.png)
 
 chọn external and click CREATE
 
-![image-20200621100559386](docker-java.assets/image-20200621100559386.png)
+![image-20210227140504500](docker-java.assets/image-20210227140504500.png)
 
 Nhập như trên chọn lại External network là 6025
 
-![image-20200621101049489](docker-java.assets/image-20200621101049489.png)  
+![image-20210227140553921](docker-java.assets/image-20210227140553921.png)  
 
 chọn yes
 
 ### 4. Windows only Setting up 2 Docker Machines
+
+Run powershell with administration
+
+> vs-1: is virtual machine that we have created in previous chapter
+
+![image-20210227141031849](docker-java.assets/image-20210227141031849.png) 
 
 ![image-20200621101804758](docker-java.assets/image-20200621101804758.png)  
 
@@ -1753,6 +1777,12 @@ run với port 32771 cũng chạy
 ![image-20200621114801536](docker-java.assets/image-20200621114801536.png)  
 
 ![image-20200621114918380](docker-java.assets/image-20200621114918380.png)  
+
+![image-20210227142018713](docker-java.assets/image-20210227142018713.png)
+
+Tag and push to docker hub
+
+
 
 Now Docker composed this used to create micro services are run services inside of Docker machines.
 
@@ -1817,6 +1847,10 @@ RUN cd /usr/local/docker-mysql-connector && mvn assembly:assembly
 CMD ["java", "-cp", "/usr/local/docker-mysql-connector/target/docker-mysql-connector-1.0.0-SNAPSHOT-jar-with-dependencies.jar", "org.pictolearn.docker.mysql.MySQLConnection"]
 ```
 
+Import existing maven project
+
+![image-20210227142449269](docker-java.assets/image-20210227142449269.png)
+
 ![image-20200621120037320](docker-java.assets/image-20200621120037320.png)  
 
 So just to take you back to that picture you're going to go back to that picture which I gave which
@@ -1828,6 +1862,8 @@ documentaries with two different IP addresses these are dummy IP addresses.
 One has a Microsoft is running which is called My sql and another is a Java container and standalone
 
 javascript called web.
+
+![image-20210227142957256](docker-java.assets/image-20210227142957256.png)
 
 => 2 dịa chỉ Ip máy ảo khác nhau
 
@@ -1890,13 +1926,66 @@ Lý do có url vì
 
 copy the last command 
 
-![image-20200621122658172](docker-java.assets/image-20200621122658172.png)  
+![image-20200621122658172](docker-java.assets/image-20200621122658172.png)
 
-![image-20200621122942098](docker-java.assets/image-20200621122942098.png)
+Link can be: `String url = "jdbc:mysql://mysql-1:3306/Users?autoReconnect=false&useSSL=false";` but we have `link` in docker-compose => use `db`
 
 Sau khi sửa lại url trong java có chỉ có db: mới chạy đúng
 
-=> This make easier to deploy selective microservices
+=> This make easier to deploy selective microservices  
+
+![image-20200621122942098](docker-java.assets/image-20200621122942098.png)
+
+```java
+package org.pictolearn.docker.mysql;
+
+import java.net.InetAddress;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.Map;
+
+/**
+ * MYSQL connection checker, tries to connect to mysql database.
+ *
+ */
+public class MySQLConnection {
+	public static void main(String[] args) throws Exception {
+		String ipAddr = InetAddress.getLocalHost().getHostName();
+		System.out.println("Printing IP address of the host " + ipAddr);
+		Map<String, String> env = System.getenv();
+		for (String envName : env.keySet()) {
+			System.out.format("%s=%s%n", envName, env.get(envName));
+		}
+		Thread.sleep(10000);
+
+		boolean connected = false;
+		while (!connected) {
+			try {
+				
+				// Note the way the mysql container is used here.
+				String url = "jdbc:mysql://db:3306/Users?autoReconnect=false&useSSL=false";
+				String user = "root";
+				String password = "root";
+				System.out.println("Connecting to URL " + url);
+				// Load the Connector/J driver
+				Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+				// Establish connection to MySQL
+				Connection conn = DriverManager.getConnection(url, user, password);
+				System.out.println("Connection was successful");
+				connected = true;
+			} catch (Exception e) {
+				System.err.println("Error connecting to database");
+				e.printStackTrace();
+				Thread.sleep(5000);
+			}
+		}
+
+	}
+}
+
+```
+
+
 
 ![image-20200621123631306](docker-java.assets/image-20200621123631306.png)  
 
@@ -1993,7 +2082,7 @@ services: #specifies 2 microservices "web" and "mysql"
       - DB_PORT=tcp://mysql:3306  
 ```
 
-![image-20200621132805623](docker-java.assets/image-20200621132805623.png)  
+![image-20210227152639557](docker-java.assets/image-20210227152639557.png)
 
 Dockerfile
 
@@ -2011,29 +2100,39 @@ RUN cd /usr/local/pictolearn && mvn clean package
 CMD ["java","-jar","-DlogPath=/usr/local/pictolearn", "/usr/local/pictolearn/target/docker-compose-pictolearn-1.0.0-SNAPSHOT.jar"]
 ```
 
-![image-20200621133057165](docker-java.assets/image-20200621133057165.png)  
+![image-20210227152833384](docker-java.assets/image-20210227152833384.png)
+
+![image-20210227152929414](docker-java.assets/image-20210227152929414.png)
+
+  ![image-20210227153013544](docker-java.assets/image-20210227153013544.png)
 
 ![image-20200621133234462](docker-java.assets/image-20200621133234462.png)  
 
 import to eclipse
 
-![image-20200621133347903](docker-java.assets/image-20200621133347903.png)  
+![image-20210227153249378](docker-java.assets/image-20210227153249378.png)
 
 ![image-20200621134448479](docker-java.assets/image-20200621134448479.png)  
 
-![image-20200621135320324](docker-java.assets/image-20200621135320324.png)  
+![image-20200621135320324](docker-java.assets/image-20200621135320324.png)
+
+![image-20210227153535017](docker-java.assets/image-20210227153535017.png)  
 
 ![image-20200621135448819](docker-java.assets/image-20200621135448819.png)  
 
 ![image-20200621135638775](docker-java.assets/image-20200621135638775.png)  
 
-![image-20200621135805578](docker-java.assets/image-20200621135805578.png)  
+![image-20210227153809518](docker-java.assets/image-20210227153809518.png)  
 
 Gọi post and get
 
 body lấy từ file post.json, type is application/context
 
 ![image-20200621140015916](docker-java.assets/image-20200621140015916.png)
+
+Connect to db
+
+![image-20210227153920564](docker-java.assets/image-20210227153920564.png)
 
 ### 2. Building Spring Boot Microservice with Docker
 
@@ -2096,9 +2195,56 @@ docker-compose down
 
 ![image-20200621141227030](docker-java.assets/image-20200621141227030.png)  
 
-![image-20200621141401064](docker-java.assets/image-20200621141401064.png)  
+![image-20210227154206303](docker-java.assets/image-20210227154206303.png)  
 
-![image-20200621141631062](docker-java.assets/image-20200621141631062.png)  
+![image-20210227154430475](docker-java.assets/image-20210227154430475.png)
+
+![image-20210227154710965](docker-java.assets/image-20210227154710965.png)
+
+Dockerfile
+
+```dockerfile
+# This file is used to create a docker image.
+FROM pictolearn/tomcat8-jdk8
+
+#Author of the file
+MAINTAINER pictolearn
+
+#install maven for debugging
+RUN apt-get -y install maven lsof
+
+#Set Catalina HOME and JAVA_OPTS
+ENV CATALINA_BASE /opt/tomcat
+ENV CATALINA_HOME /opt/tomcat
+ENV PATH $PATH:$CATALINA_HOME/bin
+ENV JAVA_OPTS="-Xms1024m -Xmx1024m -Xss8192k -XX:PermSize=500m -XX:CMSInitiatingOccupancyFraction=50 -XX:+ExplicitGCInvokesConcurrent -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:NewRatio=1 -XX:SurvivorRatio=1  -Dorg.apache.cxf.JDKBugHacks.imageIO=false"
+
+#Expose this a port to the host machine.
+EXPOSE 8080
+EXPOSE 8009
+
+#The WORKDIR instruction sets the working directory for any RUN, CMD, ENTRYPOINT, COPY and ADD instructions that follow it in the Dockerfile.
+WORKDIR /opt/tomcat
+
+
+# add the directory to the path
+ADD . /usr/local/pictolearn
+
+RUN mkdir -p /usr/local/pictolearn/logs
+
+# Run maven
+RUN cd /usr/local/pictolearn && mvn clean package
+
+# Move the war file to the tomcat folder once it is done.
+RUN  cp /usr/local/pictolearn/target/pictolearn-dispatcher.war /opt/tomcat/webapps/pictolearn-dispatcher.war
+
+
+
+# Launch Tomcat
+CMD ["/opt/tomcat/bin/catalina.sh","run"]
+```
+
+
 
 pom.xml trong dispatcher
 
@@ -2188,7 +2334,7 @@ pom.xml trong dispatcher
 
 ### 3. Demo
 
-![image-20200621150057156](docker-java.assets/image-20200621150057156.png)  
+![image-20210227155301753](docker-java.assets/image-20210227155301753.png)
 
 Make sure your windows enable hyper-v and run powershell with administration
 
@@ -2214,13 +2360,13 @@ Mysql run on port 8888
 
 Test connection
 
-![image-20200621151343946](docker-java.assets/image-20200621151343946.png)  
+![image-20210227155704173](docker-java.assets/image-20210227155704173.png)
 
-sau khi nhập pass ấn test
+Ấn vào Store in vault.. =>  nhập pass ấn test
 
-![image-20200621151458471](docker-java.assets/image-20200621151458471.png)  
+![image-20210227155820577](docker-java.assets/image-20210227155820577.png)
 
-![image-20200621151530248](docker-java.assets/image-20200621151530248.png)  
+Check db được thêm record mới
 
 ![image-20200621151649782](docker-java.assets/image-20200621151649782.png)  
 
@@ -2234,9 +2380,9 @@ So what I'm going to do right now as I'm going to go and check into my school da
 
 there's an entry as I see it got inserted. 
 
-![image-20200621152041874](docker-java.assets/image-20200621152041874.png)  
+![image-20210227160409811](docker-java.assets/image-20210227160409811.png)
 
-
+Scale up
 
 ![image-20200621153402519](docker-java.assets/image-20200621153402519.png)
 
@@ -2248,7 +2394,7 @@ And typically for logging from all these containers we use tools like loudly tha
 
 diner trays or at Dynamix higher performance monitoring tools.
 
-![image-20200621153431621](docker-java.assets/image-20200621153431621.png)  
+![image-20210227160601794](docker-java.assets/image-20210227160601794.png)  
 
 ![image-20200621153544505](docker-java.assets/image-20200621153544505.png)  
 
